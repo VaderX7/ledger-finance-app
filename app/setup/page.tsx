@@ -115,13 +115,11 @@ function CornerLogoBar({
 }) {
   return (
     <div className="flex items-center justify-between mb-10 w-full relative z-30">
-      <div className="w-12">
+      <div className="flex items-center gap-3">
         <BackButton onBack={onBack} />
-      </div>
-      <div className="flex-1 flex justify-center">
         <LedgerLogo variant="corner" />
       </div>
-      <div className="flex items-center justify-end gap-3 w-28">
+      <div className="flex items-center gap-3">
         <StepDots current={current} total={total} />
         {rightSlot}
       </div>
@@ -464,7 +462,7 @@ function NameStep({ onNext, onBack, profile, setProfile }: {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 8 }}
-            className="px-4 py-3 rounded-xl mb-8"
+            className="px-4 py-3 rounded-xl mb-6"
             style={{ background: GOLD_DIM, border: `1px solid ${GOLD_BORDER}` }}
           >
             <p className="text-[13px]" style={{ color: GOLD, fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 600 }}>
@@ -474,7 +472,12 @@ function NameStep({ onNext, onBack, profile, setProfile }: {
         )}
       </AnimatePresence>
 
-      <div className="mt-auto">
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ ...easeOut, delay: 0.25 }}
+        className="w-full"
+      >
         <motion.button
           whileTap={{ scale: 0.97 }}
           onClick={onNext}
@@ -499,7 +502,7 @@ function NameStep({ onNext, onBack, profile, setProfile }: {
           </span>
           <ChevronRight size={16} strokeWidth={2.5} style={{ color: valid ? '#1a0f00' : 'rgba(255,255,255,0.25)' }} />
         </motion.button>
-      </div>
+      </motion.div>
     </div>
   );
 }
