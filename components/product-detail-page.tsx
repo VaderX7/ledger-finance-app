@@ -152,7 +152,7 @@ export default function ProductDetailPage({ product, onBack }: ProductDetailPage
       animate={{ x: 0, opacity: 1 }}
       exit={{ x: '100%', opacity: 0 }}
       transition={{ type: 'spring', stiffness: 340, damping: 34 }}
-      className="fixed inset-0 bg-[#070A12] z-40 flex flex-col max-w-md mx-auto"
+      className="fixed inset-0 bg-[#070A12] z-[60] flex flex-col max-w-md mx-auto"
     >
       {/* Sticky header */}
       <div
@@ -380,6 +380,7 @@ export default function ProductDetailPage({ product, onBack }: ProductDetailPage
           backdropFilter: 'blur(16px)',
           WebkitBackdropFilter: 'blur(16px)',
           borderColor: 'rgba(255, 255, 255, 0.06)',
+          paddingBottom: 'max(1rem, env(safe-area-inset-bottom))',
         }}
       >
         <motion.button
