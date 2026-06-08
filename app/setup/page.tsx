@@ -12,6 +12,7 @@ import {
   ArrowLeft,
 } from 'lucide-react';
 import { useLang } from '@/context/LanguageContext';
+import LedgerLogo from '@/components/LedgerLogo';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -101,6 +102,33 @@ function BackButton({ onBack }: { onBack: () => void }) {
   );
 }
 
+function CornerLogoBar({
+  current,
+  total,
+  onBack,
+  rightSlot,
+}: {
+  current: number;
+  total: number;
+  onBack: () => void;
+  rightSlot?: React.ReactNode;
+}) {
+  return (
+    <div className="flex items-center justify-between mb-10 w-full relative z-30">
+      <div className="w-12">
+        <BackButton onBack={onBack} />
+      </div>
+      <div className="flex-1 flex justify-center">
+        <LedgerLogo variant="corner" />
+      </div>
+      <div className="flex items-center justify-end gap-3 w-28">
+        <StepDots current={current} total={total} />
+        {rightSlot}
+      </div>
+    </div>
+  );
+}
+
 // ─── Steps ────────────────────────────────────────────────────────────────────
 
 function SplashStep({ onNext }: { onNext: () => void }) {
@@ -117,28 +145,7 @@ function SplashStep({ onNext }: { onNext: () => void }) {
         transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
         className="mb-8 relative"
       >
-        <div
-          className="w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-6"
-          style={{
-            background: `linear-gradient(135deg, ${GOLD_DIM}, rgba(201,169,110,0.08))`,
-            border: `1px solid ${GOLD_BORDER}`,
-            boxShadow: `0 0 60px ${GOLD}22`,
-          }}
-        >
-          <span
-            className="text-3xl"
-            style={{
-              fontFamily: "'Plus Jakarta Sans', sans-serif",
-              fontWeight: 800,
-              background: `linear-gradient(135deg, ${GOLD_LIGHT}, ${GOLD})`,
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-            }}
-          >
-            L
-          </span>
-        </div>
+        <LedgerLogo variant="hero" />
       </motion.div>
 
       {/* Wordmark */}
@@ -234,17 +241,20 @@ function GoogleStep({ onNext, onBack, onSkip }: { onNext: () => void; onBack: ()
     <div className="flex flex-col min-h-screen px-6 pt-14 pb-10 relative overflow-hidden">
       <GoldOrb size={260} opacity={0.3} x="80%" y="15%" delay={0} />
 
-      <div className="flex items-center justify-between mb-10">
-        <BackButton onBack={onBack} />
-        <StepDots current={0} total={3} />
-        <button
-          onClick={onSkip}
-          className="text-[12px] text-white/30"
-          style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 500 }}
-        >
-          Skip
-        </button>
-      </div>
+      <CornerLogoBar
+        current={0}
+        total={3}
+        onBack={onBack}
+        rightSlot={
+          <button
+            onClick={onSkip}
+            className="text-[12px] text-white/30 ml-2"
+            style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 500 }}
+          >
+            Skip
+          </button>
+        }
+      />
 
       <motion.div
         initial={{ opacity: 0, y: 28 }}
@@ -362,11 +372,11 @@ function NameStep({ onNext, onBack, profile, setProfile }: {
     <div className="flex flex-col min-h-screen px-6 pt-14 pb-10 relative overflow-hidden">
       <GoldOrb size={220} opacity={0.28} x="20%" y="75%" delay={0} />
 
-      <div className="flex items-center justify-between mb-10">
-        <BackButton onBack={onBack} />
-        <StepDots current={1} total={3} />
-        <div className="w-9" />
-      </div>
+      <CornerLogoBar
+        current={1}
+        total={3}
+        onBack={onBack}
+      />
 
       <motion.div
         initial={{ opacity: 0, y: 28 }}
@@ -504,11 +514,11 @@ function LanguageStep({ onNext, onBack, profile, setProfile }: {
     <div className="flex flex-col min-h-screen px-6 pt-14 pb-10 relative overflow-hidden">
       <GoldOrb size={200} opacity={0.25} x="85%" y="60%" delay={0} />
 
-      <div className="flex items-center justify-between mb-10">
-        <BackButton onBack={onBack} />
-        <StepDots current={2} total={3} />
-        <div className="w-9" />
-      </div>
+      <CornerLogoBar
+        current={2}
+        total={3}
+        onBack={onBack}
+      />
 
       <motion.div
         initial={{ opacity: 0, y: 28 }}
@@ -619,6 +629,7 @@ function LanguageStep({ onNext, onBack, profile, setProfile }: {
 function DoneStep({ profile }: { profile: UserProfile }) {
   const router = useRouter();
   const { setLang } = useLang();
+  const [celebrationDone, setCelebrationDone] = useState(false);
 
   useEffect(() => {
     // Save to localStorage
@@ -638,25 +649,27 @@ function DoneStep({ profile }: { profile: UserProfile }) {
       <GoldOrb size={160} opacity={0.3} x="10%" y="20%" delay={0.3} />
       <GoldOrb size={120} opacity={0.2} x="90%" y="75%" delay={0.5} />
 
-      {/* Animated checkmark */}
+      {/* Animated checkmark replacement */}
       <motion.div
-        initial={{ scale: 0, opacity: 0 }}
+        initial={{ scale: 0.6, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ type: 'spring', stiffness: 300, damping: 22, delay: 0.1 }}
-        className="w-24 h-24 rounded-[2rem] flex items-center justify-center mb-8"
-        style={{
-          background: `linear-gradient(135deg, ${GOLD}22, ${GOLD}0a)`,
-          border: `1px solid ${GOLD_BORDER}`,
-          boxShadow: `0 0 80px ${GOLD}30`,
-        }}
+        className="mb-8 relative flex items-center justify-center animate-glow"
       >
-        <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ type: 'spring', stiffness: 400, damping: 20, delay: 0.35 }}
-        >
-          <Check size={40} style={{ color: GOLD }} strokeWidth={2.5} />
-        </motion.div>
+        <LedgerLogo variant="done" onDoneComplete={() => setCelebrationDone(true)} />
+        {celebrationDone && (
+          <motion.div
+            initial={{ scale: 1, opacity: 0.5 }}
+            animate={{ scale: 2.4, opacity: 0 }}
+            transition={{ duration: 0.9, ease: 'easeOut' }}
+            className="absolute rounded-full pointer-events-none"
+            style={{
+              width: 88,
+              height: 88,
+              border: `2px solid ${GOLD}`,
+            }}
+          />
+        )}
       </motion.div>
 
       <motion.h2

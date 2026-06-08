@@ -3,13 +3,13 @@ import { Product, BankType, ProductCategory } from './products';
 const BASE = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSGWM40JwxQ_b3EQf288e5S1I_5DKjZy3HH-EidhMeBWaBGUbnn2381vr-ukaEt9WTrU9RTpny1JEgi/pub';
 
 const SHEET_URLS: Partial<Record<ProductCategory, string>> = {
-  savings:      `${BASE}?gid=1872951396&single=true&output=csv`,
-  fds:          `${BASE}?gid=568132012&single=true&output=csv`,
-  loans:        `${BASE}?gid=1410955768&single=true&output=csv`,
-  creditcards:  `${BASE}?gid=211788568&single=true&output=csv`,
-  current:      `${BASE}?gid=949941536&single=true&output=csv`,
-  govtschemes:  `${BASE}?gid=230854347&single=true&output=csv`,
-  insurance:    `${BASE}?gid=81767275&single=true&output=csv`,
+  savings: `${BASE}?gid=1872951396&single=true&output=csv`,
+  fds: `${BASE}?gid=568132012&single=true&output=csv`,
+  loans: `${BASE}?gid=1410955768&single=true&output=csv`,
+  creditcards: `${BASE}?gid=211788568&single=true&output=csv`,
+  current: `${BASE}?gid=949941536&single=true&output=csv`,
+  govtschemes: `${BASE}?gid=230854347&single=true&output=csv`,
+  insurance: `${BASE}?gid=81767275&single=true&output=csv`,
 };
 
 const FALLBACK_URL = `${BASE}?output=csv`;

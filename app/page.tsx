@@ -8,6 +8,7 @@ import { ProductCategory } from '@/lib/products';
 import ProductCategoryView from '@/components/product-category-view';
 import { useLang } from '@/context/LanguageContext';
 import { getGreeting } from '@/lib/i18n';
+import LedgerLogo from '@/components/LedgerLogo';
 
 type AppView = 'home' | ProductCategory;
 
@@ -65,17 +66,7 @@ export default function HomePage() {
             className="flex items-center justify-between mb-8"
           >
             <div className="flex items-center gap-2.5">
-              <div
-                className="w-8 h-8 rounded-xl flex items-center justify-center"
-                style={{ background: 'rgba(201, 169, 110, 0.15)', border: '1px solid rgba(201, 169, 110, 0.25)' }}
-              >
-                <span
-                  className="text-xs"
-                  style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800, color: '#C9A96E' }}
-                >
-                  L
-                </span>
-              </div>
+              <LedgerLogo variant="home" />
               <span
                 className="text-sm text-white/80"
                 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 600 }}
