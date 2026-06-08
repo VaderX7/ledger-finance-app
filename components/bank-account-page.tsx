@@ -6,6 +6,7 @@ import { FinancialInstitution } from '@/lib/institutions';
 import JargonBottomSheet from './jargon-bottom-sheet';
 import { useState, useEffect } from 'react';
 import { getProductsByCategory } from '@/lib/data-fetcher';
+import { getOverriddenColor } from './product-category-view';
 
 interface BankAccountPageProps {
   institution: FinancialInstitution;
@@ -194,22 +195,26 @@ export default function BankAccountPage({ institution, onBack }: BankAccountPage
     window.scrollTo(0, 0);
     getProductsByCategory('savings').then(products => {
       const filtered = products.filter(p => p.lender === institution.name);
-      const mapped = filtered.map(p => ({
-        id: p.id,
-        name: p.name,
-        bankId: institution.id,
-        type: 'regular',
-        minimumBalance: String(p.metrics?.minBalance ?? 'Contact bank'),
-        interestRate: String(p.metrics?.interestRate ?? ''),
-        features: p.highlights ?? [],
-        jargonTerms: [],
-        specialization: '',
-        documentation: p.documents ?? [],
-        eligibility: [],
-        ageEligibility: { min: p.minAge ?? 18 },
-        color: p.color,
-        colorAccent: p.colorAccent,
-      }));
+      const mapped = filtered.map(p => {
+        const color = getOverriddenColor(p.lender, 'color', p.color);
+        const colorAccent = getOverriddenColor(p.lender, 'colorAccent', p.colorAccent);
+        return {
+          id: p.id,
+          name: p.name,
+          bankId: institution.id,
+          type: 'regular',
+          minimumBalance: String(p.metrics?.minBalance ?? 'Contact bank'),
+          interestRate: String(p.metrics?.interestRate ?? ''),
+          features: p.highlights ?? [],
+          jargonTerms: [],
+          specialization: '',
+          documentation: p.documents ?? [],
+          eligibility: [],
+          ageEligibility: { min: p.minAge ?? 18 },
+          color,
+          colorAccent,
+        };
+      });
       setAccountVariants(mapped);
       setLoading(false);
     });

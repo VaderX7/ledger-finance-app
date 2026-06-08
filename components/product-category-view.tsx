@@ -56,6 +56,58 @@ const BANK_LOGO_MAP: Record<string, string> = {
   'HSBC Bank India': 'hsbc',
 };
 
+export const BANK_COLORS_MAP: Record<string, { color: string; colorAccent: string }> = {
+  "Axis Bank": { "color": "#97144D", "colorAccent": "#BF3C75" },
+  "Bandhan Bank": { "color": "#ED3F24", "colorAccent": "#A12122" },
+  "CSB Bank": { "color": "#FF611E", "colorAccent": "#FF8946" },
+  "City Union Bank": { "color": "#2D3093", "colorAccent": "#5558BB" },
+  "DCB Bank": { "color": "#2D4291", "colorAccent": "#6271AB" },
+  "Dhanlaxmi Bank": { "color": "#540043", "colorAccent": "#7C286B" },
+  "Federal Bank": { "color": "#004CBE", "colorAccent": "#2874E6" },
+  "HDFC Bank": { "color": "#ED232A", "colorAccent": "#004B8E" },
+  "ICICI Bank": { "color": "#B12B30", "colorAccent": "#F48120" },
+  "IDBI Bank": { "color": "#00856D", "colorAccent": "#FF6B21" },
+  "IndusInd Bank": { "color": "#843030", "colorAccent": "#885959" },
+  "J&K Bank": { "color": "#0193D5", "colorAccent": "#97CA3D" },
+  "Jammu & Kashmir Bank": { "color": "#0193D5", "colorAccent": "#97CA3D" },
+  "Kotak Mahindra Bank": { "color": "#013474", "colorAccent": "#ED151E" },
+  "KVB": { "color": "#E9E515", "colorAccent": "#017E4B" },
+  "Karur Vysya Bank": { "color": "#E9E515", "colorAccent": "#017E4B" },
+  "Nainital Bank": { "color": "#CD8E91", "colorAccent": "#E2C0C1" },
+  "RBL Bank": { "color": "#2E3579", "colorAccent": "#E21E25" },
+  "State Bank of India": { "color": "#00B4EF", "colorAccent": "#008CC7" },
+  "South Indian Bank": { "color": "#C4171C", "colorAccent": "#E69EA0" },
+  "TMB": { "color": "#F2CDE4", "colorAccent": "#C21D86" },
+  "Tamilnad Mercantile Bank": { "color": "#F2CDE4", "colorAccent": "#C21D86" },
+  "Yes Bank": { "color": "#005092", "colorAccent": "#417DAE" },
+  "YES Bank": { "color": "#005092", "colorAccent": "#417DAE" },
+  "YES BANK": { "color": "#005092", "colorAccent": "#417DAE" }
+};
+
+export const getOverriddenColor = (lender: string, field: 'color' | 'colorAccent', fallback: string): string => {
+  const match = BANK_COLORS_MAP[lender];
+  if (match) return match[field];
+
+  const lenderUpper = lender.toUpperCase();
+  if (lenderUpper.includes('YES BANK')) {
+    return BANK_COLORS_MAP['Yes Bank']?.[field] || fallback;
+  }
+  if (lenderUpper.includes('KARUR VYSYA') || lenderUpper === 'KVB') {
+    return BANK_COLORS_MAP['KVB']?.[field] || fallback;
+  }
+  if (lenderUpper.includes('TAMILNAD MERCANTILE') || lenderUpper === 'TMB') {
+    return BANK_COLORS_MAP['TMB']?.[field] || fallback;
+  }
+  if (lenderUpper.includes('JAMMU & KASHMIR') || lenderUpper.includes('J&K')) {
+    return BANK_COLORS_MAP['J&K Bank']?.[field] || fallback;
+  }
+  if (lenderUpper.includes('STATE BANK OF INDIA') || lenderUpper === 'SBI') {
+    return BANK_COLORS_MAP['State Bank of India']?.[field] || fallback;
+  }
+
+  return fallback;
+};
+
 const getBankInitials = (lender: string): string => {
   const nameUpper = lender.toUpperCase();
   if (nameUpper.includes('STATE BANK OF INDIA')) return 'SBI';
@@ -419,7 +471,14 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
     setSortBy('popularity');
     setShowSortPopup(false);
     getProductsByCategory(category)
-      .then(setAllProducts)
+      .then((products) => {
+        const overridden = products.map((p) => ({
+          ...p,
+          color: getOverriddenColor(p.lender, 'color', p.color),
+          colorAccent: getOverriddenColor(p.lender, 'colorAccent', p.colorAccent),
+        }));
+        setAllProducts(overridden);
+      })
       .finally(() => setLoading(false));
     // scroll to top
     window.scrollTo(0, 0);
