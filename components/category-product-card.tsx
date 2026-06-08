@@ -13,6 +13,35 @@ interface CategoryProductCardProps {
   onDetailsClick: (product: Product) => void;
 }
 
+function getReadableColor(hexColor: string) {
+  if (!hexColor || !hexColor.startsWith('#')) return 'rgba(255, 255, 255, 0.9)';
+  const hex = hexColor.replace('#', '');
+  if (hex.length !== 6 && hex.length !== 3) return 'rgba(255, 255, 255, 0.9)';
+  
+  let r = 0, g = 0, b = 0;
+  if (hex.length === 6) {
+    r = parseInt(hex.substring(0, 2), 16);
+    g = parseInt(hex.substring(2, 4), 16);
+    b = parseInt(hex.substring(4, 6), 16);
+  } else {
+    r = parseInt(hex.substring(0, 1) + hex.substring(0, 1), 16);
+    g = parseInt(hex.substring(1, 2) + hex.substring(1, 2), 16);
+    b = parseInt(hex.substring(2, 3) + hex.substring(2, 3), 16);
+  }
+  
+  // relative luminance calculation
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  
+  // if too dark, blend with 65% white to make it a readable pastel tone
+  if (luminance < 0.45) {
+    const lr = Math.round(r + (255 - r) * 0.65);
+    const lg = Math.round(g + (255 - g) * 0.65);
+    const lb = Math.round(b + (255 - b) * 0.65);
+    return `rgb(${lr}, ${lg}, ${lb})`;
+  }
+  return hexColor;
+}
+
 export default function CategoryProductCard({
   product,
   index,
@@ -22,6 +51,7 @@ export default function CategoryProductCard({
   const isReturnsCategory = product.category === 'savings' || product.category === 'fds';
   const accentColor = isReturnsCategory ? '#00F5A0' : '#00E5FF';
   const metricEntries = Object.entries(product.metrics).slice(0, 3);
+  const readableLenderColor = getReadableColor(product.color);
 
   return (
     <motion.div
@@ -48,13 +78,13 @@ export default function CategoryProductCard({
         className="relative z-10 flex items-center justify-between px-4 py-2"
         style={{
           borderBottom: `1px solid ${product.color}20`,
-          background: `${product.color}0a`,
+          background: `${product.color}0c`,
           borderLeft: `3px solid ${product.color}`,
         }}
       >
         <span
-          className="font-body text-[10px] font-semibold tracking-wide uppercase truncate"
-          style={{ color: `${product.color}cc` }}
+          className="font-body text-[10px] font-bold tracking-wide uppercase truncate"
+          style={{ color: readableLenderColor }}
         >
           {product.lender}
         </span>
