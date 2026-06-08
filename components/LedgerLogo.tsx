@@ -90,19 +90,11 @@ export default function LedgerLogo({ variant, onDoneComplete }: LedgerLogoProps)
         boxShadow: variant === 'hero' ? '0 0 60px rgba(201,169,110,0.14)' : variant === 'done' ? '0 0 80px rgba(201,169,110,0.22)' : 'none',
       }}
     >
-      <span
-        style={{
-          fontFamily: "'Plus Jakarta Sans', sans-serif",
-          fontWeight: 800,
-          fontSize,
-          background: 'linear-gradient(135deg, #E4C98A, #C9A96E)',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
-          backgroundClip: 'text',
-        }}
-      >
-        L
-      </span>
+      <img
+        src="/logo.png"
+        alt="Ledger Logo"
+        className="w-full h-full object-cover select-none pointer-events-none"
+      />
       
       {(variant === 'hero' || variant === 'done') && (
         <motion.div
