@@ -12,6 +12,7 @@ import ProductDetailPage from './product-detail-page';
 import { Search, X, ChevronDown, Check, ChevronRight, ArrowLeft } from 'lucide-react';
 import { useLang } from '@/context/LanguageContext';
 import { TranslationKey } from '@/lib/i18n';
+import { financialInstitutions } from '@/lib/institutions';
 
 const bankTypeFilters: Array<{ id: BankType | 'all'; labelKey: 'all' | 'publicSector' | 'privateSector' | 'smallFinance' | 'nbfc' }> = [
   { id: 'all', labelKey: 'all' },
@@ -108,6 +109,68 @@ function SelectSheet({
   );
 }
 
+function SortSelectSheet({
+  title,
+  options,
+  selected,
+  onSelect,
+  onClose,
+  getLabel,
+}: {
+  title: string;
+  options: string[];
+  selected: string;
+  onSelect: (v: string) => void;
+  onClose: () => void;
+  getLabel: (v: string) => string;
+}) {
+  return (
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 bg-black/50 z-50"
+        onClick={onClose}
+      />
+      <motion.div
+        initial={{ y: '100%' }}
+        animate={{ y: 0 }}
+        exit={{ y: '100%' }}
+        transition={{ type: 'spring', stiffness: 320, damping: 32 }}
+        className="fixed bottom-0 inset-x-0 mx-auto max-w-md bg-[#0D1220] rounded-t-3xl z-50 overflow-hidden"
+        style={{ borderTop: '1px solid rgba(255,255,255,0.08)', boxShadow: '0 -4px 40px rgba(0,0,0,0.6)' }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex justify-center pt-3 pb-1">
+          <div className="w-8 h-1 rounded-full bg-white/10" />
+        </div>
+        <div className="flex items-center justify-between px-5 py-3 border-b border-white/[0.06]">
+          <p style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, color: 'rgba(255,255,255,0.88)', fontSize: 15 }}>
+            {title}
+          </p>
+          <button onClick={onClose}>
+            <X size={18} className="text-white/40" />
+          </button>
+        </div>
+        <div className="px-4 py-3 max-h-80 overflow-y-auto space-y-1 pb-8">
+          {options.map((opt) => (
+            <button
+              key={opt}
+              onClick={() => { onSelect(opt); onClose(); }}
+              className="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all"
+              style={{ background: selected === opt ? 'rgba(255,255,255,0.06)' : 'transparent' }}
+            >
+              <span className="font-body text-[13px] text-white/75">{getLabel(opt)}</span>
+              {selected === opt && <Check size={14} className="text-white/60" />}
+            </button>
+          ))}
+        </div>
+      </motion.div>
+    </AnimatePresence>
+  );
+}
+
 interface ProductCategoryViewProps {
   category: ProductCategory;
   onBack: () => void;
@@ -124,6 +187,8 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedBank, setSelectedBank] = useState<string | null>(null);
+  const [sortBy, setSortBy] = useState<string>('popularity');
+  const [showSortPopup, setShowSortPopup] = useState(false);
 
   const getRateRange = (products: Product[]) => {
     const rates: number[] = [];
@@ -163,6 +228,102 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
     return lowestVal === Infinity ? '—' : lowestStr;
   };
 
+  const getMaxInterest = (products: Product[]): number => {
+    let maxRate = 0;
+    products.forEach((p) => {
+      const rateStr = String(p.metrics.interestRate || '');
+      const matches = rateStr.match(/\d+(\.\d+)?/g);
+      if (matches) {
+        matches.forEach((m) => {
+          const rate = parseFloat(m);
+          if (rate > maxRate) maxRate = rate;
+        });
+      }
+    });
+    return maxRate;
+  };
+
+  const getMinInterest = (products: Product[]): number => {
+    let minRate = Infinity;
+    products.forEach((p) => {
+      const rateStr = String(p.metrics.interestRate || '');
+      const matches = rateStr.match(/\d+(\.\d+)?/g);
+      if (matches) {
+        matches.forEach((m) => {
+          const rate = parseFloat(m);
+          if (rate < minRate) minRate = rate;
+        });
+      }
+    });
+    return minRate === Infinity ? 0 : minRate;
+  };
+
+  const getMinBalanceValue = (products: Product[]): number => {
+    let lowestVal = Infinity;
+    products.forEach((p) => {
+      const balStr = String(p.metrics.minBalance || '').trim();
+      const lower = balStr.toLowerCase();
+      if (lower.includes('nil') || lower.includes('zero') || lower.includes('free') || balStr.includes('0')) {
+        if (0 < lowestVal) {
+          lowestVal = 0;
+        }
+      } else {
+        const num = parseInt(balStr.replace(/[^\d]/g, ''), 10);
+        if (!isNaN(num) && num < lowestVal) {
+          lowestVal = num;
+        }
+      }
+    });
+    return lowestVal === Infinity ? 999999999 : lowestVal;
+  };
+
+  const getPopularityIndex = (lender: string): number => {
+    const index = financialInstitutions.findIndex(
+      (inst) => inst.name.toLowerCase().includes(lender.toLowerCase()) || lender.toLowerCase().includes(inst.name.toLowerCase())
+    );
+    return index === -1 ? 999 : index;
+  };
+
+  const getSortLabel = (sortByKey: string) => {
+    if (lang === 'hi') {
+      switch (sortByKey) {
+        case 'popularity': return 'लोकप्रियता';
+        case 'alpha-asc': return 'वर्णानुक्रम (A-Z)';
+        case 'alpha-desc': return 'वर्णानुक्रम (Z-A)';
+        case 'interest-desc': return 'ब्याज: उच्च से निम्न';
+        case 'interest-asc': return 'ब्याज: निम्न से उच्च';
+        case 'balance-asc': return 'न्यूनतम बैलेंस: निम्न से उच्च';
+        case 'balance-desc': return 'न्यूनतम बैलेंस: उच्च से निम्न';
+        case 'accounts-desc': return 'विकल्पों की संख्या';
+        default: return 'क्रमबद्ध करें';
+      }
+    } else if (lang === 'hinglish') {
+      switch (sortByKey) {
+        case 'popularity': return 'Popularity';
+        case 'alpha-asc': return 'Alphabetical (A-Z)';
+        case 'alpha-desc': return 'Alphabetical (Z-A)';
+        case 'interest-desc': return 'Interest: High to Low';
+        case 'interest-asc': return 'Interest: Low to High';
+        case 'balance-asc': return 'Min Balance: Low to High';
+        case 'balance-desc': return 'Min Balance: High to Low';
+        case 'accounts-desc': return 'Zyada Accounts First';
+        default: return 'Sort By';
+      }
+    } else {
+      switch (sortByKey) {
+        case 'popularity': return 'Popularity';
+        case 'alpha-asc': return 'Alphabetical (A-Z)';
+        case 'alpha-desc': return 'Alphabetical (Z-A)';
+        case 'interest-desc': return 'Interest: High to Low';
+        case 'interest-asc': return 'Interest: Low to High';
+        case 'balance-asc': return 'Min Balance: Low to High';
+        case 'balance-desc': return 'Min Balance: High to Low';
+        case 'accounts-desc': return 'Number of Options';
+        default: return 'Sort By';
+      }
+    }
+  };
+
   // Institution popup filter
   const [showBankPopup, setShowBankPopup] = useState(false);
   const [bankPopupFilter, setBankPopupFilter] = useState<string | null>(null);
@@ -185,6 +346,8 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
     setTypeFilter(null);
     setSelectedProduct(null);
     setSelectedBank(null);
+    setSortBy('popularity');
+    setShowSortPopup(false);
     getProductsByCategory(category)
       .then(setAllProducts)
       .finally(() => setLoading(false));
@@ -287,6 +450,25 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
       }
       group.products.push(p);
     });
+
+    // Apply sorting to bankGroups
+    if (sortBy === 'popularity') {
+      bankGroups.sort((a, b) => getPopularityIndex(a.lender) - getPopularityIndex(b.lender));
+    } else if (sortBy === 'alpha-asc') {
+      bankGroups.sort((a, b) => a.lender.localeCompare(b.lender));
+    } else if (sortBy === 'alpha-desc') {
+      bankGroups.sort((a, b) => b.lender.localeCompare(a.lender));
+    } else if (sortBy === 'interest-desc') {
+      bankGroups.sort((a, b) => getMaxInterest(b.products) - getMaxInterest(a.products));
+    } else if (sortBy === 'interest-asc') {
+      bankGroups.sort((a, b) => getMinInterest(a.products) - getMinInterest(b.products));
+    } else if (sortBy === 'balance-asc') {
+      bankGroups.sort((a, b) => getMinBalanceValue(a.products) - getMinBalanceValue(b.products));
+    } else if (sortBy === 'balance-desc') {
+      bankGroups.sort((a, b) => getMinBalanceValue(b.products) - getMinBalanceValue(a.products));
+    } else if (sortBy === 'accounts-desc') {
+      bankGroups.sort((a, b) => b.products.length - a.products.length);
+    }
   }
 
   const showSavingsLevel2 = category === 'savings' && selectedBank !== null;
@@ -337,6 +519,31 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
                 </div>
               </div>
 
+              {/* Counts display showing filtered vs total */}
+              {!loading && allProducts.length > 0 && (
+                <div className="mb-3 mt-1.5 px-1 flex items-center justify-between text-[11px] font-body text-white/40">
+                  <div>
+                    {category === 'savings' ? (
+                      lang === 'hi' ? (
+                        <span>दिखा रहा है: <strong className="text-white/80">{filtered.length}</strong> खाते, <strong className="text-white/80">{bankGroups.length}</strong> बैंकों में (कुल {allProducts.length} खाते, {Array.from(new Set(allProducts.map(p => p.lender))).length} बैंकों में से)</span>
+                      ) : lang === 'hinglish' ? (
+                        <span>Showing <strong className="text-white/80">{filtered.length}</strong> accounts across <strong className="text-white/80">{bankGroups.length}</strong> banks (Out of {allProducts.length} accounts across {Array.from(new Set(allProducts.map(p => p.lender))).length} banks)</span>
+                      ) : (
+                        <span>Showing <strong className="text-white/80">{filtered.length}</strong> accounts across <strong className="text-white/80">{bankGroups.length}</strong> banks (Out of {allProducts.length} accounts across {Array.from(new Set(allProducts.map(p => p.lender))).length} banks)</span>
+                      )
+                    ) : (
+                      lang === 'hi' ? (
+                        <span>दिखा रहा है: <strong className="text-white/80">{filtered.length}</strong> विकल्प (कुल {allProducts.length} में से)</span>
+                      ) : lang === 'hinglish' ? (
+                        <span>Showing <strong className="text-white/80">{filtered.length}</strong> options (Out of {allProducts.length} total)</span>
+                      ) : (
+                        <span>Showing <strong className="text-white/80">{filtered.length}</strong> options (Out of {allProducts.length} total)</span>
+                      )
+                    )}
+                  </div>
+                </div>
+              )}
+
               {/* Institution type filter pills */}
               <div className="mb-3 mt-2">
                 <p className="text-[10px] tracking-widest uppercase text-white/30 mb-2" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700 }}>
@@ -364,23 +571,42 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
                 </div>
               </div>
 
-              {/* Browse by Institution + dual type filters */}
+              {/* Browse by Institution + Sort by + dual type filters */}
               {!loading && allProducts.length > 0 && (
                 <div className="flex gap-2 mb-4 flex-wrap">
-                  {/* Browse by Institution */}
-                  <motion.button
-                    whileTap={{ scale: 0.96 }}
-                    onClick={() => setShowBankPopup(true)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-body text-[10px] font-medium transition-all"
-                    style={{
-                      background: bankPopupFilter ? `${meta.accentColor}18` : 'rgba(255,255,255,0.04)',
-                      border: bankPopupFilter ? `1px solid ${meta.accentColor}44` : '1px solid rgba(255,255,255,0.08)',
-                      color: bankPopupFilter ? meta.accentColor : 'rgba(255,255,255,0.45)',
-                    }}
-                  >
-                    {bankPopupFilter ?? t.filterByBank}
-                    <ChevronDown size={11} />
-                  </motion.button>
+                  {/* Browse by Institution (hidden for savings because it is bank view by default) */}
+                  {category !== 'savings' && (
+                    <motion.button
+                      whileTap={{ scale: 0.96 }}
+                      onClick={() => setShowBankPopup(true)}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-body text-[10px] font-medium transition-all"
+                      style={{
+                        background: bankPopupFilter ? `${meta.accentColor}18` : 'rgba(255,255,255,0.04)',
+                        border: bankPopupFilter ? `1px solid ${meta.accentColor}44` : '1px solid rgba(255,255,255,0.08)',
+                        color: bankPopupFilter ? meta.accentColor : 'rgba(255,255,255,0.45)',
+                      }}
+                    >
+                      {bankPopupFilter ?? t.filterByBank}
+                      <ChevronDown size={11} />
+                    </motion.button>
+                  )}
+
+                  {/* Sort By option (specifically for savings Level 1 view) */}
+                  {category === 'savings' && (
+                    <motion.button
+                      whileTap={{ scale: 0.96 }}
+                      onClick={() => setShowSortPopup(true)}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-body text-[10px] font-medium transition-all"
+                      style={{
+                        background: sortBy !== 'popularity' ? `${meta.accentColor}18` : 'rgba(255,255,255,0.04)',
+                        border: sortBy !== 'popularity' ? `1px solid ${meta.accentColor}44` : '1px solid rgba(255,255,255,0.08)',
+                        color: sortBy !== 'popularity' ? meta.accentColor : 'rgba(255,255,255,0.45)',
+                      }}
+                    >
+                      {getSortLabel(sortBy)}
+                      <ChevronDown size={11} />
+                    </motion.button>
+                  )}
 
                   {/* Type filter — only for creditcards and loans */}
                   {showDualFilters && (
@@ -399,15 +625,21 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
                     </motion.button>
                   )}
 
-                  {/* Clear all active filters */}
-                  {activeFilterCount > 0 && (
+                  {/* Clear all active filters and search/sort values */}
+                  {(activeFilterCount > 0 || bankFilter !== 'all' || sortBy !== 'popularity' || searchText !== '') && (
                     <motion.button
                       whileTap={{ scale: 0.96 }}
-                      onClick={() => { setBankPopupFilter(null); setTypeFilter(null); }}
+                      onClick={() => {
+                        setBankPopupFilter(null);
+                        setTypeFilter(null);
+                        setBankFilter('all');
+                        setSortBy('popularity');
+                        setSearchText('');
+                      }}
                       className="flex items-center gap-1 px-3 py-1.5 rounded-lg font-body text-[10px] font-medium"
                       style={{ background: 'rgba(251,113,133,0.10)', border: '1px solid rgba(251,113,133,0.25)', color: '#FB7185' }}
                     >
-                      <X size={10} /> {activeFilterCount > 1 ? t.clearAll : t.clear}
+                      <X size={10} /> {t.clearAll}
                     </motion.button>
                   )}
                 </div>
@@ -563,7 +795,7 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
                         {selectedBank}
                       </h2>
                       <p className="text-[10px] text-white/40 font-body uppercase tracking-wider font-semibold">
-                        {bankProducts.length} {bankProducts.length === 1 ? 'option' : 'options'} available
+                        {filteredBankProducts.length} {filteredBankProducts.length === 1 ? 'option' : 'options'} matching (Out of {bankProducts.length} total)
                       </p>
                     </div>
                   </div>
@@ -635,6 +867,26 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
           selected={bankPopupFilter}
           onSelect={setBankPopupFilter}
           onClose={() => setShowBankPopup(false)}
+        />
+      )}
+
+      {showSortPopup && (
+        <SortSelectSheet
+          title={lang === 'hi' ? 'क्रमबद्ध करें' : lang === 'hinglish' ? 'Sort By' : 'Sort Options'}
+          options={[
+            'popularity',
+            'alpha-asc',
+            'alpha-desc',
+            'interest-desc',
+            'interest-asc',
+            'balance-asc',
+            'balance-desc',
+            'accounts-desc',
+          ]}
+          selected={sortBy}
+          onSelect={setSortBy}
+          onClose={() => setShowSortPopup(false)}
+          getLabel={getSortLabel}
         />
       )}
 
