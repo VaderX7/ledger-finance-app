@@ -32,7 +32,7 @@ const BANK_LOGO_MAP: Record<string, string> = {
   'Bandhan Bank': 'bandhan',
   'CSB Bank': 'csb',
   'CSB Bank (formerly Catholic Syrian Bank)': 'csb',
-  'City Union Bank': 'cub',
+  'City Union Bank': 'cityunion',
   'DCB Bank': 'dcb',
   'Dhanlaxmi Bank': 'dhanlaxmi',
   'Federal Bank': 'federal',
@@ -50,7 +50,7 @@ const BANK_LOGO_MAP: Record<string, string> = {
   'Tamilnad Mercantile Bank': 'tmb',
   'YES BANK': 'yes',
   'YES Bank': 'yes',
-  'South Indian Bank': 'sib',
+  'South Indian Bank': 'southindian',
   'DBS Bank India (Digibank)': 'dbs',
   'Standard Chartered Bank': 'sc',
   'HSBC Bank India': 'hsbc',
@@ -885,6 +885,10 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
                 return true;
               });
 
+              const bankLogoId = BANK_LOGO_MAP[selectedBank || ''] || selectedBank?.toLowerCase().replace(/bank/gi, '').replace(/[^a-z0-9]/g, '').trim() || '';
+              const logoUrl = `/logos/${bankLogoId}.png`;
+              const hasLogoError = logoErrors[bankLogoId] || false;
+
               return (
                 <div className="relative min-h-screen">
                   {/* Scoped Header */}
@@ -901,11 +905,47 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
                     >
                       <ArrowLeft size={16} />
                     </motion.button>
-                    <div>
-                      <h2 className="text-[17px] font-bold text-white/90 leading-tight" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+
+                    {/* Scoped Logo Container */}
+                    {selectedBank && (
+                      <div 
+                        className="w-12 h-12 rounded-xl flex-shrink-0 flex items-center justify-center p-[6px] overflow-hidden mr-3"
+                        style={{
+                          background: 'rgba(255, 255, 255, 0.06)',
+                          border: '1px solid rgba(255, 255, 255, 0.08)',
+                        }}
+                      >
+                        {!hasLogoError ? (
+                          <Image
+                            src={logoUrl}
+                            alt={`${selectedBank} logo`}
+                            width={40}
+                            height={40}
+                            className="object-contain w-full h-full"
+                            onError={() => {
+                              setLogoErrors((prev) => ({ ...prev, [bankLogoId]: true }));
+                            }}
+                          />
+                        ) : (
+                          <div 
+                            className="w-full h-full rounded-full flex items-center justify-center text-[10px] font-extrabold tracking-wider border"
+                            style={{ 
+                              borderColor: `${color}40`,
+                              color: color, 
+                              background: `${color}08`
+                            }}
+                          >
+                            {getBankInitials(selectedBank)}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    <div className="flex-1 min-w-0">
+                      <h2 className="text-[17px] font-bold text-white/90 leading-tight truncate" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
                         {selectedBank}
                       </h2>
-                      <p className="text-[10px] text-white/40 font-body uppercase tracking-wider font-semibold">
+                      <p className="text-[10px] text-white/40 font-body uppercase tracking-wider font-semibold mt-0.5">
                         {filteredBankProducts.length} {filteredBankProducts.length === 1 ? 'option' : 'options'} matching (Out of {bankProducts.length} total)
                       </p>
                     </div>
