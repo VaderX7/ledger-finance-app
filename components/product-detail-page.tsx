@@ -1,9 +1,13 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Product } from '@/lib/products';
-import { ArrowLeft, ExternalLink, Shield, Gift, AlertCircle } from 'lucide-react';
+import { 
+  ArrowLeft, ExternalLink, Shield, Gift, AlertCircle, 
+  Percent, Wallet, CreditCard, Coins, ArrowLeftRight, 
+  Sparkles, CircleDot, ChevronDown, Landmark, UserCheck, FileText 
+} from 'lucide-react';
 import { useLang } from '@/context/LanguageContext';
 import { TranslationKey } from '@/lib/i18n';
 
@@ -12,9 +16,24 @@ interface ProductDetailPageProps {
   onBack: () => void;
 }
 
+const getDetailIcon = (key: string, color: string) => {
+  const k = key.toLowerCase();
+  const style = { color };
+  if (k.includes('rate') || k.includes('yield')) return <Percent size={13} style={style} className="flex-shrink-0" />;
+  if (k.includes('balance') || k.includes('mab')) return <Wallet size={13} style={style} className="flex-shrink-0" />;
+  if (k.includes('card')) return <CreditCard size={13} style={style} className="flex-shrink-0" />;
+  if (k.includes('fee') || k.includes('charges')) return <Coins size={13} style={style} className="flex-shrink-0" />;
+  if (k.includes('atm') || k.includes('withdrawal')) return <ArrowLeftRight size={13} style={style} className="flex-shrink-0" />;
+  if (k.includes('benefit') || k.includes('reward') || k.includes('feature')) return <Sparkles size={13} style={style} className="flex-shrink-0" />;
+  if (k.includes('protection') || k.includes('dicgc') || k.includes('insured')) return <Shield size={13} style={style} className="flex-shrink-0" />;
+  return <CircleDot size={13} style={style} className="flex-shrink-0" />;
+};
+
 export default function ProductDetailPage({ product, onBack }: ProductDetailPageProps) {
   const { t, lang } = useLang();
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [docsExpanded, setDocsExpanded] = useState(false);
+  const [eligibilityExpanded, setEligibilityExpanded] = useState(true);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -176,7 +195,7 @@ export default function ProductDetailPage({ product, onBack }: ProductDetailPage
       </div>
 
       {/* Scrollable content */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto px-5 py-5 space-y-5 pb-10">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto px-5 py-5 space-y-5 pb-28">
         {/* Lender + description */}
         <div>
           <p
@@ -207,99 +226,137 @@ export default function ProductDetailPage({ product, onBack }: ProductDetailPage
           ))}
         </div>
 
-        {/* Key metrics */}
+        {/* Key metrics - Stacked vertically to avoid overlap */}
         <div
-          className="p-4 rounded-xl space-y-2"
+          className="p-4 rounded-2xl space-y-3"
           style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.06)' }}
         >
           <h3
-            className="text-[12px] text-white/80 mb-1"
+            className="text-[12px] text-white/80 mb-2 border-b border-white/[0.04] pb-2"
             style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700 }}
           >
             {t.keyDetails || "Key Details"}
           </h3>
-          {Object.entries(product.metrics).map(([key, value]) => {
-            const translatedVal = t[key as TranslationKey];
-            const displayLabel = typeof translatedVal === 'string' ? translatedVal : key.replace(/([A-Z])/g, ' $1').trim();
-            return (
-              <div key={key} className="flex items-center justify-between py-1.5 border-b border-white/[0.04] last:border-0">
-                <p className="font-body text-[10px] text-white/35 capitalize">
-                  {displayLabel}
-                </p>
-                <span
-                  className="text-[11px]"
-                  style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, color: product.colorAccent }}
-                >
-                  {String(value)}
-                </span>
-              </div>
-            );
-          })}
+          <div className="space-y-4">
+            {Object.entries(product.metrics).map(([key, value]) => {
+              const translatedVal = t[key as TranslationKey];
+              const displayLabel = typeof translatedVal === 'string' ? translatedVal : key.replace(/([A-Z])/g, ' $1').trim();
+              return (
+                <div key={key} className="flex flex-col gap-1">
+                  <div className="flex items-center gap-1.5 text-white/35">
+                    {getDetailIcon(key, product.colorAccent)}
+                    <p className="font-body text-[9px] uppercase tracking-wider font-semibold capitalize">
+                      {displayLabel}
+                    </p>
+                  </div>
+                  <div
+                    className="text-[11.5px] leading-relaxed pl-5 font-semibold text-white/90"
+                    style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+                  >
+                    {String(value)}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
 
         {/* Category-specific content */}
         {renderCategorySpecificContent()}
 
-        {/* Documents */}
-        <div>
-          <p
-            className="text-[12px] text-white/70 mb-2.5"
-            style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700 }}
+        {/* Collapsible Documents Panel */}
+        <div className="border border-white/[0.06] rounded-xl overflow-hidden bg-white/[0.01]">
+          <button
+            onClick={() => setDocsExpanded(!docsExpanded)}
+            className="w-full flex items-center justify-between p-4 text-[12px] text-white/80 font-bold transition-all hover:bg-white/[0.02]"
+            style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
           >
-            {t.requiredDocuments || "Required Documents"}
-          </p>
-          <div className="space-y-1">
-            {product.documents.map((doc) => (
-              <div
-                key={doc}
-                className="flex items-start gap-2 p-2 rounded-lg"
-                style={{ background: 'rgba(255,255,255,0.02)' }}
-              >
-                <span className="text-[9px] font-bold flex-shrink-0 mt-0.5" style={{ color: product.colorAccent }}>✓</span>
-                <span className="font-body text-[10px] text-white/45">{doc}</span>
-              </div>
-            ))}
-          </div>
+            <span className="flex items-center gap-2">
+              <FileText size={14} style={{ color: product.colorAccent }} />
+              {t.requiredDocuments || "Required Documents"}
+            </span>
+            <motion.div
+              animate={{ rotate: docsExpanded ? 180 : 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <ChevronDown size={16} className="text-white/40" />
+            </motion.div>
+          </button>
+          
+          <motion.div
+            initial={false}
+            animate={{ height: docsExpanded ? 'auto' : 0, opacity: docsExpanded ? 1 : 0 }}
+            transition={{ duration: 0.25, ease: 'easeInOut' }}
+            className="overflow-hidden"
+          >
+            <div className="px-4 pb-4 pt-1 space-y-1">
+              {product.documents.map((doc) => (
+                <div
+                  key={doc}
+                  className="flex items-start gap-2 p-2 rounded-lg"
+                  style={{ background: 'rgba(255,255,255,0.015)', border: '1px solid rgba(255,255,255,0.03)' }}
+                >
+                  <span className="text-[9px] font-bold flex-shrink-0 mt-0.5" style={{ color: product.colorAccent }}>✓</span>
+                  <span className="font-body text-[10px] text-white/50">{doc}</span>
+                </div>
+              ))}
+            </div>
+          </motion.div>
         </div>
 
-        {/* Eligibility */}
+        {/* Collapsible Eligibility Panel */}
         {(product.minAge || product.minAnnualIncome || product.employmentTypes) && (
-          <div>
-            <p
-              className="text-[12px] text-white/70 mb-2.5"
-              style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700 }}
+          <div className="border border-white/[0.06] rounded-xl overflow-hidden bg-white/[0.01]">
+            <button
+              onClick={() => setEligibilityExpanded(!eligibilityExpanded)}
+              className="w-full flex items-center justify-between p-4 text-[12px] text-white/80 font-bold transition-all hover:bg-white/[0.02]"
+              style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
             >
-              {t.eligibility || "Eligibility"}
-            </p>
-            <div
-              className="p-4 rounded-xl space-y-2"
-              style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.06)' }}
+              <span className="flex items-center gap-2">
+                <UserCheck size={14} style={{ color: product.colorAccent }} />
+                {t.eligibility || "Eligibility"}
+              </span>
+              <motion.div
+                animate={{ rotate: eligibilityExpanded ? 180 : 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                <ChevronDown size={16} className="text-white/40" />
+              </motion.div>
+            </button>
+            
+            <motion.div
+              initial={false}
+              animate={{ height: eligibilityExpanded ? 'auto' : 0, opacity: eligibilityExpanded ? 1 : 0 }}
+              transition={{ duration: 0.25, ease: 'easeInOut' }}
+              className="overflow-hidden"
             >
-              {product.minAge && (
-                <div className="flex items-center justify-between text-[10px]">
-                  <span className="font-body text-white/35">{t.ageRange || "Age Range"}</span>
-                  <span style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 600, color: 'rgba(255,255,255,0.65)' }}>
-                    {product.minAge}{product.maxAge ? `–${product.maxAge}` : '+'} {lang === 'hi' ? 'वर्ष' : lang === 'hinglish' ? 'saal' : 'yrs'}
-                  </span>
-                </div>
-              )}
-              {product.minAnnualIncome !== undefined && (
-                <div className="flex items-center justify-between text-[10px]">
-                  <span className="font-body text-white/35">{t.minAnnualIncome || "Min. Annual Income"}</span>
-                  <span style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 600, color: 'rgba(255,255,255,0.65)' }}>
-                    {product.minAnnualIncome === 0 ? (t.noMinimum || "No minimum") : `₹${(product.minAnnualIncome / 100000).toFixed(1)}L`}
-                  </span>
-                </div>
-              )}
-              {product.employmentTypes && (
-                <div className="flex items-center justify-between text-[10px]">
-                  <span className="font-body text-white/35">{t.employment || "Employment"}</span>
-                  <span style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 600, color: 'rgba(255,255,255,0.65)' }}>
-                    {product.employmentTypes.map(emp => emp.toLowerCase().includes('salaried') ? t.salaried : emp.toLowerCase().includes('self') ? t.selfEmployed : emp).join(', ')}
-                  </span>
-                </div>
-              )}
-            </div>
+              <div className="px-4 pb-4 pt-1 space-y-2">
+                {product.minAge && (
+                  <div className="flex items-center justify-between text-[10px] p-2 rounded-lg" style={{ background: 'rgba(255,255,255,0.015)', border: '1px solid rgba(255,255,255,0.03)' }}>
+                    <span className="font-body text-white/35">{t.ageRange || "Age Range"}</span>
+                    <span style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 600, color: 'rgba(255,255,255,0.65)' }}>
+                      {product.minAge}{product.maxAge ? `–${product.maxAge}` : '+'} {lang === 'hi' ? 'वर्ष' : lang === 'hinglish' ? 'saal' : 'yrs'}
+                    </span>
+                  </div>
+                )}
+                {product.minAnnualIncome !== undefined && (
+                  <div className="flex items-center justify-between text-[10px] p-2 rounded-lg" style={{ background: 'rgba(255,255,255,0.015)', border: '1px solid rgba(255,255,255,0.03)' }}>
+                    <span className="font-body text-white/35">{t.minAnnualIncome || "Min. Annual Income"}</span>
+                    <span style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 600, color: 'rgba(255,255,255,0.65)' }}>
+                      {product.minAnnualIncome === 0 ? (t.noMinimum || "No minimum") : `₹${(product.minAnnualIncome / 100000).toFixed(1)}L`}
+                    </span>
+                  </div>
+                )}
+                {product.employmentTypes && (
+                  <div className="flex items-center justify-between text-[10px] p-2 rounded-lg" style={{ background: 'rgba(255,255,255,0.015)', border: '1px solid rgba(255,255,255,0.03)' }}>
+                    <span className="font-body text-white/35">{t.employment || "Employment"}</span>
+                    <span style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 600, color: 'rgba(255,255,255,0.65)' }}>
+                      {product.employmentTypes.map(emp => emp.toLowerCase().includes('salaried') ? t.salaried : emp.toLowerCase().includes('self') ? t.selfEmployed : emp).join(', ')}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </motion.div>
           </div>
         )}
 
@@ -313,15 +370,26 @@ export default function ProductDetailPage({ product, onBack }: ProductDetailPage
             {t.anonymousComparisonNote || "This comparison is completely anonymous. No data is collected, stored, or shared with third parties."}
           </p>
         </div>
+      </div>
 
-        {/* CTA */}
+      {/* Floating Bottom Bar containing the CTA */}
+      <div
+        className="flex-shrink-0 p-4 border-t"
+        style={{
+          background: 'rgba(7, 10, 18, 0.85)',
+          backdropFilter: 'blur(16px)',
+          WebkitBackdropFilter: 'blur(16px)',
+          borderColor: 'rgba(255, 255, 255, 0.06)',
+        }}
+      >
         <motion.button
           whileTap={{ scale: 0.96 }}
           onClick={handleAccessPortal}
-          className="w-full py-3.5 rounded-xl font-body text-[12px] font-semibold flex items-center justify-center gap-2.5 transition-all"
+          className="w-full py-3.5 rounded-xl font-body text-[12px] font-semibold flex items-center justify-center gap-2.5 transition-all shadow-lg"
           style={{
-            background: 'linear-gradient(135deg, #C9A96E 0%, #E4C98A 100%)',
+            background: `linear-gradient(135deg, ${product.colorAccent} 0%, ${product.color} 100%)`,
             color: '#070A12',
+            boxShadow: `0 8px 30px ${product.colorAccent}25`,
           }}
         >
           {t.accessPortalAnonymously || "Access Official Portal Anonymously"}
