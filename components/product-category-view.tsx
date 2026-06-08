@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import Image from 'next/image';
 import { Product, ProductCategory } from '@/lib/products';
 import { BankType } from '@/lib/products';
 import { getProductsByCategory } from '@/lib/data-fetcher';
@@ -13,6 +14,74 @@ import { Search, X, ChevronDown, Check, ChevronRight, ArrowLeft } from 'lucide-r
 import { useLang } from '@/context/LanguageContext';
 import { TranslationKey } from '@/lib/i18n';
 import { financialInstitutions } from '@/lib/institutions';
+
+const BANK_LOGO_MAP: Record<string, string> = {
+  'State Bank of India': 'sbi',
+  'Bank of Baroda': 'bob',
+  'Bank of India': 'boi',
+  'Bank of Maharashtra': 'bom',
+  'Canara Bank': 'canara',
+  'Central Bank of India': 'cbi',
+  'Indian Bank': 'indian',
+  'Indian Overseas Bank': 'iob',
+  'Punjab & Sind Bank': 'psb',
+  'Punjab National Bank': 'pnb',
+  'UCO Bank': 'uco',
+  'Union Bank of India': 'unionbank',
+  'Axis Bank': 'axis',
+  'Bandhan Bank': 'bandhan',
+  'CSB Bank': 'csb',
+  'CSB Bank (formerly Catholic Syrian Bank)': 'csb',
+  'City Union Bank': 'cub',
+  'DCB Bank': 'dcb',
+  'Dhanlaxmi Bank': 'dhanlaxmi',
+  'Federal Bank': 'federal',
+  'HDFC Bank': 'hdfc',
+  'ICICI Bank': 'icici',
+  'IDBI Bank': 'idbi',
+  'IDFC FIRST Bank': 'idfc',
+  'IndusInd Bank': 'indusind',
+  'Jammu & Kashmir Bank': 'jkb',
+  'Karnataka Bank': 'karnataka',
+  'Karur Vysya Bank': 'kvb',
+  'Kotak Mahindra Bank': 'kotak',
+  'Nainital Bank': 'nainital',
+  'RBL Bank': 'rbl',
+  'Tamilnad Mercantile Bank': 'tmb',
+  'YES BANK': 'yes',
+  'YES Bank': 'yes',
+  'South Indian Bank': 'sib',
+  'DBS Bank India (Digibank)': 'dbs',
+  'Standard Chartered Bank': 'sc',
+  'HSBC Bank India': 'hsbc',
+};
+
+const getBankInitials = (lender: string): string => {
+  const nameUpper = lender.toUpperCase();
+  if (nameUpper.includes('STATE BANK OF INDIA')) return 'SBI';
+  if (nameUpper.includes('BANK OF BARODA')) return 'BOB';
+  if (nameUpper.includes('BANK OF INDIA')) return 'BOI';
+  if (nameUpper.includes('BANK OF MAHARASHTRA')) return 'BOM';
+  if (nameUpper.includes('CENTRAL BANK OF INDIA')) return 'CBI';
+  if (nameUpper.includes('PUNJAB & SIND')) return 'PSB';
+  if (nameUpper.includes('PUNJAB NATIONAL')) return 'PNB';
+  if (nameUpper.includes('UNION BANK OF INDIA')) return 'UBI';
+  if (nameUpper.includes('INDIAN OVERSEAS')) return 'IOB';
+  if (nameUpper.includes('JAMMU & KASHMIR')) return 'JKB';
+  if (nameUpper.includes('KARUR VYSYA')) return 'KVB';
+  if (nameUpper.includes('SOUTH INDIAN')) return 'SIB';
+  if (nameUpper.includes('TAMILNAD MERCANTILE')) return 'TMB';
+  if (nameUpper.includes('CITY UNION')) return 'CUB';
+  if (nameUpper.includes('DHANLAXMI')) return 'DLB';
+  if (nameUpper.includes('IDFC FIRST')) return 'IDFC';
+  
+  const cleanName = lender.replace(/bank/gi, '').trim();
+  const words = cleanName.split(/[\s-]+/).filter(Boolean);
+  if (words.length >= 2) {
+    return words.slice(0, 3).map(w => w[0].toUpperCase()).join('');
+  }
+  return cleanName.substring(0, 4).toUpperCase();
+};
 
 const bankTypeFilters: Array<{ id: BankType | 'all'; labelKey: 'all' | 'publicSector' | 'privateSector' | 'smallFinance' | 'nbfc' }> = [
   { id: 'all', labelKey: 'all' },
@@ -189,6 +258,7 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
   const [selectedBank, setSelectedBank] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<string>('popularity');
   const [showSortPopup, setShowSortPopup] = useState(false);
+  const [logoErrors, setLogoErrors] = useState<Record<string, boolean>>({});
 
   const getRateRange = (products: Product[]) => {
     const rates: number[] = [];
@@ -667,6 +737,10 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
                       const lowestMinBal = getLowestMinBalance(group.products);
                       const highlights = firstProduct.highlights.slice(0, 3);
 
+                      const bankLogoId = BANK_LOGO_MAP[group.lender] || group.lender.toLowerCase().replace(/bank/gi, '').replace(/[^a-z0-9]/g, '').trim();
+                      const logoUrl = `/logos/${bankLogoId}.png`;
+                      const hasLogoError = logoErrors[bankLogoId] || false;
+
                       return (
                         <motion.div
                           key={group.lender}
@@ -683,18 +757,55 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
                         >
                           <div className="absolute -top-8 -right-8 w-28 h-28 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" style={{ background: `${color}14` }} />
 
-                          <div className="flex justify-between items-start mb-2">
-                            <h3 className="text-[17px] leading-tight text-white/95 truncate pr-2" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800 }}>
-                              {group.lender}
-                            </h3>
-                            <span className="text-[9px] font-body px-1.5 py-0.5 rounded uppercase font-semibold text-white/40 flex-shrink-0" style={{ background: 'rgba(255,255,255,0.04)' }}>
-                              {bankTypeName}
-                            </span>
-                          </div>
+                          <div className="flex items-center gap-3 mb-3">
+                            {/* Logo Container */}
+                            <div 
+                              className="w-12 h-12 rounded-xl flex-shrink-0 flex items-center justify-center p-[6px] overflow-hidden"
+                              style={{
+                                background: 'rgba(255, 255, 255, 0.06)',
+                                border: '1px solid rgba(255, 255, 255, 0.08)',
+                              }}
+                            >
+                              {!hasLogoError ? (
+                                <Image
+                                  src={logoUrl}
+                                  alt={`${group.lender} logo`}
+                                  width={40}
+                                  height={40}
+                                  className="object-contain w-full h-full"
+                                  onError={() => {
+                                    setLogoErrors((prev) => ({ ...prev, [bankLogoId]: true }));
+                                  }}
+                                />
+                              ) : (
+                                <div 
+                                  className="w-full h-full rounded-full flex items-center justify-center text-[10px] font-extrabold tracking-wider border"
+                                  style={{ 
+                                    borderColor: `${color}40`,
+                                    color: color, 
+                                    background: `${color}08`
+                                  }}
+                                >
+                                  {getBankInitials(group.lender)}
+                                </div>
+                              )}
+                            </div>
 
-                          <p className="text-[11px] text-white/50 mb-3 font-body">
-                            {group.products.length} {group.products.length === 1 ? 'savings option' : 'savings options'}
-                          </p>
+                            {/* Bank Name and Sector Badge */}
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-start justify-between gap-2">
+                                <h3 className="text-[16px] leading-tight text-white/95 truncate pr-1" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800 }}>
+                                  {group.lender}
+                                </h3>
+                                <span className="text-[9px] font-body px-1.5 py-0.5 rounded uppercase font-semibold text-white/40 flex-shrink-0 mt-0.5" style={{ background: 'rgba(255,255,255,0.04)' }}>
+                                  {bankTypeName}
+                                </span>
+                              </div>
+                              <p className="text-[11px] text-white/50 mt-1 font-body">
+                                {group.products.length} {group.products.length === 1 ? 'savings option' : 'savings options'}
+                              </p>
+                            </div>
+                          </div>
 
                           <div className="grid grid-cols-2 gap-3 mb-3">
                             <div className="rounded-lg px-2.5 py-2" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
