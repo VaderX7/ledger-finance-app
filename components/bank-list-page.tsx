@@ -7,6 +7,8 @@ import { Product, ProductCategory } from '@/lib/products';
 import CategoryProductCard from './category-product-card';
 import ProductDetailPage from './product-detail-page';
 import JargonBottomSheet from './jargon-bottom-sheet';
+import { BANK_LOGO_MAP } from './product-category-view';
+
 
 interface BankListPageProps {
   products: Product[];
@@ -219,18 +221,30 @@ export default function BankListPage({
                 border: `1px solid ${group.color}30`,
               }}
             >
-              {/* Logo letter */}
-              <div
-                className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-                style={{ background: `${group.color}20`, border: `1px solid ${group.color}35` }}
-              >
-                <span
-                  className="text-[11px]"
-                  style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800, color: group.colorAccent }}
-                >
-                  {group.lender.slice(0, 2).toUpperCase()}
-                </span>
-              </div>
+              {/* Logo / Initials */}
+              {(() => {
+                const bankLogoId = BANK_LOGO_MAP[group.lender] || group.lender.toLowerCase().replace(/bank/gi, '').replace(/[^a-z0-9]/g, '').trim();
+                const logoUrl = `/logos/${bankLogoId}.png`;
+                return (
+                  <div
+                    className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 relative overflow-hidden bg-white/5"
+                    style={{ border: `1px solid ${group.color}35` }}
+                  >
+                    <span
+                      className="text-[11px] absolute"
+                      style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800, color: group.colorAccent }}
+                    >
+                      {group.lender.slice(0, 2).toUpperCase()}
+                    </span>
+                    <img
+                      src={logoUrl}
+                      alt={`${group.lender} logo`}
+                      className="w-full h-full object-contain p-[3px] relative z-10 bg-[#070A12]"
+                      onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                    />
+                  </div>
+                );
+              })()}
 
               {/* Text */}
               <div className="flex-1 min-w-0">

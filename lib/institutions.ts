@@ -64,7 +64,7 @@ export const financialInstitutions: FinancialInstitution[] = [
     hasZeroBalance: true,
     color: '#2C3E50',
     colorAccent: '#C9A96E',
-    logoUrl: '/sbi.webp',
+    logoUrl: '/logos/sbi.png',
   },
   {
     id: 'bob',
@@ -127,7 +127,7 @@ export const financialInstitutions: FinancialInstitution[] = [
     hasZeroBalance: true,
     color: '#0052CC',
     colorAccent: '#38BDF8',
-    logoUrl: '/hdfc.jpg',
+    logoUrl: '/logos/hdfc.png',
   },
   {
     id: 'icici',
@@ -138,7 +138,7 @@ export const financialInstitutions: FinancialInstitution[] = [
     hasZeroBalance: true,
     color: '#003D7A',
     colorAccent: '#FB7185',
-    logoUrl: '/icici.png',
+    logoUrl: '/logos/icici.png',
   },
   {
     id: 'axis',
@@ -149,7 +149,7 @@ export const financialInstitutions: FinancialInstitution[] = [
     hasZeroBalance: true,
     color: '#1A1F71',
     colorAccent: '#00E5FF',
-    logoUrl: '/axis.jpg',
+    logoUrl: '/logos/axis.png',
   },
   {
     id: 'kotak',
@@ -160,7 +160,7 @@ export const financialInstitutions: FinancialInstitution[] = [
     hasZeroBalance: true,
     color: '#C60C30',
     colorAccent: '#00F5A0',
-    logoUrl: 'https://unavatar.io/kotak.com',
+    logoUrl: '/logos/kmb.png',
   },
   {
     id: 'idfc',
@@ -171,6 +171,7 @@ export const financialInstitutions: FinancialInstitution[] = [
     hasZeroBalance: true,
     color: '#004687',
     colorAccent: '#2DD4BF',
+    logoUrl: '/logos/idfc.png',
   },
   {
     id: 'fed-bank',
@@ -181,6 +182,7 @@ export const financialInstitutions: FinancialInstitution[] = [
     hasZeroBalance: true,
     color: '#0066CC',
     colorAccent: '#C9A96E',
+    logoUrl: '/logos/federal.png',
   },
   {
     id: 'indusind',
@@ -191,6 +193,7 @@ export const financialInstitutions: FinancialInstitution[] = [
     hasZeroBalance: true,
     color: '#003366',
     colorAccent: '#38BDF8',
+    logoUrl: '/logos/indusind.png',
   },
   {
     id: 'yes-bank',
@@ -201,6 +204,7 @@ export const financialInstitutions: FinancialInstitution[] = [
     hasZeroBalance: true,
     color: '#004D99',
     colorAccent: '#FB7185',
+    logoUrl: '/logos/yesbank.png',
   },
 
   // SMALL FINANCE BANKS
@@ -213,7 +217,7 @@ export const financialInstitutions: FinancialInstitution[] = [
     hasZeroBalance: true,
     color: '#E31F24',
     colorAccent: '#00E5FF',
-    logoUrl: '/au.png',
+    logoUrl: '/logos/au_sfb.png',
   },
   {
     id: 'jana-sfb',
@@ -224,7 +228,7 @@ export const financialInstitutions: FinancialInstitution[] = [
     hasZeroBalance: true,
     color: '#E91E8C',
     colorAccent: '#FFB300',
-    logoUrl: '/jana_small_finance_bank.png',
+    logoUrl: '/logos/jana_sfb.png',
   },
   {
     id: 'equitas-sfb',
@@ -235,6 +239,7 @@ export const financialInstitutions: FinancialInstitution[] = [
     hasZeroBalance: true,
     color: '#2DD4BF',
     colorAccent: '#00F5A0',
+    logoUrl: '/logos/equitas_sfb.png',
   },
   {
     id: 'ujjivan-sfb',
@@ -245,6 +250,7 @@ export const financialInstitutions: FinancialInstitution[] = [
     hasZeroBalance: true,
     color: '#0066CC',
     colorAccent: '#C9A96E',
+    logoUrl: '/logos/ujjivan_sfb.png',
   },
   {
     id: 'suryoday-sfb',
@@ -255,6 +261,7 @@ export const financialInstitutions: FinancialInstitution[] = [
     hasZeroBalance: true,
     color: '#FF9800',
     colorAccent: '#38BDF8',
+    logoUrl: '/logos/suryoday_sfb.png',
   },
   {
     id: 'north-east-sfb',
@@ -265,6 +272,7 @@ export const financialInstitutions: FinancialInstitution[] = [
     hasZeroBalance: true,
     color: '#004687',
     colorAccent: '#FB7185',
+    logoUrl: '/logos/northeast_sfb.png',
   },
 
   // PAYMENTS BANKS

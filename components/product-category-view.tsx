@@ -15,7 +15,7 @@ import { useLang } from '@/context/LanguageContext';
 import { TranslationKey } from '@/lib/i18n';
 import { financialInstitutions } from '@/lib/institutions';
 
-const BANK_LOGO_MAP: Record<string, string> = {
+export const BANK_LOGO_MAP: Record<string, string> = {
   'State Bank of India': 'sbi',
   'Bank of Baroda': 'bob',
   'Bank of India': 'boi',
@@ -29,6 +29,7 @@ const BANK_LOGO_MAP: Record<string, string> = {
   'UCO Bank': 'uco',
   'Union Bank of India': 'unionbank',
   'Axis Bank': 'axis',
+  'Axis Bank Limited': 'axis',
   'Bandhan Bank': 'bandhan',
   'CSB Bank': 'csb',
   'CSB Bank (formerly Catholic Syrian Bank)': 'csb',
@@ -37,9 +38,13 @@ const BANK_LOGO_MAP: Record<string, string> = {
   'Dhanlaxmi Bank': 'dhanlaxmi',
   'Federal Bank': 'federal',
   'HDFC Bank': 'hdfc',
+  'Housing Development Finance Corporation': 'hdfc',
   'ICICI Bank': 'icici',
+  'ICICI Bank Limited': 'icici',
   'IDBI Bank': 'idbi',
   'IDFC FIRST Bank': 'idfc',
+  'IDFC First Bank': 'idfc',
+  'IDFC Bank': 'idfc',
   'IndusInd Bank': 'indusind',
   'Jammu & Kashmir Bank': 'j&k',
   'Karnataka Bank': 'karnataka',
@@ -54,7 +59,46 @@ const BANK_LOGO_MAP: Record<string, string> = {
   'DBS Bank India (Digibank)': 'dbs',
   'Standard Chartered Bank': 'sc',
   'HSBC Bank India': 'hsbc',
+
+  // Small Finance Banks
+  'AU Small Finance Bank': 'au_sfb',
+  'AU Small Finance Bank Limited': 'au_sfb',
+  'AU Small Finance Bank Ltd': 'au_sfb',
+  'Capital Small Finance Bank': 'capital_sfb',
+  'Capital Small Finance Bank Limited': 'capital_sfb',
+  'Capital Small Finance Bank Ltd': 'capital_sfb',
+  'Equitas Small Finance Bank': 'equitas_sfb',
+  'Equitas Small Finance Bank Limited': 'equitas_sfb',
+  'Equitas Small Finance Bank Ltd': 'equitas_sfb',
+  'ESAF Small Finance Bank': 'esaf_sfb',
+  'ESAF Small Finance Bank Limited': 'esaf_sfb',
+  'ESAF Small Finance Bank Ltd': 'esaf_sfb',
+  'Jana Small Finance Bank': 'jana_sfb',
+  'Jana Small Finance Bank Limited': 'jana_sfb',
+  'Jana Small Finance Bank Ltd': 'jana_sfb',
+  'North East Small Finance Bank': 'northeast_sfb',
+  'North East Small Finance Bank Limited': 'northeast_sfb',
+  'North East Small Finance Bank Ltd': 'northeast_sfb',
+  'Northeast Small Finance Bank': 'northeast_sfb',
+  'Northeast Small Finance Bank Limited': 'northeast_sfb',
+  'Northeast Small Finance Bank Ltd': 'northeast_sfb',
+  'Shivalik Small Finance Bank': 'shivalik_sfb',
+  'Shivalik Small Finance Bank Limited': 'shivalik_sfb',
+  'Shivalik Small Finance Bank Ltd': 'shivalik_sfb',
+  'Suryoday Small Finance Bank': 'suryoday_sfb',
+  'Suryoday Small Finance Bank Limited': 'suryoday_sfb',
+  'Suryoday Small Finance Bank Ltd': 'suryoday_sfb',
+  'Ujjivan Small Finance Bank': 'ujjivan_sfb',
+  'Ujjivan Small Finance Bank Limited': 'ujjivan_sfb',
+  'Ujjivan Small Finance Bank Ltd': 'ujjivan_sfb',
+  'Unity Small Finance Bank': 'unity_sfb',
+  'Unity Small Finance Bank Limited': 'unity_sfb',
+  'Unity Small Finance Bank Ltd': 'unity_sfb',
+  'Utkarsh Small Finance Bank': 'utkarsh_sfb',
+  'Utkarsh Small Finance Bank Limited': 'utkarsh_sfb',
+  'Utkarsh Small Finance Bank Ltd': 'utkarsh_sfb',
 };
+
 
 export const BANK_COLORS_MAP: Record<string, { color: string; colorAccent: string }> = {
   "Axis Bank": { "color": "#97144D", "colorAccent": "#BF3C75" },
