@@ -1588,7 +1588,7 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
         term={selectedTerm}
         isOpen={isSheetOpen}
         onClose={handleSheetClose}
-        onBackgroundChange={() => { }}
+
       />
     </>
   );

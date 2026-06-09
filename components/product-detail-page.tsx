@@ -142,8 +142,6 @@ export default function ProductDetailPage({ product, onBack }: ProductDetailPage
   const [eligibilityExpanded, setEligibilityExpanded] = useState(true);
   const [selectedTerm, setSelectedTerm] = useState<string | null>(null);
   const [jargonOpen, setJargonOpen] = useState(false);
-  const [bgScale, setBgScale] = useState(1);
-  const [bgOpacity, setBgOpacity] = useState(1);
 
   const handleTermClick = (term: string) => { setSelectedTerm(term); setJargonOpen(true); };
 
@@ -293,17 +291,17 @@ export default function ProductDetailPage({ product, onBack }: ProductDetailPage
     <motion.div
       key="product-detail"
       initial={{ x: '100%', opacity: 0 }}
-      animate={{ x: 0, opacity: 1 }}
+      animate={{ x: 0, opacity: 1, scale: jargonOpen ? 0.92 : 1 }}
       exit={{ x: '100%', opacity: 0 }}
       transition={{
         x: { type: 'spring', stiffness: 340, damping: 34 },
         opacity: { type: 'spring', stiffness: 340, damping: 34 },
-        scale: { type: 'spring', stiffness: 300, damping: 30 },
+        scale: { type: 'spring', stiffness: 180, damping: 26, mass: 1.1 },
       }}
       className="fixed inset-0 z-[60] flex flex-col max-w-md mx-auto"
       style={{
-        scale: bgScale,
-        opacity: bgOpacity,
+        overflow: 'hidden',
+        backgroundColor: '#070A12',
         background: `linear-gradient(180deg, ${(product.color || '#C9A96E')}18 0%, transparent 100%), #070A12`,
       }}
     >
@@ -667,7 +665,6 @@ export default function ProductDetailPage({ product, onBack }: ProductDetailPage
         term={selectedTerm}
         isOpen={jargonOpen}
         onClose={() => { setJargonOpen(false); setTimeout(() => setSelectedTerm(null), 300); }}
-        onBackgroundChange={(scale, opacity) => { setBgScale(scale); setBgOpacity(opacity); }}
       />
     </motion.div>
   );

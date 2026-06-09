@@ -16,8 +16,7 @@ interface DetailPanelProps {
 export default function DetailPanel({ product, isOpen, onClose }: DetailPanelProps) {
   const [selectedTerm, setSelectedTerm] = useState<string | null>(null);
   const [jargonOpen, setJargonOpen] = useState(false);
-  const [bgScale, setBgScale] = useState(1);
-  const [bgOpacity, setBgOpacity] = useState(1);
+
 
   const handleAccessPortal = () => {
     const win = window.open(product.portalUrl, '_blank', 'noopener,noreferrer');
@@ -211,7 +210,6 @@ export default function DetailPanel({ product, isOpen, onClose }: DetailPanelPro
             {/* Content */}
             <motion.div
               className="px-5 py-5 space-y-5 overflow-y-auto flex-1"
-              style={{ scale: bgScale, opacity: bgOpacity }}
               transition={{ type: 'spring', stiffness: 300, damping: 30 }}
             >
               {/* Product Description */}
@@ -336,7 +334,7 @@ export default function DetailPanel({ product, isOpen, onClose }: DetailPanelPro
         term={selectedTerm}
         isOpen={jargonOpen}
         onClose={() => { setJargonOpen(false); setTimeout(() => setSelectedTerm(null), 300); }}
-        onBackgroundChange={(scale, opacity) => { setBgScale(scale); setBgOpacity(opacity); }}
+
       />
     </AnimatePresence>
   );

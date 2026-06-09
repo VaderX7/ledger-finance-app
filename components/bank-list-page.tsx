@@ -153,7 +153,7 @@ function BankProductsPage({
         term={selectedTerm}
         isOpen={isSheetOpen}
         onClose={handleSheetClose}
-        onBackgroundChange={() => {}}
+
       />
     </>
   );

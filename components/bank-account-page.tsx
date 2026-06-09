@@ -200,8 +200,7 @@ function AccountDetailPage({ account, institution, onBack, onTermClick }: { acco
 export default function BankAccountPage({ institution, onBack }: BankAccountPageProps) {
   const [selectedTerm, setSelectedTerm] = useState<string | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
-  const [bgScale, setBgScale] = useState(1);
-  const [bgOpacity, setBgOpacity] = useState(1);
+
   const [accountVariants, setAccountVariants] = useState<AccountVariant[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedAccount, setSelectedAccount] = useState<AccountVariant | null>(null);
@@ -474,7 +473,7 @@ export default function BankAccountPage({ institution, onBack }: BankAccountPage
         term={selectedTerm}
         isOpen={isSheetOpen}
         onClose={handleSheetClose}
-        onBackgroundChange={(scale, opacity) => { setBgScale(scale); setBgOpacity(opacity); }}
+
       />
     </>
   );
