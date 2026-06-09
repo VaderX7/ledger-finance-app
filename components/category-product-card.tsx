@@ -179,7 +179,10 @@ export default function CategoryProductCard({
       className="relative overflow-hidden cursor-pointer group p-4 flex flex-col justify-between"
       style={{
         background: '#0d1117',
-        border: '1px solid rgba(0, 229, 255, 0.12)',
+        borderTop: '1px solid rgba(0, 229, 255, 0.12)',
+        borderRight: '1px solid rgba(0, 229, 255, 0.12)',
+        borderBottom: '1px solid rgba(0, 229, 255, 0.12)',
+        borderLeft: `3px solid ${product.color || '#C9A96E'}`,
         borderRadius: '16px',
       }}
     >

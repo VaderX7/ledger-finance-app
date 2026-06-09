@@ -77,21 +77,53 @@ function BankProductsPage({
           >
             <ArrowLeft size={18} className="text-white/80" strokeWidth={2} />
           </motion.button>
-          <div className="flex-1 min-w-0">
-            <p className="font-body text-[10px] tracking-widest uppercase text-white/25">
-              {typeLabels[group.bankType] ?? group.bankType}
-            </p>
-            <p
-              className="text-[15px] leading-tight truncate mt-0.5"
-              style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, color: 'rgba(255,255,255,0.92)' }}
-            >
-              {group.lender}
-            </p>
+          <div className="flex items-center gap-2 flex-1 min-w-0">
+            {(() => {
+              const bankLogoId = BANK_LOGO_MAP[group.lender] || group.lender.toLowerCase().replace(/bank/gi, '').replace(/[^a-z0-9]/g, '').trim();
+              const logoUrl = `/logos/${bankLogoId}.png`;
+              return (
+                <div
+                  className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 relative overflow-hidden bg-white/5"
+                  style={{ border: `1px solid ${group.color}35` }}
+                >
+                  <span
+                    className="text-[9px] absolute font-bold"
+                    style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: group.colorAccent }}
+                  >
+                    {group.lender.slice(0, 2).toUpperCase()}
+                  </span>
+                  <img
+                    src={logoUrl}
+                    alt={`${group.lender} logo`}
+                    className="w-full h-full object-contain p-[2px] relative z-10 bg-[#070A12]"
+                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                  />
+                </div>
+              );
+            })()}
+            <div className="min-w-0 flex-1">
+              <p
+                className="text-[14px] font-bold leading-tight truncate text-white/95"
+                style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+              >
+                {group.lender}
+              </p>
+              <p className="text-[10px] text-white/40 font-body mt-0.5">
+                {group.products.length} {
+                  (() => {
+                    const cat = group.products[0]?.category;
+                    return cat === 'savings' ? 'savings options' :
+                           cat === 'current' ? 'current account options' :
+                           cat === 'fds' ? 'FD options' :
+                           cat === 'creditcards' ? 'credit card options' :
+                           cat === 'loans' ? 'loan options' :
+                           cat === 'govtschemes' ? 'schemes' :
+                           'options';
+                  })()
+                }
+              </p>
+            </div>
           </div>
-          <div
-            className="w-2 h-2 rounded-full flex-shrink-0"
-            style={{ background: group.colorAccent, boxShadow: `0 0 8px ${group.colorAccent}88` }}
-          />
         </div>
 
         {/* Product list */}

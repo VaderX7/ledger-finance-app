@@ -151,9 +151,12 @@ export default function SearchPage() {
 
       {loading && (
         <div className="space-y-2.5">
-          {[1, 2, 3, 4, 5].map((n) => (
-            <div key={n} className="h-16 rounded-xl animate-pulse" style={{ background: 'rgba(255,255,255,0.04)' }} />
-          ))}
+          {(() => {
+            const accentColor = activeCategory !== 'all' ? categoryMeta[activeCategory].color : '#C9A96E';
+            return [1, 2, 3, 4, 5].map((n) => (
+              <div key={n} className="h-16 rounded-xl animate-pulse" style={{ background: `${accentColor}12` }} />
+            ));
+          })()}
         </div>
       )}
 

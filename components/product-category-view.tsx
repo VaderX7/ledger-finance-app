@@ -1126,7 +1126,7 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
               {loading && (
                 <div className="space-y-3 mt-2">
                   {[1, 2, 3].map((n) => (
-                    <div key={n} className="h-28 rounded-2xl animate-pulse" style={{ background: 'rgba(255,255,255,0.04)' }} />
+                    <div key={n} className="h-28 rounded-2xl animate-pulse" style={{ background: `${meta.accentColor}12` }} />
                   ))}
                 </div>
               )}
@@ -1343,48 +1343,55 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
                       <ArrowLeft size={16} />
                     </motion.button>
 
-                    {/* Scoped Logo Container */}
-                    {selectedBank && (
-                      <div 
-                        className="w-12 h-12 rounded-xl flex-shrink-0 flex items-center justify-center p-[6px] overflow-hidden mr-3"
-                        style={{
-                          background: 'rgba(255, 255, 255, 0.06)',
-                          border: '1px solid rgba(255, 255, 255, 0.08)',
-                        }}
-                      >
-                        {!hasLogoError ? (
-                          <Image
-                            src={logoUrl}
-                            alt={`${selectedBank} logo`}
-                            width={40}
-                            height={40}
-                            className="object-contain w-full h-full"
-                            onError={() => {
-                              setLogoErrors((prev) => ({ ...prev, [bankLogoId]: true }));
-                            }}
-                          />
-                        ) : (
-                          <div 
-                            className="w-full h-full rounded-full flex items-center justify-center text-[10px] font-extrabold tracking-wider border"
-                            style={{ 
-                              borderColor: `${color}40`,
-                              color: color, 
-                              background: `${color}08`
-                            }}
-                          >
-                            {getBankInitials(selectedBank)}
-                          </div>
-                        )}
+                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                      {selectedBank && (
+                        <div 
+                          className="w-7 h-7 rounded-lg flex-shrink-0 flex items-center justify-center p-[3px] overflow-hidden"
+                          style={{
+                            background: 'rgba(255, 255, 255, 0.08)',
+                            border: '1px solid rgba(255, 255, 255, 0.12)',
+                          }}
+                        >
+                          {!hasLogoError ? (
+                            <Image
+                              src={logoUrl}
+                              alt={`${selectedBank} logo`}
+                              width={28}
+                              height={28}
+                              className="object-contain w-full h-full"
+                              onError={() => {
+                                setLogoErrors((prev) => ({ ...prev, [bankLogoId]: true }));
+                              }}
+                            />
+                          ) : (
+                            <div 
+                              className="w-full h-full rounded-md flex items-center justify-center text-[8px] font-extrabold tracking-wider"
+                              style={{ 
+                                color: colorAccent, 
+                                background: `${color}15`
+                              }}
+                            >
+                              {getBankInitials(selectedBank)}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                      <div className="min-w-0 flex-1">
+                        <h2 className="text-[15px] font-bold text-white/95 leading-tight truncate" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+                          {selectedBank}
+                        </h2>
+                        <p className="text-[10px] text-white/45 font-body mt-0.5">
+                          {bankProducts.length} {
+                            category === 'savings' ? 'savings options' :
+                            category === 'current' ? 'current account options' :
+                            category === 'fds' ? 'FD options' :
+                            category === 'creditcards' ? 'credit card options' :
+                            category === 'loans' ? 'loan options' :
+                            category === 'govtschemes' ? 'schemes' :
+                            'options'
+                          }
+                        </p>
                       </div>
-                    )}
-
-                    <div className="flex-1 min-w-0">
-                      <h2 className="text-[17px] font-bold text-white/90 leading-tight truncate" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-                        {selectedBank}
-                      </h2>
-                      <p className="text-[10px] text-white/40 font-body uppercase tracking-wider font-semibold mt-0.5">
-                        {filteredBankProducts.length} {filteredBankProducts.length === 1 ? 'option' : 'options'} matching (Out of {bankProducts.length} total)
-                      </p>
                     </div>
                   </div>
 

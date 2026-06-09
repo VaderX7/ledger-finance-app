@@ -297,7 +297,7 @@ export default function BankAccountPage({ institution, onBack }: BankAccountPage
                 <div
                   key={i}
                   className="rounded-2xl overflow-hidden animate-pulse"
-                  style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}
+                  style={{ background: `${institution?.color || '#C9A96E'}12`, border: `1px solid ${institution?.color || '#C9A96E'}22` }}
                 >
                   <div className="px-4 py-3 flex items-center gap-2.5" style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                     <div className="w-3 h-3 rounded-full bg-white/10" />
