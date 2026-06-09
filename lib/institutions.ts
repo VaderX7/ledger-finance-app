@@ -75,6 +75,7 @@ export const financialInstitutions: FinancialInstitution[] = [
     hasZeroBalance: true,
     color: '#1A472A',
     colorAccent: '#00E5FF',
+    logoUrl: '/logos/bob_public.png',
   },
   {
     id: 'boi',
@@ -85,6 +86,7 @@ export const financialInstitutions: FinancialInstitution[] = [
     hasZeroBalance: true,
     color: '#1C3144',
     colorAccent: '#00F5A0',
+    logoUrl: '/logos/boi_public.png',
   },
   {
     id: 'pnb',
@@ -95,6 +97,7 @@ export const financialInstitutions: FinancialInstitution[] = [
     hasZeroBalance: true,
     color: '#2D2D2D',
     colorAccent: '#FB7185',
+    logoUrl: '/logos/pnb_public.png',
   },
   {
     id: 'union-bank',
@@ -105,6 +108,7 @@ export const financialInstitutions: FinancialInstitution[] = [
     hasZeroBalance: true,
     color: '#004B87',
     colorAccent: '#2DD4BF',
+    logoUrl: '/logos/ubi_public.png',
   },
   {
     id: 'canara',
@@ -115,6 +119,7 @@ export const financialInstitutions: FinancialInstitution[] = [
     hasZeroBalance: true,
     color: '#8B0000',
     colorAccent: '#C9A96E',
+    logoUrl: '/logos/canara_public.png',
   },
 
   // PRIVATE SECTOR BANKS (Premium Selection)
@@ -297,6 +302,7 @@ export const financialInstitutions: FinancialInstitution[] = [
     color: '#1565C0',
     colorAccent: '#00F5A0',
     disclaimer: 'Payments bank - Limited transactional features',
+    logoUrl: '/logos/fino_pb.png',
   },
   {
     id: 'airtel-pb',
@@ -308,6 +314,7 @@ export const financialInstitutions: FinancialInstitution[] = [
     color: '#E81B1C',
     colorAccent: '#2DD4BF',
     disclaimer: 'Airtel Payments Bank - Mobile-first digital banking',
+    logoUrl: '/logos/airtel_pb.png',
   },
 
   // REGIONAL RURAL BANKS
