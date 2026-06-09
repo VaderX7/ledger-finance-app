@@ -1,4 +1,4 @@
-export type BankType = 'public' | 'private' | 'sfb' | 'nbfc';
+export type BankType = 'public' | 'private' | 'sfb' | 'nbfc' | 'payments';
 
 export type ProductCategory = 'savings' | 'loans' | 'current' | 'fds' | 'creditcards' | 'govtschemes' | 'insurance';
 

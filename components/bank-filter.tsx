@@ -12,6 +12,7 @@ const bankTypes: Array<{ id: BankType; label: string; icon: string }> = [
   { id: 'public', label: 'Public', icon: '🏛️' },
   { id: 'private', label: 'Private', icon: '🏢' },
   { id: 'sfb', label: 'Small Finance', icon: '💰' },
+  { id: 'payments', label: 'Payments', icon: '📱' },
   { id: 'nbfc', label: 'NBFC', icon: '📊' },
 ];
 
@@ -25,10 +26,10 @@ export default function BankFilter({ activeFilters, onFilterChange }: BankFilter
   };
 
   const showAll = () => {
-    if (activeFilters.length === 4) {
+    if (activeFilters.length === bankTypes.length) {
       onFilterChange([]);
     } else {
-      onFilterChange(['public', 'private', 'sfb', 'nbfc']);
+      onFilterChange(bankTypes.map((b) => b.id));
     }
   };
 
@@ -51,7 +52,7 @@ export default function BankFilter({ activeFilters, onFilterChange }: BankFilter
           onClick={showAll}
           className="text-[10px] font-body font-medium text-[#C9A96E]/60 hover:text-[#C9A96E] transition-colors"
         >
-          {activeFilters.length === 4 ? 'Clear' : 'All'}
+          {activeFilters.length === bankTypes.length ? 'Clear' : 'All'}
         </motion.button>
       </div>
       <div className="flex flex-wrap gap-2">

@@ -22,7 +22,7 @@ export default function BottomNav() {
 
   return (
     <nav
-      className="fixed bottom-0 inset-x-0 mx-auto max-w-md z-50"
+      className="fixed bottom-0 inset-x-0 mx-auto max-w-md z-30"
       style={{
         background: 'rgba(7, 10, 18, 0.88)',
         backdropFilter: 'blur(24px)',

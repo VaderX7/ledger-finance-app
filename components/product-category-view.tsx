@@ -81,7 +81,24 @@ export const BANK_COLORS_MAP: Record<string, { color: string; colorAccent: strin
   "Tamilnad Mercantile Bank": { "color": "#F2CDE4", "colorAccent": "#C21D86" },
   "Yes Bank": { "color": "#005092", "colorAccent": "#417DAE" },
   "YES Bank": { "color": "#005092", "colorAccent": "#417DAE" },
-  "YES BANK": { "color": "#005092", "colorAccent": "#417DAE" }
+  "YES BANK": { "color": "#005092", "colorAccent": "#417DAE" },
+  "Airtel Payments Bank": { "color": "#E11900", "colorAccent": "#F24E3D" },
+  "India Post Payments Bank": { "color": "#005A9C", "colorAccent": "#FF9933" },
+  "IPPB": { "color": "#005A9C", "colorAccent": "#FF9933" },
+  "Fino Payments Bank": { "color": "#00A9E0", "colorAccent": "#FCA311" },
+  "Jio Payments Bank": { "color": "#0F3B99", "colorAccent": "#00D4FF" },
+  "Paytm Payments Bank": { "color": "#002E6E", "colorAccent": "#00B9F5" },
+  "AU Small Finance Bank": { "color": "#662D91", "colorAccent": "#FF7A00" },
+  "Equitas Small Finance Bank": { "color": "#005C8A", "colorAccent": "#D9AB26" },
+  "Ujjivan Small Finance Bank": { "color": "#003E7E", "colorAccent": "#E26D2B" },
+  "Jana Small Finance Bank": { "color": "#E31B23", "colorAccent": "#FFC72C" },
+  "ESAF Small Finance Bank": { "color": "#005F9E", "colorAccent": "#39B54A" },
+  "Utkarsh Small Finance Bank": { "color": "#00529B", "colorAccent": "#F39200" },
+  "Capital Small Finance Bank": { "color": "#002A54", "colorAccent": "#00B5E2" },
+  "Fincare Small Finance Bank": { "color": "#0A85B3", "colorAccent": "#F58220" },
+  "Suryoday Small Finance Bank": { "color": "#00539E", "colorAccent": "#FF8200" },
+  "Unity Small Finance Bank": { "color": "#004F9F", "colorAccent": "#FFC72C" },
+  "North East Small Finance Bank": { "color": "#1B6A47", "colorAccent": "#FFD100" }
 };
 
 export const getOverriddenColor = (lender: string, field: 'color' | 'colorAccent', fallback: string): string => {
@@ -103,6 +120,54 @@ export const getOverriddenColor = (lender: string, field: 'color' | 'colorAccent
   }
   if (lenderUpper.includes('STATE BANK OF INDIA') || lenderUpper === 'SBI') {
     return BANK_COLORS_MAP['State Bank of India']?.[field] || fallback;
+  }
+  if (lenderUpper.includes('AIRTEL')) {
+    return BANK_COLORS_MAP['Airtel Payments Bank']?.[field] || fallback;
+  }
+  if (lenderUpper.includes('INDIA POST') || lenderUpper.includes('IPPB')) {
+    return BANK_COLORS_MAP['India Post Payments Bank']?.[field] || fallback;
+  }
+  if (lenderUpper.includes('FINO')) {
+    return BANK_COLORS_MAP['Fino Payments Bank']?.[field] || fallback;
+  }
+  if (lenderUpper.includes('JIO')) {
+    return BANK_COLORS_MAP['Jio Payments Bank']?.[field] || fallback;
+  }
+  if (lenderUpper.includes('PAYTM')) {
+    return BANK_COLORS_MAP['Paytm Payments Bank']?.[field] || fallback;
+  }
+  if (lenderUpper.includes('AU SMALL')) {
+    return BANK_COLORS_MAP['AU Small Finance Bank']?.[field] || fallback;
+  }
+  if (lenderUpper.includes('EQUITAS')) {
+    return BANK_COLORS_MAP['Equitas Small Finance Bank']?.[field] || fallback;
+  }
+  if (lenderUpper.includes('UJJIVAN')) {
+    return BANK_COLORS_MAP['Ujjivan Small Finance Bank']?.[field] || fallback;
+  }
+  if (lenderUpper.includes('JANA')) {
+    return BANK_COLORS_MAP['Jana Small Finance Bank']?.[field] || fallback;
+  }
+  if (lenderUpper.includes('ESAF')) {
+    return BANK_COLORS_MAP['ESAF Small Finance Bank']?.[field] || fallback;
+  }
+  if (lenderUpper.includes('UTKARSH')) {
+    return BANK_COLORS_MAP['Utkarsh Small Finance Bank']?.[field] || fallback;
+  }
+  if (lenderUpper.includes('CAPITAL')) {
+    return BANK_COLORS_MAP['Capital Small Finance Bank']?.[field] || fallback;
+  }
+  if (lenderUpper.includes('FINCARE')) {
+    return BANK_COLORS_MAP['Fincare Small Finance Bank']?.[field] || fallback;
+  }
+  if (lenderUpper.includes('SURYODAY')) {
+    return BANK_COLORS_MAP['Suryoday Small Finance Bank']?.[field] || fallback;
+  }
+  if (lenderUpper.includes('UNITY')) {
+    return BANK_COLORS_MAP['Unity Small Finance Bank']?.[field] || fallback;
+  }
+  if (lenderUpper.includes('NORTH EAST')) {
+    return BANK_COLORS_MAP['North East Small Finance Bank']?.[field] || fallback;
   }
 
   return fallback;
@@ -292,6 +357,70 @@ function SortSelectSheet({
   );
 }
 
+function InstitutionSelectSheet({
+  title,
+  options,
+  selected,
+  onSelect,
+  onClose,
+  getLabel,
+}: {
+  title: string;
+  options: (BankType | 'all')[];
+  selected: BankType | 'all';
+  onSelect: (v: BankType | 'all') => void;
+  onClose: () => void;
+  getLabel: (v: BankType | 'all') => string;
+}) {
+  return (
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 bg-black/50 z-50"
+        onClick={onClose}
+      />
+      <motion.div
+        initial={{ y: '100%' }}
+        animate={{ y: 0 }}
+        exit={{ y: '100%' }}
+        transition={{ type: 'spring', stiffness: 320, damping: 32 }}
+        className="fixed bottom-0 inset-x-0 mx-auto max-w-md bg-[#0D1220] rounded-t-3xl z-50 overflow-hidden"
+        style={{ borderTop: '1px solid rgba(255,255,255,0.08)', boxShadow: '0 -4px 40px rgba(0,0,0,0.6)' }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex justify-center pt-3 pb-1">
+          <div className="w-8 h-1 rounded-full bg-white/10" />
+        </div>
+        <div className="flex items-center justify-between px-5 py-3 border-b border-white/[0.06]">
+          <p style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, color: 'rgba(255,255,255,0.88)', fontSize: 15 }}>
+            {title}
+          </p>
+          <button onClick={onClose}>
+            <X size={18} className="text-white/40" />
+          </button>
+        </div>
+        <div className="px-4 py-3 max-h-80 overflow-y-auto space-y-1 pb-8">
+          {options.map((opt) => (
+            <button
+              key={opt}
+              onClick={() => { onSelect(opt); onClose(); }}
+              className="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all"
+              style={{ background: selected === opt ? 'rgba(255,255,255,0.06)' : 'transparent' }}
+            >
+              <span className="font-body text-[13px]" style={{ color: selected === opt ? '#ffffff' : 'rgba(255,255,255,0.75)', fontWeight: selected === opt ? 600 : 400 }}>
+                {getLabel(opt)}
+              </span>
+              {selected === opt && <Check size={14} className="text-white/60" />}
+            </button>
+          ))}
+        </div>
+      </motion.div>
+    </AnimatePresence>
+  );
+}
+
 interface ProductCategoryViewProps {
   category: ProductCategory;
   onBack: () => void;
@@ -310,6 +439,7 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
   const [selectedBank, setSelectedBank] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<string>('popularity');
   const [showSortPopup, setShowSortPopup] = useState(false);
+  const [showBankTypePopup, setShowBankTypePopup] = useState(false);
   const [logoErrors, setLogoErrors] = useState<Record<string, boolean>>({});
 
   const getRateRange = (products: Product[]) => {
@@ -442,6 +572,40 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
         case 'balance-desc': return 'Min Balance: High to Low';
         case 'accounts-desc': return 'Number of Options';
         default: return 'Sort By';
+      }
+    }
+  };
+
+  const getBankTypeLabel = (bt: BankType | 'all'): string => {
+    if (lang === 'hi') {
+      switch (bt) {
+        case 'all': return 'सभी संस्थान';
+        case 'public': return 'सरकारी बैंक';
+        case 'private': return 'निजी बैंक';
+        case 'sfb': return 'स्मॉल फाइनेंस बैंक';
+        case 'payments': return 'पेमेंट्स बैंक';
+        case 'nbfc': return 'एनबीएफसी (NBFC)';
+        default: return String(bt);
+      }
+    } else if (lang === 'hinglish') {
+      switch (bt) {
+        case 'all': return 'All Institutions';
+        case 'public': return 'Public Banks';
+        case 'private': return 'Private Banks';
+        case 'sfb': return 'Small Finance Banks';
+        case 'payments': return 'PAYMENTS BANK';
+        case 'nbfc': return 'NBFCs';
+        default: return String(bt);
+      }
+    } else {
+      switch (bt) {
+        case 'all': return 'All Institutions';
+        case 'public': return 'Public Banks';
+        case 'private': return 'Private Banks';
+        case 'sfb': return 'Small Finance Banks';
+        case 'payments': return 'PAYMENTS BANK';
+        case 'nbfc': return 'NBFCs';
+        default: return String(bt);
       }
     }
   };
@@ -673,103 +837,131 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
                 </div>
               )}
 
-              {/* Institution type filter pills */}
-              <div className="mb-3 mt-2">
-                <p className="text-[10px] tracking-widest uppercase text-white/30 mb-2" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700 }}>
-                  {t.institutionType}
-                </p>
-                <div className="flex gap-2 overflow-x-auto scrollbar-hidden pb-1">
-                  {bankTypeFilters.map((f) => {
-                    const isActive = bankFilter === f.id;
-                    return (
-                      <motion.button
-                        key={f.id}
-                        whileTap={{ scale: 0.93 }}
-                        onClick={() => setBankFilter(f.id as BankType | 'all')}
-                        className="flex-shrink-0 px-3 py-1.5 rounded-lg font-body text-[10px] font-medium whitespace-nowrap transition-all"
-                        style={{
-                          background: isActive ? `${meta.accentColor}18` : 'rgba(255,255,255,0.03)',
-                          border: isActive ? `1px solid ${meta.accentColor}44` : '1px solid rgba(255,255,255,0.06)',
-                          color: isActive ? meta.accentColor : 'rgba(255,255,255,0.3)',
-                        }}
-                      >
-                        {t[f.labelKey]}
-                      </motion.button>
-                    );
-                  })}
-                </div>
-              </div>
-
               {/* Browse by Institution + Sort by + dual type filters */}
               {!loading && allProducts.length > 0 && (
-                <div className="flex gap-2 mb-4 flex-wrap">
-                  {/* Browse by Institution (hidden for savings because it is bank view by default) */}
-                  {category !== 'savings' && (
-                    <motion.button
-                      whileTap={{ scale: 0.96 }}
-                      onClick={() => setShowBankPopup(true)}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-body text-[10px] font-medium transition-all"
-                      style={{
-                        background: bankPopupFilter ? `${meta.accentColor}18` : 'rgba(255,255,255,0.04)',
-                        border: bankPopupFilter ? `1px solid ${meta.accentColor}44` : '1px solid rgba(255,255,255,0.08)',
-                        color: bankPopupFilter ? meta.accentColor : 'rgba(255,255,255,0.45)',
-                      }}
-                    >
-                      {bankPopupFilter ?? t.filterByBank}
-                      <ChevronDown size={11} />
-                    </motion.button>
-                  )}
+                <div className="mb-4">
+                  {category === 'savings' ? (
+                    <div className="grid grid-cols-2 gap-2.5 w-full">
+                      {/* Institution Type Filter Button */}
+                      <motion.button
+                        whileTap={{ scale: 0.97 }}
+                        onClick={() => setShowBankTypePopup(true)}
+                        className="flex items-center justify-between px-3.5 py-3 rounded-xl font-body text-[11px] font-semibold transition-all relative overflow-hidden"
+                        style={{
+                          background: bankFilter !== 'all'
+                            ? `linear-gradient(135deg, ${meta.accentColor}d0 0%, ${meta.accentColor}80 100%)`
+                            : `linear-gradient(135deg, ${meta.accentColor}15 0%, ${meta.accentColor}06 100%)`,
+                          border: `1px solid ${bankFilter !== 'all' ? meta.accentColor : `${meta.accentColor}33`}`,
+                          boxShadow: bankFilter !== 'all' ? `0 0 20px ${meta.accentColor}30` : `inset 0 1px 0 rgba(255, 255, 255, 0.05)`,
+                          color: bankFilter !== 'all' ? '#070A12' : `${meta.accentColor}d0`,
+                        }}
+                      >
+                        <div className="flex flex-col items-start min-w-0 text-left">
+                          <span className="text-[9px] uppercase tracking-wider opacity-60 font-body">Institution</span>
+                          <span className="truncate mt-0.5 max-w-full">
+                            {bankFilter === 'all' ? 'All Banks' : getBankTypeLabel(bankFilter)}
+                          </span>
+                        </div>
+                        <ChevronDown size={14} className="flex-shrink-0 ml-1.5" style={{ color: bankFilter !== 'all' ? '#070A12' : meta.accentColor }} />
+                      </motion.button>
 
-                  {/* Sort By option (specifically for savings Level 1 view) */}
-                  {category === 'savings' && (
-                    <motion.button
-                      whileTap={{ scale: 0.96 }}
-                      onClick={() => setShowSortPopup(true)}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-body text-[10px] font-medium transition-all"
-                      style={{
-                        background: sortBy !== 'popularity' ? `${meta.accentColor}18` : 'rgba(255,255,255,0.04)',
-                        border: sortBy !== 'popularity' ? `1px solid ${meta.accentColor}44` : '1px solid rgba(255,255,255,0.08)',
-                        color: sortBy !== 'popularity' ? meta.accentColor : 'rgba(255,255,255,0.45)',
-                      }}
-                    >
-                      {getSortLabel(sortBy)}
-                      <ChevronDown size={11} />
-                    </motion.button>
-                  )}
+                      {/* Sort By Filter Button */}
+                      <motion.button
+                        whileTap={{ scale: 0.97 }}
+                        onClick={() => setShowSortPopup(true)}
+                        className="flex items-center justify-between px-3.5 py-3 rounded-xl font-body text-[11px] font-semibold transition-all relative overflow-hidden"
+                        style={{
+                          background: sortBy !== 'popularity'
+                            ? `linear-gradient(135deg, ${meta.accentColor}d0 0%, ${meta.accentColor}80 100%)`
+                            : `linear-gradient(135deg, ${meta.accentColor}15 0%, ${meta.accentColor}06 100%)`,
+                          border: `1px solid ${sortBy !== 'popularity' ? meta.accentColor : `${meta.accentColor}33`}`,
+                          boxShadow: sortBy !== 'popularity' ? `0 0 20px ${meta.accentColor}30` : `inset 0 1px 0 rgba(255, 255, 255, 0.05)`,
+                          color: sortBy !== 'popularity' ? '#070A12' : `${meta.accentColor}d0`,
+                        }}
+                      >
+                        <div className="flex flex-col items-start min-w-0 text-left">
+                          <span className="text-[9px] uppercase tracking-wider opacity-60 font-body">Sort By</span>
+                          <span className="truncate mt-0.5 max-w-full">{getSortLabel(sortBy)}</span>
+                        </div>
+                        <ChevronDown size={14} className="flex-shrink-0 ml-1.5" style={{ color: sortBy !== 'popularity' ? '#070A12' : meta.accentColor }} />
+                      </motion.button>
+                    </div>
+                  ) : (
+                    /* For other categories, show them as grid or flex layout */
+                    <div className="flex flex-wrap gap-2 w-full">
+                      {/* Institution Type Filter Button */}
+                      <motion.button
+                        whileTap={{ scale: 0.96 }}
+                        onClick={() => setShowBankTypePopup(true)}
+                        className="flex items-center gap-1.5 px-3 py-2 rounded-lg font-body text-[10px] font-semibold transition-all"
+                        style={{
+                          background: bankFilter !== 'all'
+                            ? `linear-gradient(135deg, ${meta.accentColor}dd 0%, ${meta.accentColor}99 100%)`
+                            : `linear-gradient(135deg, ${meta.accentColor}15 0%, ${meta.accentColor}06 100%)`,
+                          border: `1px solid ${bankFilter !== 'all' ? meta.accentColor : `${meta.accentColor}33`}`,
+                          color: bankFilter !== 'all' ? '#070A12' : `${meta.accentColor}d0`,
+                        }}
+                      >
+                        {bankFilter === 'all' ? 'All Institutions' : getBankTypeLabel(bankFilter)}
+                        <ChevronDown size={11} style={{ color: bankFilter !== 'all' ? '#070A12' : meta.accentColor }} />
+                      </motion.button>
 
-                  {/* Type filter — only for creditcards and loans */}
-                  {showDualFilters && (
-                    <motion.button
-                      whileTap={{ scale: 0.96 }}
-                      onClick={() => setShowTypePopup(true)}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-body text-[10px] font-medium transition-all"
-                      style={{
-                        background: typeFilter ? `${meta.accentColor}18` : 'rgba(255,255,255,0.04)',
-                        border: typeFilter ? `1px solid ${meta.accentColor}44` : '1px solid rgba(255,255,255,0.08)',
-                        color: typeFilter ? meta.accentColor : 'rgba(255,255,255,0.45)',
-                      }}
-                    >
-                      {typeFilter ?? (category === 'loans' ? t.filterByType : category === 'insurance' ? t.filterByType : t.filterByIncome)}
-                      <ChevronDown size={11} />
-                    </motion.button>
+                      {/* Browse by Institution */}
+                      <motion.button
+                        whileTap={{ scale: 0.96 }}
+                        onClick={() => setShowBankPopup(true)}
+                        className="flex items-center gap-1.5 px-3 py-2 rounded-lg font-body text-[10px] font-semibold transition-all"
+                        style={{
+                          background: bankPopupFilter
+                            ? `linear-gradient(135deg, ${meta.accentColor}dd 0%, ${meta.accentColor}99 100%)`
+                            : `linear-gradient(135deg, ${meta.accentColor}15 0%, ${meta.accentColor}06 100%)`,
+                          border: `1px solid ${bankPopupFilter ? meta.accentColor : `${meta.accentColor}33`}`,
+                          color: bankPopupFilter ? '#070A12' : `${meta.accentColor}d0`,
+                        }}
+                      >
+                        {bankPopupFilter ?? t.filterByBank}
+                        <ChevronDown size={11} style={{ color: bankPopupFilter ? '#070A12' : meta.accentColor }} />
+                      </motion.button>
+
+                      {/* Type filter — only for creditcards and loans */}
+                      {showDualFilters && (
+                        <motion.button
+                          whileTap={{ scale: 0.96 }}
+                          onClick={() => setShowTypePopup(true)}
+                          className="flex items-center gap-1.5 px-3 py-2 rounded-lg font-body text-[10px] font-semibold transition-all"
+                          style={{
+                            background: typeFilter
+                              ? `linear-gradient(135deg, ${meta.accentColor}dd 0%, ${meta.accentColor}99 100%)`
+                              : `linear-gradient(135deg, ${meta.accentColor}15 0%, ${meta.accentColor}06 100%)`,
+                            border: `1px solid ${typeFilter ? meta.accentColor : `${meta.accentColor}33`}`,
+                            color: typeFilter ? '#070A12' : `${meta.accentColor}d0`,
+                          }}
+                        >
+                          {typeFilter ?? (category === 'loans' ? t.filterByType : category === 'insurance' ? t.filterByType : t.filterByIncome)}
+                          <ChevronDown size={11} style={{ color: typeFilter ? '#070A12' : meta.accentColor }} />
+                        </motion.button>
+                      )}
+                    </div>
                   )}
 
                   {/* Clear all active filters and search/sort values */}
-                  {(activeFilterCount > 0 || bankFilter !== 'all' || sortBy !== 'popularity' || searchText !== '') && (
-                    <motion.button
-                      whileTap={{ scale: 0.96 }}
-                      onClick={() => {
-                        setBankPopupFilter(null);
-                        setTypeFilter(null);
-                        setBankFilter('all');
-                        setSortBy('popularity');
-                        setSearchText('');
-                      }}
-                      className="flex items-center gap-1 px-3 py-1.5 rounded-lg font-body text-[10px] font-medium"
-                      style={{ background: 'rgba(251,113,133,0.10)', border: '1px solid rgba(251,113,133,0.25)', color: '#FB7185' }}
-                    >
-                      <X size={10} /> {t.clearAll}
-                    </motion.button>
+                  {(bankPopupFilter || typeFilter || bankFilter !== 'all' || sortBy !== 'popularity' || searchText !== '') && (
+                    <div className="mt-2 flex justify-start">
+                      <motion.button
+                        whileTap={{ scale: 0.96 }}
+                        onClick={() => {
+                          setBankPopupFilter(null);
+                          setTypeFilter(null);
+                          setBankFilter('all');
+                          setSortBy('popularity');
+                          setSearchText('');
+                        }}
+                        className="flex items-center gap-1 px-3 py-1.5 rounded-lg font-body text-[9px] font-semibold"
+                        style={{ background: 'rgba(251,113,133,0.10)', border: '1px solid rgba(251,113,133,0.25)', color: '#FB7185' }}
+                      >
+                        <X size={10} /> {t.clearAll}
+                      </motion.button>
+                    </div>
                   )}
                 </div>
               )}
@@ -791,7 +983,7 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
                       const firstProduct = group.products[0];
                       const color = firstProduct.color || '#C9A96E';
                       const colorAccent = firstProduct.colorAccent || '#00F5A0';
-                      const bankTypeName = firstProduct.bankType === 'public' ? 'PUBLIC' : firstProduct.bankType === 'private' ? 'PRIVATE' : firstProduct.bankType === 'sfb' ? 'SMALL FINANCE' : 'NBFC';
+                      const bankTypeName = firstProduct.bankType === 'public' ? 'PUBLIC' : firstProduct.bankType === 'private' ? 'PRIVATE' : firstProduct.bankType === 'sfb' ? 'SMALL FINANCE' : firstProduct.bankType === 'payments' ? 'PAYMENTS BANK' : 'NBFC';
                       const rateRange = getRateRange(group.products);
                       const lowestMinBal = getLowestMinBalance(group.products);
                       const highlights = firstProduct.highlights.slice(0, 3);
@@ -1077,6 +1269,17 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
           selected={bankPopupFilter}
           onSelect={setBankPopupFilter}
           onClose={() => setShowBankPopup(false)}
+        />
+      )}
+
+      {showBankTypePopup && (
+        <InstitutionSelectSheet
+          title={lang === 'hi' ? 'संस्थान प्रकार' : lang === 'hinglish' ? 'Institution Type' : 'Institution Type'}
+          options={['all', 'public', 'private', 'sfb', 'payments']}
+          selected={bankFilter}
+          onSelect={setBankFilter}
+          onClose={() => setShowBankTypePopup(false)}
+          getLabel={getBankTypeLabel}
         />
       )}
 

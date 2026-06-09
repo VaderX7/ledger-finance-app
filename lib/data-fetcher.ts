@@ -103,7 +103,16 @@ function rowToProduct(row: Record<string, string>): Product {
     id: row['id'],
     name: row['name'],
     lender: row['lender'],
-    bankType: row['bankType'] as BankType,
+    bankType: (() => {
+      const bt = (row['bankType'] || '').trim().toLowerCase();
+      const lender = (row['lender'] || '').toLowerCase();
+      if (bt.includes('sfb') || bt.includes('small finance') || lender.includes('small finance') || lender.includes('sfb')) return 'sfb';
+      if (bt.includes('payment') || lender.includes('payment')) return 'payments';
+      if (bt.includes('public')) return 'public';
+      if (bt.includes('private')) return 'private';
+      if (bt.includes('nbfc')) return 'nbfc';
+      return 'private'; // default fallback
+    })() as BankType,
     category: row['category'] as ProductCategory,
     description: row['description'],
     highlights: arr(row['highlights']),
