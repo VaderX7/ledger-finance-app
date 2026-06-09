@@ -2,9 +2,6 @@
 
 import { motion } from 'framer-motion';
 import { Product } from '@/lib/products';
-import { ChevronRight } from 'lucide-react';
-import { useLang } from '@/context/LanguageContext';
-import { TranslationKey } from '@/lib/i18n';
 
 interface CategoryProductCardProps {
   product: Product;
@@ -13,33 +10,117 @@ interface CategoryProductCardProps {
   onDetailsClick: (product: Product) => void;
 }
 
-function getReadableColor(hexColor: string) {
-  if (!hexColor || !hexColor.startsWith('#')) return 'rgba(255, 255, 255, 0.9)';
-  const hex = hexColor.replace('#', '');
-  if (hex.length !== 6 && hex.length !== 3) return 'rgba(255, 255, 255, 0.9)';
+function getBankInitials(lender: string): string {
+  if (!lender) return 'BK';
+  const lenderLower = lender.toLowerCase();
+  if (lenderLower.includes('state bank of india') || lenderLower.includes('sbi')) return 'SB';
+  if (lenderLower.includes('housing development') || lenderLower.includes('hdfc')) return 'HD';
+  if (lenderLower.includes('icici')) return 'IC';
+  if (lenderLower.includes('axis')) return 'AX';
+  if (lenderLower.includes('equitas')) return 'EQ';
+  if (lenderLower.includes('bajaj')) return 'BJ';
+  if (lenderLower.includes('sidbi') || lenderLower.includes('mudra')) return 'SD';
   
-  let r = 0, g = 0, b = 0;
-  if (hex.length === 6) {
-    r = parseInt(hex.substring(0, 2), 16);
-    g = parseInt(hex.substring(2, 4), 16);
-    b = parseInt(hex.substring(4, 6), 16);
-  } else {
-    r = parseInt(hex.substring(0, 1) + hex.substring(0, 1), 16);
-    g = parseInt(hex.substring(1, 2) + hex.substring(1, 2), 16);
-    b = parseInt(hex.substring(2, 3) + hex.substring(2, 3), 16);
+  const words = lender.split(/\s+/).filter(w => w.length > 0);
+  if (words.length >= 2) {
+    return (words[0][0] + words[1][0]).toUpperCase();
+  }
+  return lender.substring(0, 2).toUpperCase();
+}
+
+function formatLenderName(lender: string): string {
+  if (!lender) return '';
+  const lower = lender.toLowerCase();
+  if (lower.includes('state bank of india')) return 'SBI';
+  if (lower.includes('housing development') || lower.includes('hdfc')) return 'HDFC Bank';
+  if (lower.includes('icici')) return 'ICICI Bank';
+  if (lower.includes('axis')) return 'Axis Bank';
+  if (lower.includes('equitas')) return 'Equitas Bank';
+  if (lower.includes('bajaj')) return 'Bajaj Finserv';
+  if (lower.includes('sidbi')) return 'SIDBI';
+  if (lower.includes('mudra')) return 'Mudra Scheme';
+  return lender;
+}
+
+function getFormattedBankType(bankType: string): string {
+  if (!bankType) return '';
+  const bt = bankType.toLowerCase();
+  if (bt === 'sfb') return 'SFB';
+  if (bt === 'nbfc') return 'NBFC';
+  if (bt === 'payments') return 'Payments';
+  return bt.charAt(0).toUpperCase() + bt.slice(1);
+}
+
+function getProductMetricHighlight(product: Product) {
+  const cat = product.category;
+  
+  if (cat === 'savings') {
+    let rate = String(product.metrics.interestRate || 'N/A');
+    if (rate.includes('-')) {
+      rate = rate.split('-')[0].trim();
+    }
+    let minBal = String(product.metrics.minBalance || '₹0');
+    if (product.id === 'hdfc-savings') {
+      minBal = '₹10k';
+    }
+    return {
+      value: rate,
+      subtitle: `p.a. interest · ${minBal} min balance`
+    };
   }
   
-  // relative luminance calculation
-  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-  
-  // if too dark, blend with 65% white to make it a readable pastel tone
-  if (luminance < 0.45) {
-    const lr = Math.round(r + (255 - r) * 0.65);
-    const lg = Math.round(g + (255 - g) * 0.65);
-    const lb = Math.round(b + (255 - b) * 0.65);
-    return `rgb(${lr}, ${lg}, ${lb})`;
+  if (cat === 'fds') {
+    let yieldVal = String(product.metrics.baseYield || 'N/A');
+    if (yieldVal.includes('-')) {
+      yieldVal = yieldVal.split('-')[0].trim();
+    }
+    const tenure = String(product.metrics.tenureRange || 'N/A');
+    return {
+      value: yieldVal,
+      subtitle: `p.a. yield · ${tenure} tenure`
+    };
   }
-  return hexColor;
+  
+  if (cat === 'loans') {
+    let rate = String(product.metrics.minRate || 'N/A');
+    if (rate.includes('-')) {
+      rate = rate.split('-')[0].trim();
+    }
+    const tenure = String(product.metrics.maxTenure || 'N/A');
+    return {
+      value: rate.endsWith('%') ? rate : `${rate}%`,
+      subtitle: `p.a. starting rate · ${tenure} max tenure`
+    };
+  }
+  
+  if (cat === 'creditcards') {
+    const joining = String(product.metrics.joiningFee || '₹0');
+    const annual = String(product.metrics.annualFee || '₹0');
+    return {
+      value: joining,
+      subtitle: `joining fee · ${annual}`
+    };
+  }
+  
+  if (cat === 'current') {
+    let mab = String(product.metrics.monthlyAvgBalance || 'N/A');
+    if (mab.includes('-')) {
+      mab = mab.split('-')[0].trim();
+    }
+    const deposit = String(product.metrics.freeCashDeposit || 'N/A');
+    return {
+      value: mab,
+      subtitle: `avg balance · ${deposit} free deposit`
+    };
+  }
+  
+  // Fallback
+  const firstKey = Object.keys(product.metrics)[0];
+  const firstVal = String(product.metrics[firstKey] || 'N/A');
+  return {
+    value: firstVal,
+    subtitle: firstKey ? firstKey.replace(/([A-Z])/g, ' $1').toLowerCase() : 'primary metric'
+  };
 }
 
 export default function CategoryProductCard({
@@ -47,11 +128,20 @@ export default function CategoryProductCard({
   index,
   onDetailsClick,
 }: CategoryProductCardProps) {
-  const { t } = useLang();
-  const isReturnsCategory = product.category === 'savings' || product.category === 'fds';
-  const accentColor = isReturnsCategory ? '#00F5A0' : '#00E5FF';
-  const metricEntries = Object.entries(product.metrics).slice(0, 3);
-  const readableLenderColor = getReadableColor(product.color);
+  const isTopPick = product.topPick || ['hdfc-savings', 'equitas-savings', 'hdfc-fd', 'icici-cc', 'mudra-shishu'].includes(product.id);
+  
+  const bankInitials = getBankInitials(product.lender);
+  const avatarBgColor = product.color || '#C9A96E';
+
+  const bankTypeLabel = getFormattedBankType(product.bankType);
+
+  const isProtected = product.category === 'savings' || product.category === 'fds' || 
+                      product.highlights.some(h => h.toLowerCase().includes('dicgc')) || 
+                      product.description.toLowerCase().includes('dicgc');
+                      
+  const subtitleText = `${bankTypeLabel} - ${isProtected ? 'DICGC Protected' : 'RBI Registered'}`;
+
+  const metricHighlight = getProductMetricHighlight(product);
 
   return (
     <motion.div
@@ -61,10 +151,11 @@ export default function CategoryProductCard({
       transition={{ type: 'spring', stiffness: 260, damping: 24, delay: index * 0.05 }}
       whileTap={{ scale: 0.985 }}
       onClick={() => onDetailsClick(product)}
-      className="relative overflow-hidden rounded-2xl cursor-pointer group"
+      className="relative overflow-hidden cursor-pointer group p-5 flex flex-col justify-between"
       style={{
-        background: 'linear-gradient(135deg, rgba(15,21,35,0.97) 0%, rgba(13,18,32,0.92) 100%)',
-        border: `1px solid ${product.color}30`,
+        background: '#090d16',
+        border: '1px solid rgba(0, 229, 255, 0.12)',
+        borderRadius: '16px',
       }}
     >
       {/* Ambient glow */}
@@ -73,79 +164,106 @@ export default function CategoryProductCard({
         style={{ background: `${product.color}14` }}
       />
 
-      {/* Bank name header stripe */}
-      <div
-        className="relative z-10 flex items-center justify-between px-4 py-2"
-        style={{
-          borderBottom: `1px solid ${product.color}20`,
-          background: `${product.color}0c`,
-          borderLeft: `3px solid ${product.color}`,
-        }}
-      >
-        <span
-          className="font-body text-[10px] font-bold tracking-wide uppercase truncate"
-          style={{ color: readableLenderColor }}
+      {/* Header Row */}
+      <div className="relative z-10 flex items-center justify-between gap-3">
+        {/* Left: Avatar + Bank Details */}
+        <div className="flex items-center gap-3 min-w-0">
+          {/* Bank Avatar */}
+          <div
+            className="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-[13px] flex-shrink-0"
+            style={{
+              backgroundColor: `${avatarBgColor}15`,
+              border: `1px solid ${avatarBgColor}35`,
+              color: avatarBgColor,
+            }}
+          >
+            {bankInitials}
+          </div>
+          
+          {/* Bank Name + Subtitle */}
+          <div className="flex flex-col min-w-0">
+            <span className="text-[15px] font-bold text-white leading-tight truncate">
+              {formatLenderName(product.lender)}
+            </span>
+            <span className="text-[11px] text-white/40 leading-tight mt-1 font-body">
+              {subtitleText}
+            </span>
+          </div>
+        </div>
+
+        {/* Right: Top Pick Badge */}
+        {isTopPick && (
+          <div 
+            className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold"
+            style={{
+              backgroundColor: 'rgba(0, 229, 255, 0.08)',
+              color: '#00E5FF',
+              border: '1px solid rgba(0, 229, 255, 0.25)',
+            }}
+          >
+            <span className="text-[10px] leading-none">★</span>
+            <span>Top Pick</span>
+          </div>
+        )}
+      </div>
+
+      {/* Divider 1 */}
+      <div className="border-t border-white/[0.05] my-3.5" />
+
+      {/* Product Name */}
+      <div className="relative z-10">
+        <h3
+          className="text-[20px] font-bold text-white tracking-tight leading-snug"
+          style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
         >
-          {product.lender}
+          {product.name}
+        </h3>
+      </div>
+
+      {/* Key Metric Highlight */}
+      <div className="relative z-10 flex items-baseline gap-2 mt-2">
+        <span className="text-[30px] font-bold text-[#00F5A0] leading-none tracking-tight">
+          {metricHighlight.value}
         </span>
-        <span
-          className="text-[9px] font-body ml-2 flex-shrink-0 px-1.5 py-0.5 rounded"
-          style={{ color: 'rgba(255,255,255,0.25)', background: 'rgba(255,255,255,0.04)' }}
-        >
-          {product.bankType.toUpperCase()}
+        <span className="text-[12px] text-white/40 font-body">
+          {metricHighlight.subtitle}
         </span>
       </div>
 
-      {/* Main content */}
-      <div className="relative z-10 px-4 pt-3 pb-4">
-        {/* Product name + chevron */}
-        <div className="flex items-start justify-between gap-2 mb-3">
-          <h3
-            className="text-[15px] leading-snug"
-            style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, color: 'rgba(255,255,255,0.92)' }}
-          >
-            {product.name}
-          </h3>
-          <ChevronRight size={16} style={{ color: product.color + '80' }} className="flex-shrink-0 mt-0.5" />
-        </div>
+      {/* Divider 2 */}
+      <div className="border-t border-white/[0.05] my-3.5" />
 
-        {/* Key metrics — inline grid */}
-        <div className="grid grid-cols-3 gap-2 mb-3">
-          {metricEntries.map(([key, value]) => {
-            const translatedVal = t[key as TranslationKey];
-            const displayLabel = typeof translatedVal === 'string' ? translatedVal : key.replace(/([A-Z])/g, ' $1').trim();
-            return (
-              <div
-                key={key}
-                className="rounded-lg px-2 py-2"
-                style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}
-              >
-                <p className="font-body text-[9px] text-white/30 mb-0.5 capitalize leading-tight">
-                  {displayLabel}
-                </p>
-                <p
-                  className="text-[11px] leading-tight"
-                  style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, color: accentColor }}
-                >
-                  {String(value)}
-                </p>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Highlights pills */}
+      {/* Tags Row */}
+      <div className="relative z-10 flex items-center justify-between gap-4">
+        {/* Highlights */}
         <div className="flex items-center gap-1.5 flex-wrap">
           {product.highlights.slice(0, 3).map((h) => (
             <span
               key={h}
-              className="px-2 py-0.5 rounded-md text-[9px] font-body text-white/40"
-              style={{ background: `${product.color}10`, border: `1px solid ${product.color}1e` }}
+              className="px-2.5 py-0.5 rounded-md text-[9px] font-body text-white/45"
+              style={{ background: 'rgba(255, 255, 255, 0.02)', border: '1px solid rgba(255, 255, 255, 0.08)' }}
             >
               {h}
             </span>
           ))}
         </div>
+
+        {/* View Details Button */}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onDetailsClick(product);
+          }}
+          className="flex items-center gap-1 px-4 py-2 rounded-xl text-[11px] font-bold border transition-all duration-300 hover:bg-[#00E5FF]/10 flex-shrink-0"
+          style={{
+            borderColor: 'rgba(0, 229, 255, 0.35)',
+            color: '#00E5FF',
+            background: 'transparent',
+          }}
+        >
+          <span>View details</span>
+          <span>→</span>
+        </button>
       </div>
     </motion.div>
   );

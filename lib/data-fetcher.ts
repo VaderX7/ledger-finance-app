@@ -120,6 +120,7 @@ function rowToProduct(row: Record<string, string>): Product {
     color: row['color'],
     colorAccent: row['colorAccent'],
     portalUrl: row['portalUrl'],
+    topPick: row['topPick'] === 'true' || ['hdfc-savings', 'equitas-savings', 'hdfc-fd', 'icici-cc', 'mudra-shishu'].includes(row['id']),
     metrics,
   };
   if (row['minAge']) product.minAge = Number(row['minAge']);

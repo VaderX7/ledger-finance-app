@@ -14,6 +14,7 @@ export type Product = {
   color: string;
   colorAccent: string;
   portalUrl: string;
+  topPick?: boolean;
   // Eligibility
   minAge?: number;
   maxAge?: number;
@@ -94,6 +95,7 @@ export const products: Product[] = [
     color: '#38BDF8',
     colorAccent: '#00F5A0',
     portalUrl: 'https://www.hdfcbank.com/personal/savings-account',
+    topPick: true,
     minAge: 18,
     maxAge: 100,
     minAnnualIncome: 0,
@@ -118,6 +120,7 @@ export const products: Product[] = [
     color: '#2DD4BF',
     colorAccent: '#00F5A0',
     portalUrl: 'https://www.equitasbank.com/savings-account',
+    topPick: true,
     minAge: 18,
     maxAge: 100,
     minAnnualIncome: 0,
