@@ -2,175 +2,154 @@ const fs = require('fs');
 const path = require('path');
 const sharp = require('sharp');
 
-const LOGOS_DIR = path.join(__dirname, '..', 'public', 'logos');
-
+// Helper to convert rgb to hex
 function rgbToHex(r, g, b) {
-  const toHex = (c) => c.toString(16).padStart(2, '0');
-  return `#${toHex(r)}${toHex(g)}${toHex(b)}`.toUpperCase();
+  const toHex = (c) => {
+    const hex = Math.round(c).toString(16);
+    return hex.length === 1 ? '0' + hex : hex;
+  };
+  return '#' + (toHex(r) + toHex(g) + toHex(b)).toUpperCase();
 }
 
-function colorDistance(c1, c2) {
+// Helper for Euclidean distance
+function distance(p1, p2) {
   return Math.sqrt(
-    Math.pow(c1[0] - c2[0], 2) +
-    Math.pow(c1[1] - c2[1], 2) +
-    Math.pow(c1[2] - c2[2], 2)
+    Math.pow(p1.r - p2.r, 2) +
+    Math.pow(p1.g - p2.g, 2) +
+    Math.pow(p1.b - p2.b, 2)
   );
-}
-
-function isGrayscale(r, g, b) {
-  const max = Math.max(r, g, b);
-  const min = Math.min(r, g, b);
-  // Color is grayscale if the difference between components is small
-  const isGray = (max - min) < 25;
-  // White/near-white or black/near-black
-  const isWhite = r > 230 && g > 230 && b > 230;
-  const isBlack = r < 40 && g < 40 && b < 40;
-  return isGray || isWhite || isBlack;
 }
 
 async function extractColors(filePath) {
   try {
-    // Resize image to 40x40 to simplify analysis and merge noise/gradients
     const { data, info } = await sharp(filePath)
       .resize(40, 40, { fit: 'inside' })
       .raw()
       .toBuffer({ resolveWithObject: true });
 
-    const buckets = {};
-    const channelCount = info.channels; // 3 for RGB, 4 for RGBA
+    const pixels = [];
+    const channels = info.channels; // 3 or 4
 
-    for (let i = 0; i < data.length; i += channelCount) {
+    for (let i = 0; i < data.length; i += channels) {
       const r = data[i];
       const g = data[i + 1];
       const b = data[i + 2];
-      const a = channelCount === 4 ? data[i + 3] : 255;
+      const a = channels === 4 ? data[i + 3] : 255;
 
-      // Ignore transparent pixels (alpha < 50)
+      // Skip transparent pixels
       if (a < 50) continue;
 
-      // Group colors by rounding components to the nearest 16 to consolidate similar shades
-      const binR = Math.round(r / 16) * 16;
-      const binG = Math.round(g / 16) * 16;
-      const binB = Math.round(b / 16) * 16;
-      const bucketKey = `${binR},${binG},${binB}`;
-
-      if (!buckets[bucketKey]) {
-        buckets[bucketKey] = {
-          count: 0,
-          rSum: 0,
-          gSum: 0,
-          bSum: 0
-        };
-      }
-      buckets[bucketKey].count++;
-      buckets[bucketKey].rSum += r;
-      buckets[bucketKey].gSum += g;
-      buckets[bucketKey].bSum += b;
+      pixels.push({ r, g, b });
     }
 
-    // Convert buckets to an array of colors with their average RGB
-    const colors = Object.keys(buckets).map(key => {
-      const b = buckets[key];
-      return {
-        r: Math.round(b.rSum / b.count),
-        g: Math.round(b.gSum / b.count),
-        b: Math.round(b.bSum / b.count),
-        count: b.count
-      };
-    });
-
-    // Sort colors by frequency descending
-    colors.sort((a, b) => b.count - a.count);
-
-    if (colors.length === 0) {
+    if (pixels.length === 0) {
       return { primary: '#FFFFFF', accent: '#000000' };
     }
 
-    // Find primary: prefer non-grayscale colors first
-    let primary = null;
-    for (const c of colors) {
-      if (!isGrayscale(c.r, c.g, c.b)) {
-        primary = c;
-        break;
+    // Filter out white background pixels only if we have enough colorful pixels
+    const nonWhitePixels = pixels.filter(p => !(p.r > 240 && p.g > 240 && p.b > 240));
+    const finalPixels = nonWhitePixels.length > 20 ? nonWhitePixels : pixels;
+
+    // K-means with K = 2
+    let centroids = [];
+    
+    // Initialize Centroid 1: first pixel
+    centroids.push(finalPixels[0]);
+
+    // Initialize Centroid 2: furthest color from Centroid 1
+    let maxDist = -1;
+    let c2 = finalPixels[0];
+    for (const p of finalPixels) {
+      const dist = distance(p, centroids[0]);
+      if (dist > maxDist) {
+        maxDist = dist;
+        c2 = p;
       }
     }
-    // Fallback to the absolute most common color if all are grayscale
-    if (!primary) {
-      primary = colors[0];
-    }
+    centroids.push(c2);
 
-    // Find accent: next most common color that is distinct from primary
-    let accent = null;
-    for (const c of colors) {
-      // Must not be the same bucket as primary
-      if (c.r === primary.r && c.g === primary.g && c.b === primary.b) continue;
-
-      // Check distance in RGB space to ensure visual distinction
-      const dist = colorDistance([primary.r, primary.g, primary.b], [c.r, c.g, c.b]);
-      if (dist < 60) continue;
-
-      // Prefer non-grayscale, but accept gray/black/white if it's the only distinct color
-      if (!accent || (!isGrayscale(c.r, c.g, c.b) && isGrayscale(accent.r, accent.g, accent.b))) {
-        accent = c;
-      }
-    }
-
-    // Default fallbacks if no accent found
-    if (!accent) {
-      // Find any distinct color, even if grayscale
-      for (const c of colors) {
-        if (c.r === primary.r && c.g === primary.g && c.b === primary.b) continue;
-        const dist = colorDistance([primary.r, primary.g, primary.b], [c.r, c.g, c.b]);
-        if (dist >= 45) {
-          accent = c;
-          break;
-        }
-      }
-    }
-
-    // Ultimate fallback: create an accent by shifting brightness of primary
-    if (!accent) {
-      const shift = (primary.r + primary.g + primary.b) / 3 > 128 ? -40 : 40;
-      accent = {
-        r: Math.max(0, Math.min(255, primary.r + shift)),
-        g: Math.max(0, Math.min(255, primary.g + shift)),
-        b: Math.max(0, Math.min(255, primary.b + shift))
+    // If they are identical (e.g. monochrome image), return a default accent
+    if (distance(centroids[0], centroids[1]) < 5) {
+      const pColor = centroids[0];
+      const isDark = (pColor.r * 0.299 + pColor.g * 0.587 + pColor.b * 0.114) < 128;
+      const accent = isDark ? { r: 255, g: 255, b: 255 } : { r: 0, g: 0, b: 0 };
+      return {
+        primary: rgbToHex(pColor.r, pColor.g, pColor.b),
+        accent: rgbToHex(accent.r, accent.g, accent.b)
       };
     }
 
-    return {
-      primary: rgbToHex(primary.r, primary.g, primary.b),
-      accent: rgbToHex(accent.r, accent.g, accent.b)
-    };
+    // K-means iterations (10 max)
+    for (let iter = 0; iter < 10; iter++) {
+      const clusters = [[], []];
+      for (const p of finalPixels) {
+        const d0 = distance(p, centroids[0]);
+        const d1 = distance(p, centroids[1]);
+        if (d0 <= d1) {
+          clusters[0].push(p);
+        } else {
+          clusters[1].push(p);
+        }
+      }
 
-  } catch (error) {
-    console.error(`Error processing ${filePath}:`, error.message);
-    return null;
+      // Update centroids
+      let changed = false;
+      for (let k = 0; k < 2; k++) {
+        if (clusters[k].length === 0) continue;
+        const sum = clusters[k].reduce((acc, p) => ({ r: acc.r + p.r, g: acc.g + p.g, b: acc.b + p.b }), { r: 0, g: 0, b: 0 });
+        const newCentroid = {
+          r: sum.r / clusters[k].length,
+          g: sum.g / clusters[k].length,
+          b: sum.b / clusters[k].length
+        };
+        if (distance(newCentroid, centroids[k]) > 1) {
+          centroids[k] = newCentroid;
+          changed = true;
+        }
+      }
+
+      if (!changed) break;
+    }
+
+    // Sort centroids by cluster sizes
+    const clusters = [[], []];
+    for (const p of finalPixels) {
+      const d0 = distance(p, centroids[0]);
+      const d1 = distance(p, centroids[1]);
+      if (d0 <= d1) clusters[0].push(p);
+      else clusters[1].push(p);
+    }
+
+    if (clusters[0].length < clusters[1].length) {
+      centroids = [centroids[1], centroids[0]];
+    }
+
+    return {
+      primary: rgbToHex(centroids[0].r, centroids[0].g, centroids[0].b),
+      accent: rgbToHex(centroids[1].r, centroids[1].g, centroids[1].b)
+    };
+  } catch (err) {
+    console.error(`Error processing ${filePath}:`, err.message);
+    return { primary: '#FFFFFF', accent: '#000000' };
   }
 }
 
-async function run() {
-  if (!fs.existsSync(LOGOS_DIR)) {
-    console.error(`Logos directory not found at: ${LOGOS_DIR}`);
+async function main() {
+  const logosDir = path.join(__dirname, '..', 'public', 'logos');
+  if (!fs.existsSync(logosDir)) {
+    console.error(`Logos directory not found at ${logosDir}`);
     process.exit(1);
   }
 
-  const files = fs.readdirSync(LOGOS_DIR).filter(file => {
-    const ext = path.extname(file).toLowerCase();
-    return ext === '.png' || ext === '.jpg' || ext === '.jpeg';
-  });
-
+  const files = fs.readdirSync(logosDir).filter(f => f.toLowerCase().endsWith('.png'));
   const results = {};
 
   for (const file of files) {
-    const filePath = path.join(LOGOS_DIR, file);
-    const colors = await extractColors(filePath);
-    if (colors) {
-      results[file] = colors;
-    }
+    const filePath = path.join(logosDir, file);
+    results[file] = await extractColors(filePath);
   }
 
   console.log(JSON.stringify(results, null, 2));
 }
 
-run();
+main();

@@ -326,72 +326,74 @@ export default function BankAccountPage({ institution, onBack }: BankAccountPage
             </>
           ) : (
             <>
-              {accountVariants.map((account, idx) => (
-                <motion.div
-                  key={account.id}
-                  initial={{ opacity: 0, y: 16 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: idx * 0.06, type: 'spring', stiffness: 260, damping: 26 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => setSelectedAccount(account)}
-                  className="rounded-2xl overflow-hidden cursor-pointer"
-                  style={{
-                    background: 'rgba(255,255,255,0.025)',
-                    border: '1px solid rgba(255,255,255,0.07)',
-                  }}
-                >
-                  {/* Card header stripe */}
-                  <div
-                    className="px-4 py-3 flex items-center gap-2.5"
-                    style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', background: `${account.colorAccent}08` }}
+              {accountVariants.map((account, idx) => {
+                const displayRate = account.interestRate.match(/[\d.]+%/)?.[0] ?? account.interestRate;
+                return (
+                  <motion.div
+                    key={account.id}
+                    initial={{ opacity: 0, y: 16 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: idx * 0.06, type: 'spring', stiffness: 260, damping: 26 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => setSelectedAccount(account)}
+                    className="rounded-2xl overflow-hidden cursor-pointer"
+                    style={{
+                      background: 'rgba(255,255,255,0.025)',
+                      border: '1px solid rgba(255,255,255,0.07)',
+                    }}
                   >
-                    <Star size={13} style={{ color: account.colorAccent }} className="flex-shrink-0" strokeWidth={2} />
-                    <div className="flex-1 min-w-0">
-                      <h3
-                        className="text-[13px] leading-snug truncate"
-                        style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, color: 'rgba(255,255,255,0.88)' }}
-                      >
-                        {account.name}
-                      </h3>
-                      {account.specialization && (
-                        <p className="font-body text-[9px] mt-0.5" style={{ color: account.colorAccent + '99' }}>
-                          {account.specialization}
-                        </p>
+                    {/* Card header stripe */}
+                    <div
+                      className="px-4 py-3 flex items-center gap-2.5"
+                      style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', background: `${account.colorAccent}08` }}
+                    >
+                      <Star size={13} style={{ color: account.colorAccent }} className="flex-shrink-0" strokeWidth={2} />
+                      <div className="flex-1 min-w-0">
+                        <h3
+                          className="text-[13px] leading-snug truncate"
+                          style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, color: 'rgba(255,255,255,0.88)' }}
+                        >
+                          {account.name}
+                        </h3>
+                        {account.specialization && (
+                          <p className="font-body text-[9px] mt-0.5" style={{ color: account.colorAccent + '99' }}>
+                            {account.specialization}
+                          </p>
+                        )}
+                      </div>
+                      {account.interestRate && (
+                        <span
+                          className="flex-shrink-0 text-[10px] font-body font-semibold"
+                          style={{ color: account.colorAccent }}
+                        >
+                          {displayRate}
+                        </span>
                       )}
                     </div>
-                    {account.interestRate && (
-                      <span
-                        className="flex-shrink-0 text-[10px] font-body font-semibold"
-                        style={{ color: account.colorAccent }}
-                      >
-                        {account.interestRate.split(' ')[0]}
-                      </span>
-                    )}
-                  </div>
 
-                  {/* Key metrics */}
-                  <div className="px-4 py-3 space-y-2">
-                    <div className="flex items-start justify-between text-[10px]">
-                      <span className="text-white/35 font-body">Minimum Balance</span>
-                      <span
-                        className="text-right ml-4 text-white/70"
-                        style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 600 }}
-                      >
-                        {account.minimumBalance}
-                      </span>
-                    </div>
-
-                    {account.interestRate && (
+                    {/* Key metrics */}
+                    <div className="px-4 py-3 space-y-2">
                       <div className="flex items-start justify-between text-[10px]">
-                        <span className="text-white/35 font-body">Interest Rate</span>
+                        <span className="text-white/35 font-body">Minimum Balance</span>
                         <span
-                          className="text-right ml-4"
-                          style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 600, color: account.colorAccent }}
+                          className="text-right ml-4 text-white/70"
+                          style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 600 }}
                         >
-                          {account.interestRate}
+                          {account.minimumBalance}
                         </span>
                       </div>
-                    )}
+
+                      {account.interestRate && (
+                        <div className="flex items-start justify-between text-[10px]">
+                          <span className="text-white/35 font-body">Interest Rate</span>
+                          <span
+                            className="text-right ml-4"
+                            style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 600, color: account.colorAccent }}
+                          >
+                            {displayRate}
+                          </span>
+                        </div>
+                      )}
 
                     <div className="flex items-start justify-between text-[10px]">
                       <span className="text-white/35 font-body">Age Eligibility</span>
@@ -415,7 +417,8 @@ export default function BankAccountPage({ institution, onBack }: BankAccountPage
                     </span>
                   </div>
                 </motion.div>
-              ))}
+              );
+            })}
 
               {/* RRB note */}
               {institution.type === 'rrb' && (

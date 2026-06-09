@@ -73,13 +73,8 @@ function getProductMetricHighlight(product: Product) {
   const cat = product.category;
   
   if (cat === 'savings') {
-    let rate = String(product.metrics.interestRate || 'N/A');
-    if (rate.includes('-')) {
-      rate = rate.split('-')[0].trim();
-    }
-    if (!rate.endsWith('%') && rate !== 'N/A') {
-      rate = `${rate}%`;
-    }
+    const interestRate = String(product.metrics.interestRate || 'N/A');
+    const rate = interestRate.match(/[\d.]+%/)?.[0] ?? interestRate;
     let minBal = String(product.metrics.minBalance || '₹0');
     if (product.id === 'hdfc-savings' || minBal === '₹10,000' || minBal === '10000') {
       minBal = '₹10k';

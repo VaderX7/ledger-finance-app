@@ -5,8 +5,8 @@ import { motion } from 'framer-motion';
 import { Product } from '@/lib/products';
 import { 
   ArrowLeft, ExternalLink, Shield, Gift, AlertCircle, 
-  Percent, Wallet, CreditCard, Coins, ArrowLeftRight, 
-  Sparkles, CircleDot, ChevronDown, Landmark, UserCheck, FileText 
+  TrendingUp, Wallet, CreditCard, Building2, Star, Coins,
+  CircleDot, ChevronDown, UserCheck, FileText, Sparkles
 } from 'lucide-react';
 import { useLang } from '@/context/LanguageContext';
 import { TranslationKey } from '@/lib/i18n';
@@ -16,17 +16,121 @@ interface ProductDetailPageProps {
   onBack: () => void;
 }
 
-const getDetailIcon = (key: string, color: string) => {
-  const k = key.toLowerCase();
+const BANK_LOGO_MAP: Record<string, string> = {
+  'State Bank of India': 'sbi',
+  'Bank of Baroda': 'bob_public',
+  'Bank of Baroda Limited': 'bob_public',
+  'Bank of Baroda Ltd': 'bob_public',
+  'Bank of India': 'boi_public',
+  'Bank of India Limited': 'boi_public',
+  'Bank of India Ltd': 'boi_public',
+  'Bank of Maharashtra': 'bom_public',
+  'Bank of Maharashtra Limited': 'bom_public',
+  'Bank of Maharashtra Ltd': 'bom_public',
+  'Canara Bank': 'canara_public',
+  'Canara Bank Limited': 'canara_public',
+  'Canara Bank Ltd': 'canara_public',
+  'Central Bank of India': 'central_public',
+  'Central Bank of India Limited': 'central_public',
+  'Central Bank of India Ltd': 'central_public',
+  'Indian Bank': 'indianbank_public',
+  'Indian Bank Limited': 'indianbank_public',
+  'Indian Bank Ltd': 'indianbank_public',
+  'Indian Overseas Bank': 'iob_public',
+  'Indian Overseas Bank Limited': 'iob_public',
+  'Indian Overseas Bank Ltd': 'iob_public',
+  'Punjab & Sind Bank': 'punjabsindbank_public',
+  'Punjab & Sind Bank Limited': 'punjabsindbank_public',
+  'Punjab & Sind Bank Ltd': 'punjabsindbank_public',
+  'Punjab National Bank': 'pnb_public',
+  'Punjab National Bank Limited': 'pnb_public',
+  'Punjab National Bank Ltd': 'pnb_public',
+  'UCO Bank': 'uco_public',
+  'UCO Bank Limited': 'uco_public',
+  'UCO Bank Ltd': 'uco_public',
+  'Union Bank of India': 'ubi_public',
+  'Union Bank of India Limited': 'ubi_public',
+  'Union Bank of India Ltd': 'ubi_public',
+  'Axis Bank': 'axis',
+  'Axis Bank Limited': 'axis',
+  'Bandhan Bank': 'bandhan',
+  'CSB Bank': 'csb',
+  'CSB Bank (formerly Catholic Syrian Bank)': 'csb',
+  'City Union Bank': 'cub',
+  'DCB Bank': 'dcb',
+  'Dhanlaxmi Bank': 'dhanlaxmi',
+  'Federal Bank': 'federal',
+  'HDFC Bank': 'hdfc',
+  'Housing Development Finance Corporation': 'hdfc',
+  'ICICI Bank': 'icici',
+  'ICICI Bank Limited': 'icici',
+  'IDBI Bank': 'idbi',
+  'IDFC FIRST Bank': 'idfc',
+  'IDFC First Bank': 'idfc',
+  'IDFC Bank': 'idfc',
+  'IndusInd Bank': 'indusind',
+  'Jammu & Kashmir Bank': 'j&k',
+  'Karnataka Bank': 'karnataka',
+  'Karur Vysya Bank': 'kvb',
+  'Kotak Mahindra Bank': 'kmb',
+  'Nainital Bank': 'nainital',
+  'RBL Bank': 'rbl',
+  'Tamilnad Mercantile Bank': 'tmb',
+  'YES BANK': 'yesbank',
+  'YES Bank': 'yesbank',
+  'YES BANK ': 'yesbank',
+  'South Indian Bank': 'sib',
+  'AU Small Finance Bank': 'au_sfb',
+  'Capital Small Finance Bank': 'capital_sfb',
+  'Equitas Small Finance Bank': 'equitas_sfb',
+  'ESAF Small Finance Bank': 'esaf_sfb',
+  'Jana Small Finance Bank': 'jana_sfb',
+  'North East Small Finance Bank': 'northeast_sfb',
+  'Northeast Small Finance Bank': 'northeast_sfb',
+  'Shivalik Small Finance Bank': 'shivalik_sfb',
+  'Suryoday Small Finance Bank': 'suryoday_sfb',
+  'Ujjivan Small Finance Bank': 'ujjivan_sfb',
+  'Unity Small Finance Bank': 'unity_sfb',
+  'Utkarsh Small Finance Bank': 'utkarsh_sfb',
+  'Airtel Payments Bank': 'airtel_pb',
+  'Fino Payments Bank': 'fino_pb',
+  'Jio Payments Bank': 'jio_pb',
+  'NSDL Payments Bank': 'nsdl_pb',
+  'Paytm Payments Bank': 'paytm_pb'
+};
+
+const METRIC_LABEL_MAP: Record<string, string> = {
+  interestRate: "Interest Rate",
+  baseYield: "Annual Yield",
+  minRate: "Interest Rate",
+  minBalance: "Min. Balance",
+  cardType: "Card Type",
+  atmWithdrawals: "ATM Withdrawals",
+  benefits: "Key Benefits",
+  dicgcProtected: "DICGC Protection"
+};
+
+const getMetricIcon = (key: string, color: string) => {
   const style = { color };
-  if (k.includes('rate') || k.includes('yield')) return <Percent size={13} style={style} className="flex-shrink-0" />;
-  if (k.includes('balance') || k.includes('mab')) return <Wallet size={13} style={style} className="flex-shrink-0" />;
-  if (k.includes('card')) return <CreditCard size={13} style={style} className="flex-shrink-0" />;
-  if (k.includes('fee') || k.includes('charges')) return <Coins size={13} style={style} className="flex-shrink-0" />;
-  if (k.includes('atm') || k.includes('withdrawal')) return <ArrowLeftRight size={13} style={style} className="flex-shrink-0" />;
-  if (k.includes('benefit') || k.includes('reward') || k.includes('feature')) return <Sparkles size={13} style={style} className="flex-shrink-0" />;
-  if (k.includes('protection') || k.includes('dicgc') || k.includes('insured')) return <Shield size={13} style={style} className="flex-shrink-0" />;
-  return <CircleDot size={13} style={style} className="flex-shrink-0" />;
+  if (key === 'interestRate' || key === 'baseYield' || key === 'minRate') {
+    return <TrendingUp size={15} style={style} className="flex-shrink-0" />;
+  }
+  if (key === 'minBalance' || key === 'monthlyAvgBalance') {
+    return <Wallet size={15} style={style} className="flex-shrink-0" />;
+  }
+  if (key === 'cardType' || key === 'joiningFee' || key === 'annualFee') {
+    return <CreditCard size={15} style={style} className="flex-shrink-0" />;
+  }
+  if (key === 'atmWithdrawals') {
+    return <Building2 size={15} style={style} className="flex-shrink-0" />;
+  }
+  if (key === 'benefits' || key === 'milestoneRewards' || key === 'fuelSurcharge') {
+    return <Star size={15} style={style} className="flex-shrink-0" />;
+  }
+  if (key === 'dicgcProtected') {
+    return <Shield size={15} style={style} className="flex-shrink-0" />;
+  }
+  return <CircleDot size={15} style={style} className="flex-shrink-0" />;
 };
 
 export default function ProductDetailPage({ product, onBack }: ProductDetailPageProps) {
@@ -58,7 +162,12 @@ export default function ProductDetailPage({ product, onBack }: ProductDetailPage
   const renderCategorySpecificContent = () => {
     if (product.category === 'fds') {
       return (
-        <div className="space-y-4">
+        <motion.div 
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.35, duration: 0.4 }}
+          className="space-y-4"
+        >
           <h3
             className="text-[13px] text-white/80 flex items-center gap-2"
             style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700 }}
@@ -86,13 +195,18 @@ export default function ProductDetailPage({ product, onBack }: ProductDetailPage
               </div>
             ))}
           </div>
-        </div>
+        </motion.div>
       );
     }
 
     if (product.category === 'creditcards') {
       return (
-        <div className="space-y-4">
+        <motion.div 
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.35, duration: 0.4 }}
+          className="space-y-4"
+        >
           <h3
             className="text-[13px] text-white/80 flex items-center gap-2"
             style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700 }}
@@ -138,12 +252,34 @@ export default function ProductDetailPage({ product, onBack }: ProductDetailPage
               </p>
             </div>
           </div>
-        </div>
+        </motion.div>
       );
     }
 
     return null;
   };
+
+  // Logo mapping
+  const bankLogoId = BANK_LOGO_MAP[product.lender] || product.lender.toLowerCase().replace(/bank/gi, '').replace(/[^a-z0-9]/g, '').trim();
+  const logoUrl = `/logos/${bankLogoId}.png`;
+
+  // Hero interest rate helper
+  const heroRateKey = product.category === 'savings' ? 'interestRate' :
+                      product.category === 'fds' ? 'baseYield' :
+                      product.category === 'loans' ? 'minRate' : '';
+  const heroRateValue = heroRateKey ? String(product.metrics[heroRateKey] || '') : '';
+  const displayHeroRate = heroRateValue.match(/[\d.]+%/)?.[0] ?? heroRateValue;
+
+  // Split highlights cleanly
+  const highlightsList = Array.isArray(product.highlights) 
+    ? product.highlights 
+    : String(product.highlights || '').split('|').map(h => h.trim()).filter(Boolean);
+  const firstThreeHighlights = highlightsList.slice(0, 3);
+
+  // Split documents cleanly
+  const documentsList = Array.isArray(product.documents)
+    ? product.documents
+    : String(product.documents || '').split('|').map(d => d.trim()).filter(Boolean);
 
   return (
     <motion.div
@@ -152,13 +288,16 @@ export default function ProductDetailPage({ product, onBack }: ProductDetailPage
       animate={{ x: 0, opacity: 1 }}
       exit={{ x: '100%', opacity: 0 }}
       transition={{ type: 'spring', stiffness: 340, damping: 34 }}
-      className="fixed inset-0 bg-[#070A12] z-[60] flex flex-col max-w-md mx-auto"
+      className="fixed inset-0 z-[60] flex flex-col max-w-md mx-auto"
+      style={{
+        background: `linear-gradient(180deg, ${(product.color || '#C9A96E')}18 0%, transparent 100%), #070A12`,
+      }}
     >
       {/* Sticky header */}
       <div
         className="flex-shrink-0 flex items-center gap-3 px-4 py-3"
         style={{
-          background: 'rgba(7, 10, 18, 0.90)',
+          background: `linear-gradient(180deg, ${(product.color || '#C9A96E')}18 0%, rgba(7, 10, 18, 0.90) 100%)`,
           backdropFilter: 'blur(20px)',
           WebkitBackdropFilter: 'blur(20px)',
           borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
@@ -167,25 +306,24 @@ export default function ProductDetailPage({ product, onBack }: ProductDetailPage
         <motion.button
           whileTap={{ scale: 0.88 }}
           onClick={onBack}
-          className="flex-shrink-0 w-10 h-10 rounded-2xl flex items-center justify-center"
-          style={{
-            background: 'rgba(255, 255, 255, 0.06)',
-            border: '1px solid rgba(255, 255, 255, 0.10)',
-          }}
+          className="flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center bg-white/05 border border-white/08"
         >
           <ArrowLeft size={18} className="text-white/80" strokeWidth={2} />
         </motion.button>
 
         <div className="flex-1 min-w-0">
-          <p className="font-body text-[10px] tracking-widest uppercase text-white/25">
+          <p 
+            className="font-body text-[10px] tracking-widest uppercase font-bold"
+            style={{ color: product.color || '#C9A96E' }}
+          >
             {categoryLabels[product.category] ?? product.category}
           </p>
-          <p
-            className="text-[15px] leading-tight truncate mt-0.5"
-            style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, color: 'rgba(255,255,255,0.92)' }}
+          <h1
+            className="text-[22px] leading-tight font-bold text-white/95 tracking-tight truncate mt-0.5"
+            style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
           >
             {product.name}
-          </p>
+          </h1>
         </div>
 
         <div
@@ -196,117 +334,196 @@ export default function ProductDetailPage({ product, onBack }: ProductDetailPage
 
       {/* Scrollable content */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-5 py-5 space-y-5 pb-28">
-        {/* Lender + description */}
-        <div>
-          <p
-            className="text-[11px] font-medium mb-1"
-            style={{ color: product.colorAccent }}
-          >
-            {product.lender}
-          </p>
-          <p className="font-body text-[12px] text-white/50 leading-relaxed">
+        
+        {/* HERO SECTION: Logo, Lender name, Hero Interest Rate, description */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1, duration: 0.4 }}
+          className="space-y-4"
+        >
+          {/* Bank Row */}
+          <div className="flex items-center gap-2">
+            <div 
+              className="w-6 h-6 rounded-md bg-white p-[2.5px] flex items-center justify-center overflow-hidden flex-shrink-0"
+              style={{ border: `1px solid rgba(255, 255, 255, 0.12)` }}
+            >
+              <img
+                src={logoUrl}
+                alt={product.lender}
+                className="max-w-full max-h-full object-contain"
+                onError={(e) => { e.currentTarget.style.display = 'none'; }}
+              />
+            </div>
+            <span
+              className="text-[12px] font-bold uppercase tracking-wide"
+              style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: product.color || '#C9A96E' }}
+            >
+              {product.lender}
+            </span>
+          </div>
+
+          {/* Hero Interest Rate */}
+          {displayHeroRate && (
+            <div className="flex flex-col">
+              <span className="text-[9px] uppercase tracking-wider font-semibold text-white/30 font-body">
+                {product.category === 'fds' ? 'Annual Yield' : 'Interest Rate'}
+              </span>
+              <span
+                className="text-[32px] font-extrabold tracking-tight mt-0.5 leading-none"
+                style={{
+                  background: 'linear-gradient(135deg, #E4C98A 0%, #C9A96E 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                  fontFamily: "'Plus Jakarta Sans', sans-serif",
+                }}
+              >
+                {displayHeroRate}
+              </span>
+            </div>
+          )}
+
+          {/* Description */}
+          <p className="font-body text-[13px] text-white/40 leading-relaxed">
             {product.description}
           </p>
-        </div>
+        </motion.div>
 
-        {/* Highlights */}
-        <div className="flex flex-wrap gap-1.5">
-          {product.highlights.map((h) => (
-            <span
-              key={h}
-              className="px-2.5 py-1 rounded-lg font-body text-[10px] font-medium"
-              style={{
-                background: `${product.color}15`,
-                border: `1px solid ${product.color}30`,
-                color: 'rgba(255,255,255,0.55)',
-              }}
-            >
-              {h}
-            </span>
-          ))}
-        </div>
-
-        {/* Key metrics - Stacked vertically to avoid overlap */}
-        <div
-          className="p-4 rounded-2xl space-y-3"
-          style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.06)' }}
-        >
-          <h3
-            className="text-[12px] text-white/80 mb-2 border-b border-white/[0.04] pb-2"
-            style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700 }}
-          >
-            {t.keyDetails || "Key Details"}
-          </h3>
-          <div className="space-y-4">
-            {Object.entries(product.metrics).map(([key, value]) => {
-              const translatedVal = t[key as TranslationKey];
-              const displayLabel = typeof translatedVal === 'string' ? translatedVal : key.replace(/([A-Z])/g, ' $1').trim();
-              return (
-                <div key={key} className="flex flex-col gap-1">
-                  <div className="flex items-center gap-1.5 text-white/35">
-                    {getDetailIcon(key, product.colorAccent)}
-                    <p className="font-body text-[9px] uppercase tracking-wider font-semibold capitalize">
-                      {displayLabel}
-                    </p>
-                  </div>
-                  <div
-                    className="text-[11.5px] leading-relaxed pl-5 font-semibold text-white/90"
-                    style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
-                  >
-                    {String(value)}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Category-specific content */}
-        {renderCategorySpecificContent()}
-
-        {/* Collapsible Documents Panel */}
-        <div className="border border-white/[0.06] rounded-xl overflow-hidden bg-white/[0.01]">
-          <button
-            onClick={() => setDocsExpanded(!docsExpanded)}
-            className="w-full flex items-center justify-between p-4 text-[12px] text-white/80 font-bold transition-all hover:bg-white/[0.02]"
-            style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
-          >
-            <span className="flex items-center gap-2">
-              <FileText size={14} style={{ color: product.colorAccent }} />
-              {t.requiredDocuments || "Required Documents"}
-            </span>
-            <motion.div
-              animate={{ rotate: docsExpanded ? 180 : 0 }}
-              transition={{ duration: 0.2 }}
-            >
-              <ChevronDown size={16} className="text-white/40" />
-            </motion.div>
-          </button>
-          
+        {/* SECTION 2: Highlights scrollable row */}
+        {firstThreeHighlights.length > 0 && (
           <motion.div
-            initial={false}
-            animate={{ height: docsExpanded ? 'auto' : 0, opacity: docsExpanded ? 1 : 0 }}
-            transition={{ duration: 0.25, ease: 'easeInOut' }}
-            className="overflow-hidden"
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.18, duration: 0.4 }}
           >
-            <div className="px-4 pb-4 pt-1 space-y-1">
-              {product.documents.map((doc) => (
-                <div
-                  key={doc}
-                  className="flex items-start gap-2 p-2 rounded-lg"
-                  style={{ background: 'rgba(255,255,255,0.015)', border: '1px solid rgba(255,255,255,0.03)' }}
+            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1">
+              {firstThreeHighlights.map((highlight) => (
+                <span
+                  key={highlight}
+                  className="px-3 py-1.5 rounded-full text-[11px] bg-white/[0.06] border border-white/[0.08] text-white/60 flex-shrink-0 whitespace-nowrap"
                 >
-                  <span className="text-[9px] font-bold flex-shrink-0 mt-0.5" style={{ color: product.colorAccent }}>✓</span>
-                  <span className="font-body text-[10px] text-white/50">{doc}</span>
-                </div>
+                  {highlight}
+                </span>
               ))}
             </div>
           </motion.div>
-        </div>
+        )}
 
-        {/* Collapsible Eligibility Panel */}
-        {(product.minAge || product.minAnnualIncome || product.employmentTypes) && (
-          <div className="border border-white/[0.06] rounded-xl overflow-hidden bg-white/[0.01]">
+        {/* SECTION 3: Key Details Cards */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.25, duration: 0.4 }}
+          className="space-y-3"
+        >
+          <h3
+            className="text-[12px] text-white/80 border-b border-white/[0.04] pb-2 font-bold"
+            style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+          >
+            {t.keyDetails || "Key Details"}
+          </h3>
+          
+          <div className="space-y-2.5">
+            {Object.entries(product.metrics)
+              .filter(([key]) => key !== heroRateKey && key !== 'dicgcProtected' && isNaN(Number(key)))
+              .map(([key, value]) => {
+                const label = METRIC_LABEL_MAP[key] || key.replace(/([A-Z])/g, ' $1').trim();
+                return (
+                  <div
+                    key={key}
+                    className="flex items-center gap-3.5 p-4 rounded-2xl bg-white/[0.04] border border-white/[0.07]"
+                  >
+                    {/* Left Icon container */}
+                    <div
+                      className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
+                      style={{ background: `${product.color || '#C9A96E'}24` }}
+                    >
+                      {getMetricIcon(key, product.colorAccent || '#00F5A0')}
+                    </div>
+                    
+                    {/* Content */}
+                    <div className="flex-1 min-w-0">
+                      <span className="block text-[10px] uppercase tracking-wider text-white/30 font-semibold font-body">
+                        {label}
+                      </span>
+                      <span
+                        className="block text-[13px] text-white/85 font-medium mt-0.5 leading-relaxed"
+                        style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+                      >
+                        {String(value)}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+          </div>
+
+          {/* DICGC Special trust banner */}
+          {product.category === 'savings' && product.metrics.dicgcProtected && (
+            <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-[#00F5A0]/[0.06] border border-[#00F5A0]/0.15 mt-3">
+              <Shield size={16} className="text-[#00F5A0] flex-shrink-0" />
+              <span className="text-[11px] text-[#00F5A0] font-semibold leading-normal">
+                Protected up to ₹5 Lakhs per depositor · DICGC Insured
+              </span>
+            </div>
+          )}
+        </motion.div>
+
+        {/* SECTION 4: Required Documents Accordion */}
+        {documentsList.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.32, duration: 0.4 }}
+            className="border border-white/[0.06] rounded-xl overflow-hidden bg-white/[0.01]"
+          >
+            <button
+              onClick={() => setDocsExpanded(!docsExpanded)}
+              className="w-full flex items-center justify-between p-4 text-[12px] text-white/80 font-bold transition-all hover:bg-white/[0.02]"
+              style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+            >
+              <span className="flex items-center gap-2">
+                <FileText size={14} style={{ color: product.colorAccent }} />
+                {t.requiredDocuments || "Required Documents"}
+              </span>
+              <motion.div
+                animate={{ rotate: docsExpanded ? 180 : 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                <ChevronDown size={16} className="text-white/40" />
+              </motion.div>
+            </button>
+            
+            <motion.div
+              initial={false}
+              animate={{ height: docsExpanded ? 'auto' : 0, opacity: docsExpanded ? 1 : 0 }}
+              transition={{ duration: 0.25, ease: 'easeInOut' }}
+              className="overflow-hidden"
+            >
+              <div className="px-4 pb-4 pt-1 divide-y divide-white/[0.06]">
+                {documentsList.map((doc, idx) => (
+                  <div
+                    key={doc + idx}
+                    className="flex items-center gap-3 py-2.5"
+                  >
+                    <FileText size={14} style={{ color: product.colorAccent || '#C9A96E' }} className="flex-shrink-0" />
+                    <span className="font-body text-[11px] text-white/70">{doc}</span>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+
+        {/* SECTION 5: Eligibility Section */}
+        {(product.minAge || product.minAnnualIncome !== undefined || product.employmentTypes) && (
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4, duration: 0.4 }}
+            className="border border-white/[0.06] rounded-xl overflow-hidden bg-white/[0.01]"
+          >
             <button
               onClick={() => setEligibilityExpanded(!eligibilityExpanded)}
               className="w-full flex items-center justify-between p-4 text-[12px] text-white/80 font-bold transition-all hover:bg-white/[0.02]"
@@ -343,25 +560,66 @@ export default function ProductDetailPage({ product, onBack }: ProductDetailPage
                   <div className="flex items-center justify-between text-[10px] p-2 rounded-lg" style={{ background: 'rgba(255,255,255,0.015)', border: '1px solid rgba(255,255,255,0.03)' }}>
                     <span className="font-body text-white/35">{t.minAnnualIncome || "Min. Annual Income"}</span>
                     <span style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 600, color: 'rgba(255,255,255,0.65)' }}>
-                      {product.minAnnualIncome === 0 ? (t.noMinimum || "No minimum") : `₹${(product.minAnnualIncome / 100000).toFixed(1)}L`}
+                      {product.minAnnualIncome === 0 ? "No minimum income required" : `₹${(product.minAnnualIncome / 100000).toFixed(1)}L`}
                     </span>
                   </div>
                 )}
-                {product.employmentTypes && (
-                  <div className="flex items-center justify-between text-[10px] p-2 rounded-lg" style={{ background: 'rgba(255,255,255,0.015)', border: '1px solid rgba(255,255,255,0.03)' }}>
-                    <span className="font-body text-white/35">{t.employment || "Employment"}</span>
-                    <span style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 600, color: 'rgba(255,255,255,0.65)' }}>
-                      {product.employmentTypes.map(emp => emp.toLowerCase().includes('salaried') ? t.salaried : emp.toLowerCase().includes('self') ? t.selfEmployed : emp).join(', ')}
-                    </span>
-                  </div>
-                )}
+                <div className="flex items-center justify-between text-[10px] p-2 rounded-lg" style={{ background: 'rgba(255,255,255,0.015)', border: '1px solid rgba(255,255,255,0.03)' }}>
+                  <span className="font-body text-white/35">{t.employment || "Employment"}</span>
+                  {(() => {
+                    const rawEmp = product.employmentTypes;
+                    const employmentArray = Array.isArray(rawEmp)
+                      ? rawEmp
+                      : typeof rawEmp === 'string'
+                      ? (rawEmp as string).split('|').map(x => x.trim()).filter(Boolean)
+                      : [];
+
+                    const isEmpEmpty = employmentArray.length === 0 || 
+                      employmentArray.includes('0') || 
+                      employmentArray.includes('none') || 
+                      employmentArray.includes('null') ||
+                      employmentArray.includes('');
+
+                    if (isEmpEmpty) {
+                      return (
+                        <span style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 600, color: 'rgba(255,255,255,0.65)' }}>
+                          Open to all
+                        </span>
+                      );
+                    }
+
+                    return (
+                      <div className="flex items-center gap-1.5 flex-wrap justify-end">
+                        {employmentArray.map((emp) => (
+                          <span
+                            key={emp}
+                            className="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-[9px] font-semibold text-white/70"
+                            style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+                          >
+                            {emp.toLowerCase().includes('salaried') 
+                              ? 'Salaried' 
+                              : emp.toLowerCase().includes('self') 
+                              ? 'Self Employed' 
+                              : emp}
+                          </span>
+                        ))}
+                      </div>
+                    );
+                  })()}
+                </div>
               </div>
             </motion.div>
-          </div>
+          </motion.div>
         )}
 
+        {/* category specific render */}
+        {renderCategorySpecificContent()}
+
         {/* Anonymous note */}
-        <div
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.45 }}
           className="flex items-start gap-2.5 p-3.5 rounded-lg"
           style={{ background: 'rgba(56, 189, 248, 0.08)', border: '1px solid rgba(56, 189, 248, 0.12)' }}
         >
@@ -369,7 +627,7 @@ export default function ProductDetailPage({ product, onBack }: ProductDetailPage
           <p className="font-body text-[10px] text-white/40 leading-relaxed">
             {t.anonymousComparisonNote || "This comparison is completely anonymous. No data is collected, stored, or shared with third parties."}
           </p>
-        </div>
+        </motion.div>
       </div>
 
       {/* Floating Bottom Bar containing the CTA */}
@@ -388,9 +646,9 @@ export default function ProductDetailPage({ product, onBack }: ProductDetailPage
           onClick={handleAccessPortal}
           className="w-full py-3.5 rounded-xl font-body text-[12px] font-semibold flex items-center justify-center gap-2.5 transition-all shadow-lg"
           style={{
-            background: `linear-gradient(135deg, ${product.colorAccent} 0%, ${product.color} 100%)`,
-            color: '#070A12',
-            boxShadow: `0 8px 30px ${product.colorAccent}25`,
+            background: `linear-gradient(135deg, ${(product.color || '#C9A96E')} 0%, ${(product.colorAccent || '#00F5A0')} 100%)`,
+            color: '#ffffff',
+            boxShadow: `0 8px 28px ${(product.color || '#C9A96E')}40`,
           }}
         >
           {t.accessPortalAnonymously || "Access Official Portal Anonymously"}
