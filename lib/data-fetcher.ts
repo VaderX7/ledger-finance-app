@@ -68,6 +68,10 @@ function parseCSV(csv: string): Product[] {
     const values = parseCSVLine(line);
     const row: Record<string, string> = {};
     headers.forEach((h, idx) => { row[h.trim()] = (values[idx] ?? '').trim(); });
+    // Skip empty or placeholder rows that don't have core product info
+    if (!row['id'] || !row['name'] || !row['lender']) {
+      continue;
+    }
     try { products.push(rowToProduct(row)); }
     catch (e) { console.warn(`[SUTRA] Skipped row ${i + 1}:`, e); }
   }

@@ -524,6 +524,21 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
   const [showSortPopup, setShowSortPopup] = useState(false);
   const [showBankTypePopup, setShowBankTypePopup] = useState(false);
   const [logoErrors, setLogoErrors] = useState<Record<string, boolean>>({});
+  const [searchFocused, setSearchFocused] = useState(false);
+  const [activeChip, setActiveChip] = useState<string | null>(null);
+
+  const getBestUSP = (products: Product[]) => {
+    const allHighlights = Array.from(new Set(products.flatMap((p) => p.highlights)));
+    const priorityKeywords = [
+      'forex', 'sweep', 'atm', 'insurance', 'cashback', 'reward', 'cover', 'discount', 'lounge', 'waive',
+      'zero balance', 'high interest', 'no mab'
+    ];
+    for (const keyword of priorityKeywords) {
+      const matched = allHighlights.find((h) => h.toLowerCase().includes(keyword));
+      if (matched) return matched;
+    }
+    return allHighlights[0] || 'Premium Benefits';
+  };
 
   const getRateRange = (products: Product[]) => {
     const rates: number[] = [];
@@ -717,6 +732,7 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
     setSelectedBank(null);
     setSortBy('popularity');
     setShowSortPopup(false);
+    setActiveChip(null);
     getProductsByCategory(category)
       .then((products) => {
         const overridden = products.map((p) => ({
@@ -805,6 +821,28 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
       const q = searchText.toLowerCase();
       if (!p.name.toLowerCase().includes(q) && !p.lender.toLowerCase().includes(q)) return false;
     }
+    if (category === 'savings' && activeChip) {
+      if (activeChip === 'zero-mab') {
+        const mb = String(p.metrics.minBalance || '').toLowerCase();
+        const matchesZero = mb.includes('nil') || mb.includes('zero') || mb.includes('free') || mb.includes('₹0') || mb.includes('rs. 0') || mb.includes('rs.0');
+        if (!matchesZero) return false;
+      }
+      if (activeChip === 'high-interest') {
+        const rateStr = String(p.metrics.interestRate || '');
+        const matches = rateStr.match(/\d+(\.\d+)?(?=\s*%)/g);
+        const maxRate = matches ? Math.max(...matches.map(Number)) : 0;
+        if (maxRate < 6) return false;
+      }
+      if (activeChip === 'no-min-balance') {
+        const mb = String(p.metrics.minBalance || '').toLowerCase();
+        const matchesZero = mb.includes('nil') || mb.includes('zero') || mb.includes('free') || mb.includes('₹0') || mb.includes('rs. 0') || mb.includes('rs.0');
+        if (!matchesZero) return false;
+      }
+      if (activeChip === 'top-pick') {
+        const topPicks = ['State Bank of India', 'HDFC Bank', 'ICICI Bank', 'Axis Bank', 'Kotak Mahindra Bank', 'IDFC FIRST Bank', 'IDFC First Bank', 'Federal Bank'];
+        if (!topPicks.some((l) => p.lender.toLowerCase().includes(l.toLowerCase()))) return false;
+      }
+    }
     return true;
   });
 
@@ -872,19 +910,22 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
 
             <div ref={scrollRef} className="pt-16 px-4 pb-28">
               {/* Search bar — always first below header */}
-              <div className="sticky top-16 z-20 py-2" style={{ background: 'rgba(7,10,18,0.95)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
+              <div className="sticky top-16 z-20 py-2 space-y-2.5" style={{ background: 'rgba(7,10,18,0.95)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
                 <div className="relative">
-                  <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: 'rgba(255,255,255,0.25)' }} />
+                  <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: searchFocused ? '#00F5A0' : 'rgba(255,255,255,0.25)' }} />
                   <input
                     type="text"
                     value={searchText}
                     onChange={(e) => setSearchText(e.target.value)}
+                    onFocus={() => setSearchFocused(true)}
+                    onBlur={() => setSearchFocused(false)}
                     placeholder={lang === 'hi' ? `${label} खोजें…` : lang === 'hinglish' ? `${label} search karein…` : `Search ${label.toLowerCase()}…`}
-                    className="w-full pl-9 pr-9 py-2.5 rounded-xl font-body text-[12px] outline-none"
+                    className="w-full pl-9 pr-9 py-3 rounded-xl font-body text-[13px] outline-none transition-all duration-300"
                     style={{
-                      background: 'rgba(255,255,255,0.05)',
-                      border: '1px solid rgba(255,255,255,0.09)',
-                      color: 'rgba(255,255,255,0.78)',
+                      background: searchFocused ? 'rgba(7,10,18,0.6)' : 'rgba(255,255,255,0.05)',
+                      border: searchFocused ? '1px solid #00F5A0' : '1px solid rgba(255,255,255,0.09)',
+                      boxShadow: searchFocused ? '0 0 15px rgba(0, 245, 160, 0.25)' : 'none',
+                      color: searchFocused ? '#ffffff' : 'rgba(255,255,255,0.78)',
                     }}
                   />
                   {searchText && (
@@ -893,6 +934,38 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
                     </button>
                   )}
                 </div>
+
+                {/* Quick Filter Chips (only for savings category) */}
+                {category === 'savings' && (
+                  <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none -mx-4 px-4 mask-gradient-x">
+                    {[
+                      { id: 'zero-mab', label: 'Zero MAB' },
+                      { id: 'high-interest', label: 'High Interest' },
+                      { id: 'no-min-balance', label: 'No Min Balance' },
+                      { id: 'top-pick', label: 'Top Pick' }
+                    ].map((chip) => {
+                      const isActive = activeChip === chip.id;
+                      return (
+                        <motion.button
+                          key={chip.id}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={() => setActiveChip(isActive ? null : chip.id)}
+                          className="px-3 py-1.5 rounded-full text-[10px] font-semibold whitespace-nowrap transition-all duration-200"
+                          style={{
+                            background: isActive
+                              ? `linear-gradient(135deg, ${meta.accentColor}d0 0%, ${meta.accentColor}80 100%)`
+                              : 'rgba(255,255,255,0.04)',
+                            border: `1px solid ${isActive ? meta.accentColor : 'rgba(255,255,255,0.07)'}`,
+                            color: isActive ? '#070A12' : 'rgba(255,255,255,0.6)',
+                            boxShadow: isActive ? `0 0 10px ${meta.accentColor}40` : 'none',
+                          }}
+                        >
+                          {chip.label}
+                        </motion.button>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
 
               {/* Counts display showing filtered vs total */}
@@ -901,11 +974,11 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
                   <div>
                     {category === 'savings' ? (
                       lang === 'hi' ? (
-                        <span>दिखा रहा है: <strong className="text-white/80">{filtered.length}</strong> खाते, <strong className="text-white/80">{bankGroups.length}</strong> बैंकों में (कुल {allProducts.length} खाते, {Array.from(new Set(allProducts.map(p => p.lender))).length} बैंकों में से)</span>
+                        <span><strong className="text-white/80">{filtered.length}</strong> खाते · <strong className="text-white/80">{bankGroups.length}</strong> बैंक</span>
                       ) : lang === 'hinglish' ? (
-                        <span>Showing <strong className="text-white/80">{filtered.length}</strong> accounts across <strong className="text-white/80">{bankGroups.length}</strong> banks (Out of {allProducts.length} accounts across {Array.from(new Set(allProducts.map(p => p.lender))).length} banks)</span>
+                        <span><strong className="text-white/80">{filtered.length}</strong> accounts · <strong className="text-white/80">{bankGroups.length}</strong> banks</span>
                       ) : (
-                        <span>Showing <strong className="text-white/80">{filtered.length}</strong> accounts across <strong className="text-white/80">{bankGroups.length}</strong> banks (Out of {allProducts.length} accounts across {Array.from(new Set(allProducts.map(p => p.lender))).length} banks)</span>
+                        <span><strong className="text-white/80">{filtered.length}</strong> accounts · <strong className="text-white/80">{bankGroups.length}</strong> banks</span>
                       )
                     ) : (
                       lang === 'hi' ? (
@@ -1131,13 +1204,43 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
                                 <h3 className="text-[16px] leading-tight text-white/95 truncate pr-1" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800 }}>
                                   {group.lender}
                                 </h3>
-                                <span className="text-[9px] font-body px-1.5 py-0.5 rounded uppercase font-semibold text-white/40 flex-shrink-0 mt-0.5" style={{ background: 'rgba(255,255,255,0.04)' }}>
+                              </div>
+                              <div className="flex items-center gap-1.5 mt-1">
+                                <span 
+                                  className="text-[8px] font-body px-1.5 py-0.5 rounded-full font-bold uppercase tracking-wider"
+                                  style={{
+                                    background: firstProduct.bankType === 'public' 
+                                      ? 'rgba(201,169,110,0.12)' 
+                                      : firstProduct.bankType === 'private'
+                                      ? 'rgba(56,189,248,0.12)'
+                                      : firstProduct.bankType === 'sfb'
+                                      ? 'rgba(45,212,191,0.12)'
+                                      : 'rgba(251,113,133,0.12)',
+                                    color: firstProduct.bankType === 'public' 
+                                      ? '#C9A96E' 
+                                      : firstProduct.bankType === 'private'
+                                      ? '#38BDF8'
+                                      : firstProduct.bankType === 'sfb'
+                                      ? '#2DD4BF'
+                                      : '#FB7185',
+                                    border: `1px solid ${
+                                      firstProduct.bankType === 'public' 
+                                        ? 'rgba(201,169,110,0.25)' 
+                                        : firstProduct.bankType === 'private'
+                                        ? 'rgba(56,189,248,0.25)'
+                                        : firstProduct.bankType === 'sfb'
+                                        ? 'rgba(45,212,191,0.25)'
+                                        : 'rgba(251,113,133,0.25)'
+                                    }`
+                                  }}
+                                >
                                   {bankTypeName}
                                 </span>
+                                <span className="w-1 h-1 rounded-full bg-white/20" />
+                                <span className="text-[11px] text-white/50 font-body">
+                                  {group.products.length} {group.products.length === 1 ? 'savings option' : 'savings options'}
+                                </span>
                               </div>
-                              <p className="text-[11px] text-white/50 mt-1 font-body">
-                                {group.products.length} {group.products.length === 1 ? 'savings option' : 'savings options'}
-                              </p>
                             </div>
                           </div>
 
@@ -1149,9 +1252,9 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
                               </p>
                             </div>
                             <div className="rounded-lg px-2.5 py-2" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
-                              <p className="font-body text-[9px] text-white/30 mb-0.5 uppercase tracking-wide">Lowest MAB</p>
-                              <p className="text-[12px] font-bold" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: '#00F5A0' }}>
-                                {lowestMinBal}
+                              <p className="font-body text-[9px] text-white/30 mb-0.5 uppercase tracking-wide">Best For</p>
+                              <p className="text-[12px] font-bold truncate" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: '#00F5A0' }}>
+                                {getBestUSP(group.products)}
                               </p>
                             </div>
                           </div>
