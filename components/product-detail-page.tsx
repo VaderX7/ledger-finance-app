@@ -288,20 +288,19 @@ export default function ProductDetailPage({ product, onBack }: ProductDetailPage
     : String(product.documents || '').split('|').map(d => d.trim()).filter(Boolean);
 
   return (
+    <>
     <motion.div
       key="product-detail"
       initial={{ x: '100%', opacity: 0 }}
-      animate={{ x: 0, opacity: 1, scale: jargonOpen ? 0.92 : 1 }}
+      animate={{ x: 0, opacity: 1 }}
       exit={{ x: '100%', opacity: 0 }}
       transition={{
         x: { type: 'spring', stiffness: 340, damping: 34 },
         opacity: { type: 'spring', stiffness: 340, damping: 34 },
-        scale: { type: 'spring', stiffness: 180, damping: 26, mass: 1.1 },
+        scale: { type: 'spring', stiffness: 300, damping: 30 },
       }}
       className="fixed inset-0 z-[60] flex flex-col max-w-md mx-auto"
       style={{
-        overflow: 'hidden',
-        backgroundColor: '#070A12',
         background: `linear-gradient(180deg, ${(product.color || '#C9A96E')}18 0%, transparent 100%), #070A12`,
       }}
     >
@@ -660,12 +659,13 @@ export default function ProductDetailPage({ product, onBack }: ProductDetailPage
           <ExternalLink size={14} />
         </motion.button>
       </div>
-
-      <JargonBottomSheet
-        term={selectedTerm}
-        isOpen={jargonOpen}
-        onClose={() => { setJargonOpen(false); setTimeout(() => setSelectedTerm(null), 300); }}
-      />
     </motion.div>
+
+    <JargonBottomSheet
+      term={selectedTerm}
+      isOpen={jargonOpen}
+      onClose={() => { setJargonOpen(false); setTimeout(() => setSelectedTerm(null), 300); }}
+    />
+    </>
   );
 }
