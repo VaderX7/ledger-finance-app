@@ -10,6 +10,8 @@ import {
 } from 'lucide-react';
 import { useLang } from '@/context/LanguageContext';
 import { TranslationKey } from '@/lib/i18n';
+import JargonText from './jargon-text';
+import JargonBottomSheet from './jargon-bottom-sheet';
 
 interface ProductDetailPageProps {
   product: Product;
@@ -138,6 +140,12 @@ export default function ProductDetailPage({ product, onBack }: ProductDetailPage
   const scrollRef = useRef<HTMLDivElement>(null);
   const [docsExpanded, setDocsExpanded] = useState(false);
   const [eligibilityExpanded, setEligibilityExpanded] = useState(true);
+  const [selectedTerm, setSelectedTerm] = useState<string | null>(null);
+  const [jargonOpen, setJargonOpen] = useState(false);
+  const [bgScale, setBgScale] = useState(1);
+  const [bgOpacity, setBgOpacity] = useState(1);
+
+  const handleTermClick = (term: string) => { setSelectedTerm(term); setJargonOpen(true); };
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -287,9 +295,15 @@ export default function ProductDetailPage({ product, onBack }: ProductDetailPage
       initial={{ x: '100%', opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
       exit={{ x: '100%', opacity: 0 }}
-      transition={{ type: 'spring', stiffness: 340, damping: 34 }}
+      transition={{
+        x: { type: 'spring', stiffness: 340, damping: 34 },
+        opacity: { type: 'spring', stiffness: 340, damping: 34 },
+        scale: { type: 'spring', stiffness: 300, damping: 30 },
+      }}
       className="fixed inset-0 z-[60] flex flex-col max-w-md mx-auto"
       style={{
+        scale: bgScale,
+        opacity: bgOpacity,
         background: `linear-gradient(180deg, ${(product.color || '#C9A96E')}18 0%, transparent 100%), #070A12`,
       }}
     >
@@ -385,9 +399,7 @@ export default function ProductDetailPage({ product, onBack }: ProductDetailPage
           )}
 
           {/* Description */}
-          <p className="font-body text-[13px] text-white/40 leading-relaxed">
-            {product.description}
-          </p>
+          <JargonText text={String(product.description ?? '')} onTermClick={handleTermClick} className="font-body text-[13px] text-white/40 leading-relaxed" />
         </motion.div>
 
         {/* SECTION 2: Highlights scrollable row */}
@@ -401,9 +413,9 @@ export default function ProductDetailPage({ product, onBack }: ProductDetailPage
               {firstThreeHighlights.map((highlight) => (
                 <span
                   key={highlight}
-                  className="px-3 py-1.5 rounded-full text-[11px] bg-white/[0.06] border border-white/[0.08] text-white/60 flex-shrink-0 whitespace-nowrap"
+                  className="px-3 py-1.5 rounded-full bg-white/[0.06] border border-white/[0.08] flex-shrink-0 whitespace-nowrap inline-flex items-center"
                 >
-                  {highlight}
+                  <JargonText text={String(highlight ?? '')} onTermClick={handleTermClick} className="text-[11px] text-white/60" />
                 </span>
               ))}
             </div>
@@ -447,12 +459,7 @@ export default function ProductDetailPage({ product, onBack }: ProductDetailPage
                       <span className="block text-[10px] uppercase tracking-wider text-white/30 font-semibold font-body">
                         {label}
                       </span>
-                      <span
-                        className="block text-[13px] text-white/85 font-medium mt-0.5 leading-relaxed"
-                        style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
-                      >
-                        {String(value)}
-                      </span>
+                      <JargonText text={String(value ?? '')} onTermClick={handleTermClick} className="block text-[13px] text-white/85 font-medium mt-0.5 leading-relaxed font-display" />
                     </div>
                   </div>
                 );
@@ -508,7 +515,7 @@ export default function ProductDetailPage({ product, onBack }: ProductDetailPage
                     className="flex items-center gap-3 py-2.5"
                   >
                     <FileText size={14} style={{ color: product.colorAccent || '#C9A96E' }} className="flex-shrink-0" />
-                    <span className="font-body text-[11px] text-white/70">{doc}</span>
+                    <JargonText text={String(doc ?? '')} onTermClick={handleTermClick} className="font-body text-[11px] text-white/70" />
                   </div>
                 ))}
               </div>
@@ -655,6 +662,13 @@ export default function ProductDetailPage({ product, onBack }: ProductDetailPage
           <ExternalLink size={14} />
         </motion.button>
       </div>
+
+      <JargonBottomSheet
+        term={selectedTerm}
+        isOpen={jargonOpen}
+        onClose={() => { setJargonOpen(false); setTimeout(() => setSelectedTerm(null), 300); }}
+        onBackgroundChange={(scale, opacity) => { setBgScale(scale); setBgOpacity(opacity); }}
+      />
     </motion.div>
   );
 }

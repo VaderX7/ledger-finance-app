@@ -1,21 +1,22 @@
 'use client';
 
-import { Product, getJargonTermsInText, jargonDefinitions } from '@/lib/products';
+import { getJargonTermsInText } from '@/lib/products';
 import { motion } from 'framer-motion';
-import { useState } from 'react';
-import { ChevronRight } from 'lucide-react';
 
 export default function JargonText({
   text,
   onTermClick,
+  className,
 }: {
   text: string;
   onTermClick: (term: string) => void;
+  className?: string;
 }) {
-  const terms = getJargonTermsInText(text);
+  const safeText = String(text ?? '');
+  const terms = getJargonTermsInText(safeText);
 
   if (terms.length === 0) {
-    return <p className="font-body text-[11px] text-white/35 leading-relaxed">{text}</p>;
+    return <p className={className || 'font-body text-[11px] text-white/35 leading-relaxed'}>{safeText}</p>;
   }
 
   const segments: React.ReactNode[] = [];
@@ -23,21 +24,22 @@ export default function JargonText({
 
   terms.forEach((term, i) => {
     if (term.start > lastEnd) {
-      segments.push(text.substring(lastEnd, term.start));
+      segments.push(safeText.substring(lastEnd, term.start));
     }
 
     segments.push(
       <motion.span
         key={`term-${i}`}
         onClick={() => onTermClick(term.term)}
-        className="cursor-pointer transition-all hover:opacity-100"
+        className="cursor-pointer transition-all"
         style={{
-          borderBottom: '1px dashed #00E5FF',
-          color: 'inherit',
-          opacity: 0.85,
+          borderBottom: '1px dashed rgba(201,169,110,0.7)',
+          color: '#E4C98A',
           textDecoration: 'none',
+          paddingBottom: '2px',
         }}
-        whileHover={{ opacity: 1, textDecoration: 'underline' }}
+        whileHover={{ opacity: 1 }}
+        whileTap={{ backgroundColor: 'rgba(201,169,110,0.15)' }}
       >
         {term.term}
       </motion.span>
@@ -46,9 +48,9 @@ export default function JargonText({
     lastEnd = term.end;
   });
 
-  if (lastEnd < text.length) {
-    segments.push(text.substring(lastEnd));
+  if (lastEnd < safeText.length) {
+    segments.push(safeText.substring(lastEnd));
   }
 
-  return <p className="font-body text-[11px] text-white/35 leading-relaxed">{segments}</p>;
+  return <p className={className || 'font-body text-[11px] text-white/35 leading-relaxed'}>{segments}</p>;
 }

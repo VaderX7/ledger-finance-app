@@ -25,36 +25,6 @@ export type Product = {
   metrics: Record<string, string | number>;
 };
 
-const jargonTerms = [
-  'NBFC',
-  'DICGC Protected',
-  'Tenure',
-  'Foreclosure Fee',
-  'RBI Registered',
-  'MAB',
-  'Fuel Surcharge',
-  'Maturity Yield',
-  'Sr. Citizen Bonus',
-  'Sweep-Out',
-  'ACH',
-  'SI Mandates',
-  'DBT',
-  'Relationship Value',
-  'UHNI',
-  'KYC',
-  'FD',
-  'BSBDA',
-  'Rupay Card',
-  'NRE',
-  'NRO',
-  'RFC',
-  'Repatriation',
-  'GST',
-  'Parental Controls',
-  'Cashback',
-  'Personal Accident Insurance',
-  'Debit Card',
-];
 
 export const products: Product[] = [
   // SAVINGS ACCOUNTS
@@ -463,6 +433,17 @@ export const products: Product[] = [
   },
 ];
 
+export const jargonTerms = [
+  'NBFC', 'DICGC Protected', 'Tenure', 'Foreclosure Fee', 'RBI Registered', 'MAB', 
+  'Fuel Surcharge', 'Maturity Yield', 'Sr. Citizen Bonus', 'Sweep-Out', 'ACH', 
+  'SI Mandates', 'DBT', 'Relationship Value', 'UHNI', 'KYC', 'BSBDA', 
+  'Rupay Card', 'NRE', 'NRO', 'RFC', 'Repatriation', 'GST', 'Parental Controls', 
+  'Cashback', 'Personal Accident Insurance', 'Debit Card', 'DICGC', 'p.a.', 'RBI', 
+  'PAN', 'Aadhaar', 'OCI', 'PIO', 'DTAA', 'RuPay', 'NEFT', 'RTGS', 'IMPS', 
+  'UPI', 'NACH', 'EMI', 'SIP', 'TDS', 'SFB', 'AMB', 'Sweep-In', 
+  'Nomination', 'Overdraft', 'Lien', 'Collateral', 'Fixed Deposit', 'Recurring Deposit'
+];
+
 export const jargonDefinitions: Record<string, { en: string; hi: string }> = {
   NBFC: {
     en: "Non-Banking Financial Company (NBFC) is an organization that lends money and invests in securities but doesn't hold a banking license.",
@@ -485,8 +466,8 @@ export const jargonDefinitions: Record<string, { en: string; hi: string }> = {
     hi: 'RBI Registered का अर्थ है कि संस्था RBI द्वारा लाइसेंसप्राप्त है और कानूनी नियमों का पालन करती है।',
   },
   MAB: {
-    en: 'Minimum Average Balance (MAB) is the minimum balance you must maintain in your savings account to avoid monthly charges.',
-    hi: 'MAB (न्यूनतम औसत बैलेंस) वह न्यूनतम राशि है जो आपको चार्ज से बचने के लिए बनाए रखनी चाहिए।',
+    en: 'Minimum Average Balance (MAB) is the average balance you must keep in your bank account over a month to avoid penalty charges.',
+    hi: 'MAB वह औसत राशि है जो आपको बैंक चार्ज से बचने के लिए अपने खाते में बनाए रखनी होती है।',
   },
   'Fuel Surcharge': {
     en: 'Fuel Surcharge is an extra fee charged on credit card fuel transactions. Many premium cards waive this surcharge.',
@@ -501,8 +482,8 @@ export const jargonDefinitions: Record<string, { en: string; hi: string }> = {
     hi: 'Sr. Citizen Bonus 60 वर्ष से अधिक आयु के नागरिकों के लिए दी जाने वाली अतिरिक्त ब्याज दर है।',
   },
   'Sweep-Out': {
-    en: 'An automatic feature where excess balance above a set threshold is automatically transferred to a high-interest Fixed Deposit, maximizing savings returns.',
-    hi: 'Sweep-Out एक स्वचालित सुविधा है जहां अतिरिक्त शेष उच्च-ब्याज FD में स्वचालित रूप से स्थानांतरित होता है।',
+    en: 'An automatic feature that transfers funds exceeding a set limit from your savings account into a high-interest Fixed Deposit.',
+    hi: 'Sweep-Out एक ऐसी सुविधा है जो आपके खाते की अतिरिक्त रकम को स्वचालित रूप से उच्च ब्याज वाली FD में बदल देती है।',
   },
   ACH: {
     en: 'Automated Clearing House (ACH) is an electronic network for financial transactions. ACH mandates allow automatic recurring payments.',
@@ -525,16 +506,24 @@ export const jargonDefinitions: Record<string, { en: string; hi: string }> = {
     hi: 'UHNI (अल्ट्रा हाई नेट-वर्थ इंडिविजुअल) ₹50 करोड़ से अधिक शुद्ध संपत्ति वाले व्यक्ति को संदर्भित करता है।',
   },
   KYC: {
-    en: 'Know Your Customer (KYC) is a regulatory requirement where banks verify customer identity and collect personal information.',
-    hi: 'KYC (अपने ग्राहक को जानें) एक नियामक आवश्यकता है जहां बैंक ग्राहक की पहचान सत्यापित करते हैं।',
+    en: 'Know Your Customer (KYC) is a standard process where banks check documents to verify your identity and address.',
+    hi: 'KYC वह प्रक्रिया है जिसके द्वारा बैंक ग्राहकों की पहचान और पते का सत्यापन करते हैं।',
   },
   FD: {
-    en: 'Fixed Deposit (FD) is an investment instrument where you deposit a sum for a fixed period at a predetermined interest rate.',
-    hi: 'FD (फिक्स्ड डिपॉजिट) एक निवेश साधन है जहां आप एक निश्चित अवधि के लिए राशि जमा करते हैं।',
+    en: 'Fixed Deposit (FD) is a savings instrument where you invest money for a fixed period at a set interest rate, earning higher returns.',
+    hi: 'FD एक सुरक्षित निवेश योजना है जिसमें आप एक निश्चित अवधि के लिए तय ब्याज दर पर पैसे जमा करते हैं।',
+  },
+  'Fixed Deposit': {
+    en: 'Fixed Deposit (FD) is a savings instrument where you invest money for a fixed period at a set interest rate, earning higher returns than a regular savings account.',
+    hi: 'Fixed Deposit (FD) एक सुरक्षित निवेश योजना है जिसमें आप एक निश्चित अवधि के लिए तय ब्याज दर पर पैसे जमा करते हैं, जो बचत खाते से अधिक रिटर्न देता है।',
+  },
+  'Recurring Deposit': {
+    en: 'Recurring Deposit (RD) is a savings scheme where you deposit a fixed amount every month for a chosen tenure and earn interest on the maturity amount.',
+    hi: 'Recurring Deposit (RD) एक बचत योजना है जिसमें आप हर महीने एक निश्चित राशि जमा करते हैं और परिपक्वता राशि पर ब्याज कमाते हैं।',
   },
   BSBDA: {
-    en: 'Basic Savings Bank Deposit Account (BSBDA) is a zero-balance account designed for financial inclusion.',
-    hi: 'BSBDA एक शून्य-बैलेंस खाता है जिसे वित्तीय समावेशन के लिए डिज़ाइन किया गया है।',
+    en: 'Basic Savings Bank Deposit Account (BSBDA) is a zero-balance savings account that offers basic banking facilities for free.',
+    hi: 'BSBDA एक बिना किसी न्यूनतम बैलेंस की अनिवार्यता वाला बचत खाता है जो मुफ्त में बुनियादी बैंकिंग सुविधाएं देता है।',
   },
   'Rupay Card': {
     en: 'RuPay Card is an Indian domestic payment card developed by NPCI, offering secure transactions.',
@@ -575,6 +564,106 @@ export const jargonDefinitions: Record<string, { en: string; hi: string }> = {
   'Debit Card': {
     en: 'Debit Card is a payment card linked to your bank account that deducts funds directly from your balance.',
     hi: 'Debit Card आपके बैंक खाते से सीधे पैसे निकालने के लिए उपयोग किया जाता है।',
+  },
+  DICGC: {
+    en: 'Deposit Insurance and Credit Guarantee Corporation (DICGC) insures your bank deposits up to ₹5 lakh per bank. If the bank fails, you get your money back.',
+    hi: 'DICGC (डिपॉज़िट इंश्योरेंस एंड क्रेडिट गैरेंटी कॉर्पोरेशन) आपकी बैंक जमा राशि को प्रति बैंक ₹5 लाख तक बीमित करता है।',
+  },
+  'p.a.': {
+    en: 'p.a. stands for "per annum", meaning per year. Interest rates on loans and deposits are quoted on a yearly basis.',
+    hi: 'p.a. का मतलब है "प्रति वर्ष"। ऋण और जमा पर ब्याज दरें सालाना आधार पर बताई जाती हैं।',
+  },
+  RBI: {
+    en: 'Reserve Bank of India (RBI) is India\'s central bank that regulates all banks and financial institutions to keep your money safe.',
+    hi: 'RBI (भारतीय रिज़र्व बैंक) भारत का केंद्रीय बैंक है जो सभी बैंकों को नियंत्रित करता है।',
+  },
+  PAN: {
+    en: 'Permanent Account Number (PAN) is a unique 10-digit identifier issued by the Income Tax Department, required for financial transactions.',
+    hi: 'PAN (स्थायी खाता संख्या) आयकर विभाग द्वारा जारी एक अद्वितीय 10 अंकों का पहचान पत्र है।',
+  },
+  Aadhaar: {
+    en: 'Aadhaar is a 12-digit unique identity number issued by UIDAI, used as proof of identity and address across India.',
+    hi: 'Aadhaar UIDAI द्वारा जारी 12 अंकों की अद्वितीय पहचान संख्या है जो पहचान और पते के प्रमाण के रूप में उपयोग होती है।',
+  },
+  OCI: {
+    en: 'Overseas Citizen of India (OCI) is a foreign citizenship status for people of Indian origin, allowing visa-free travel to India.',
+    hi: 'OCI (ओवरसीज़ सिटिज़न ऑफ इंडिया) भारतीय मूल के लोगों के लिए विदेशी नागरिकता की स्थिति है।',
+  },
+  PIO: {
+    en: 'Person of Indian Origin (PIO) is a status for foreign citizens who hold an Indian passport or have Indian ancestry.',
+    hi: 'PIO (पर्सन ऑफ इंडियन ओरिजिन) उन विदेशी नागरिकों की स्थिति है जिनका भारतीय पासपोर्ट या भारतीय मूल है।',
+  },
+  DTAA: {
+    en: 'Double Taxation Avoidance Agreement (DTAA) is a treaty between two countries to prevent the same income from being taxed twice.',
+    hi: 'DTAA (डबल टैक्सेशन अवॉइडेंस एग्रीमेंट) दो देशों के बीच एक संधि है जो एक ही आय पर दो बार कर लगने से बचाती है।',
+  },
+  RuPay: {
+    en: 'RuPay is an Indian domestic debit and credit card payment network developed by NPCI, offering lower transaction fees.',
+    hi: 'RuPay NPCI द्वारा विकसित एक भारतीय भुगतान नेटवर्क है जो कम लेनदेन शुल्क प्रदान करता है।',
+  },
+  NEFT: {
+    en: 'National Electronic Funds Transfer (NEFT) is a system for transferring money between banks across India, available 24/7.',
+    hi: 'NEFT (नेशनल इलेक्ट्रॉनिक फंड्स ट्रांसफर) बैंकों के बीच पैसे भेजने की एक प्रणाली है जो 24/7 उपलब्ध है।',
+  },
+  RTGS: {
+    en: 'Real Time Gross Settlement (RTGS) is for high-value money transfers (₹2 lakh and above) that settle in real time.',
+    hi: 'RTGS (रियल टाइम ग्रॉस सेटलमेंट) उच्च मूल्य (₹2 लाख और ऊपर) के मनी ट्रांसफर के लिए है जो रियल टाइम में सेटल होता है।',
+  },
+  IMPS: {
+    en: 'Immediate Payment Service (IMPS) is an instant interbank electronic fund transfer service available 24/7 on mobile.',
+    hi: 'IMPS (इमीडिएट पेमेंट सर्विस) मोबाइल पर 24/7 उपलब्ध एक तत्काल इंटरबैंक फंड ट्रांसफर सेवा है।',
+  },
+  UPI: {
+    en: 'Unified Payments Interface (UPI) allows instant money transfers between bank accounts using a mobile app with just a UPI ID or phone number.',
+    hi: 'UPI (यूनिफाइड पेमेंट्स इंटरफेस) मोबाइल ऐप से बैंक खातों के बीच तत्काल पैसे भेजने की सुविधा है।',
+  },
+  NACH: {
+    en: 'National Automated Clearing House (NACH) handles bulk transactions like salary credits, EMIs, and dividend payments automatically.',
+    hi: 'NACH (नेशनल ऑटोमेटेड क्लीयरिंग हाउस) वेतन, EMI और लाभांश जैसे थोक लेनदेन को स्वचालित रूप से संभालता है।',
+  },
+  EMI: {
+    en: 'Equated Monthly Installment (EMI) is a fixed monthly payment you make to repay a loan over a set tenure.',
+    hi: 'EMI (समान मासिक किस्त) ऋण चुकाने के लिए आप जो हर महीने एक निश्चित राशि देते हैं।',
+  },
+  SIP: {
+    en: 'Systematic Investment Plan (SIP) lets you invest a fixed amount regularly in mutual funds, building wealth over time.',
+    hi: 'SIP (सिस्टमैटिक इन्वेस्टमेंट प्लान) आपको नियमित रूप से म्यूचुअल फंड में निवेश करने की सुविधा देता है।',
+  },
+  RD: {
+    en: 'Recurring Deposit (RD) is a savings scheme where you deposit a fixed amount every month and earn interest like an FD.',
+    hi: 'RD (रिकरिंग डिपॉज़िट) एक बचत योजना है जिसमें आप हर महीने एक निश्चित राशि जमा करते हैं और FD जैसा ब्याज कमाते हैं।',
+  },
+  TDS: {
+    en: 'Tax Deducted at Source (TDS) is tax automatically cut by the bank or employer from your interest or salary before you receive it.',
+    hi: 'TDS (स्रोत पर कर कटौती) बैंक या नियोक्ता द्वारा आपकी ब्याज आय या वेतन से स्वचालित रूप से काटा जाने वाला कर है।',
+  },
+  SFB: {
+    en: 'Small Finance Bank (SFB) is a niche bank that provides basic banking services like savings accounts, loans, and payments to underserved areas.',
+    hi: 'SFB (स्मॉल फाइनेंस बैंक) एक विशेष बैंक है जो कम सेवा वाले क्षेत्रों को बुनियादी बैंकिंग सेवाएं प्रदान करता है।',
+  },
+  AMB: {
+    en: 'Average Monthly Balance (AMB) is the minimum average amount you must maintain in your bank account each month to avoid penalties.',
+    hi: 'AMB (औसत मासिक बैलेंस) वह न्यूनतम औसत राशि है जो आपको हर महीने जुर्माने से बचने के लिए अपने खाते में रखनी होती है।',
+  },
+  'Sweep-In': {
+    en: 'Sweep-In automatically moves excess funds from a linked FD into your savings account when your balance falls below a set limit.',
+    hi: 'Sweep-In आपके बचत खाते का बैलेंस कम होने पर स्वचालित रूप से जुड़ी FD से अतिरिक्त रकम को बचत खाते में ले आता है।',
+  },
+  Nomination: {
+    en: 'Nomination is the process of appointing a person who will receive your bank funds in case of your untimely death.',
+    hi: 'Nomination एक ऐसी प्रक्रिया है जिसमें आप एक व्यक्ति को नामांकित करते हैं जो आपकी मृत्यु के बाद आपके बैंक फंड प्राप्त करेगा।',
+  },
+  Overdraft: {
+    en: 'Overdraft is a credit facility that lets you withdraw more money than your account balance, up to a pre-approved limit.',
+    hi: 'Overdraft एक ऋण सुविधा है जो आपको अपने खाते की शेष राशि से अधिक पैसे निकालने की अनुमति देती है।',
+  },
+  Lien: {
+    en: 'Lien is the bank\'s right to hold or claim your assets or funds as security until you repay your outstanding debt.',
+    hi: 'Lien बैंक का वह अधिकार है जिसके तहत वह आपकी बकाया राशि चुकाने तक आपकी संपत्ति या फंड को रख सकता है।',
+  },
+  Collateral: {
+    en: 'Collateral is an asset like property or gold that you pledge to a bank as security when taking a loan.',
+    hi: 'Collateral संपत्ति या सोने जैसी संपत्ति है जो आप ऋण लेते समय बैंक को सुरक्षा के रूप में गिरवी रखते हैं।',
   },
 };
 
@@ -617,12 +706,33 @@ export const filterProductsByUserProfile = (
 export const getJargonTermsInText = (text: string) => {
   if (!text || typeof text !== 'string') return [];
   const found: Array<{ term: string; start: number; end: number }> = [];
-  jargonTerms.forEach((term) => {
+  const textLower = text.toLowerCase();
+  
+  // Sort jargonTerms by length descending so that we match longer phrases (like "DICGC Protected") first.
+  const sortedJargonTerms = [...jargonTerms].sort((a, b) => b.length - a.length);
+
+  sortedJargonTerms.forEach((term) => {
+    const termLower = term.toLowerCase();
     let index = 0;
-    while ((index = text.indexOf(term, index)) !== -1) {
-      found.push({ term, start: index, end: index + term.length });
+    while ((index = textLower.indexOf(termLower, index)) !== -1) {
+      const start = index;
+      const end = index + term.length;
+      const before = index === 0 ? ' ' : text[index - 1];
+      const after = index + term.length >= text.length ? ' ' : text[index + term.length];
+      const boundaryBefore = /\W/.test(before);
+      const boundaryAfter = /\W/.test(after);
+      // Check if this match overlaps with any already added match
+      const overlaps = found.some(existing => 
+        (start >= existing.start && start < existing.end) ||
+        (end > existing.start && end <= existing.end) ||
+        (start <= existing.start && end >= existing.end)
+      );
+      if (boundaryBefore && boundaryAfter && !overlaps) {
+        found.push({ term, start, end });
+      }
       index += term.length;
     }
   });
+  // Sort matches by start position ascending for JargonText to parse linearly
   return found.sort((a, b) => a.start - b.start);
 };

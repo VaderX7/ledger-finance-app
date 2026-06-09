@@ -1,8 +1,11 @@
 'use client';
 
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Product } from '@/lib/products';
 import { X, ExternalLink, Shield, Gift, AlertCircle } from 'lucide-react';
+import JargonText from '@/components/jargon-text';
+import JargonBottomSheet from '@/components/jargon-bottom-sheet';
 
 interface DetailPanelProps {
   product: Product;
@@ -11,6 +14,11 @@ interface DetailPanelProps {
 }
 
 export default function DetailPanel({ product, isOpen, onClose }: DetailPanelProps) {
+  const [selectedTerm, setSelectedTerm] = useState<string | null>(null);
+  const [jargonOpen, setJargonOpen] = useState(false);
+  const [bgScale, setBgScale] = useState(1);
+  const [bgOpacity, setBgOpacity] = useState(1);
+
   const handleAccessPortal = () => {
     const win = window.open(product.portalUrl, '_blank', 'noopener,noreferrer');
     if (win) win.opener = null;
@@ -93,21 +101,19 @@ export default function DetailPanel({ product, isOpen, onClose }: DetailPanelPro
               <div className="space-y-1">
                 <div className="flex items-center justify-between">
                   <span className="font-body text-[10px] text-white/35">Joining Fee:</span>
-                  <span
-                    className="font-700 text-[11px]"
-                    style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, color: '#FB7185' }}
-                  >
-                    {String(product.metrics.joiningFee) || 'Nil'}
-                  </span>
+                  <JargonText
+                    text={String(product.metrics.joiningFee ?? 'Nil')}
+                    onTermClick={(term) => { setSelectedTerm(term); setJargonOpen(true); }}
+                    className="font-700 text-[11px] text-right"
+                  />
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="font-body text-[10px] text-white/35">Annual Fee:</span>
-                  <span
-                    className="font-700 text-[11px]"
-                    style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, color: '#FB7185' }}
-                  >
-                    {String(product.metrics.annualFee) || 'Nil'}
-                  </span>
+                  <JargonText
+                    text={String(product.metrics.annualFee ?? 'Nil')}
+                    onTermClick={(term) => { setSelectedTerm(term); setJargonOpen(true); }}
+                    className="font-700 text-[11px] text-right"
+                  />
                 </div>
               </div>
             </div>
@@ -118,7 +124,11 @@ export default function DetailPanel({ product, isOpen, onClose }: DetailPanelPro
               style={{ background: 'rgba(255, 167, 38, 0.08)', border: '1px solid rgba(255, 167, 38, 0.12)' }}
             >
               <p className="font-body text-[10px] font-medium text-white/50 mb-1.5">Milestone Rewards</p>
-              <p className="font-body text-[10px] text-white/35">{String(product.metrics.milestoneRewards)}</p>
+              <JargonText
+                text={String(product.metrics.milestoneRewards ?? '')}
+                onTermClick={(term) => { setSelectedTerm(term); setJargonOpen(true); }}
+                className="font-body text-[10px] text-white/35"
+              />
             </div>
 
             {/* Fuel Surcharge */}
@@ -127,12 +137,11 @@ export default function DetailPanel({ product, isOpen, onClose }: DetailPanelPro
               style={{ background: 'rgba(0, 229, 255, 0.08)', border: '1px solid rgba(0, 229, 255, 0.12)' }}
             >
               <p className="font-body text-[10px] font-medium text-white/50 mb-1.5">Fuel Surcharge</p>
-              <p
+              <JargonText
+                text={String(product.metrics.fuelSurcharge ?? '')}
+                onTermClick={(term) => { setSelectedTerm(term); setJargonOpen(true); }}
                 className="font-700 text-[11px]"
-                style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, color: '#00E5FF' }}
-              >
-                {String(product.metrics.fuelSurcharge)}
-              </p>
+              />
             </div>
           </div>
         </motion.div>
@@ -200,7 +209,34 @@ export default function DetailPanel({ product, isOpen, onClose }: DetailPanelPro
             </div>
 
             {/* Content */}
-            <div className="px-5 py-5 space-y-5 overflow-y-auto flex-1">
+            <motion.div
+              className="px-5 py-5 space-y-5 overflow-y-auto flex-1"
+              style={{ scale: bgScale, opacity: bgOpacity }}
+              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+            >
+              {/* Product Description */}
+              <JargonText
+                text={product.description}
+                onTermClick={(term) => { setSelectedTerm(term); setJargonOpen(true); }}
+              />
+
+              {/* Highlights */}
+              <div className="flex items-center gap-2 flex-wrap">
+                {product.highlights.map((h) => (
+                  <span
+                    key={h}
+                    className="px-2.5 py-1 rounded-md text-[10px] font-body inline-flex items-center"
+                    style={{ background: 'rgba(201,169,110,0.1)', border: '1px solid rgba(201,169,110,0.2)', color: '#E4C98A' }}
+                  >
+                    <JargonText
+                      text={h}
+                      onTermClick={(term) => { setSelectedTerm(term); setJargonOpen(true); }}
+                      className="text-[10px] leading-normal"
+                    />
+                  </span>
+                ))}
+              </div>
+
               {/* Metrics Summary */}
               <div
                 className="p-4 rounded-xl space-y-2"
@@ -217,12 +253,11 @@ export default function DetailPanel({ product, isOpen, onClose }: DetailPanelPro
                     <p className="font-body text-[10px] text-white/35 capitalize">
                       {key.replace(/([A-Z])/g, ' $1').trim()}
                     </p>
-                    <span
-                      className="font-700 text-[11px]"
-                      style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, color: '#C9A96E' }}
-                    >
-                      {String(value)}
-                    </span>
+                    <JargonText
+                      text={String(value)}
+                      onTermClick={(term) => { setSelectedTerm(term); setJargonOpen(true); }}
+                      className="font-700 text-[11px] text-right"
+                    />
                   </div>
                 ))}
               </div>
@@ -249,7 +284,11 @@ export default function DetailPanel({ product, isOpen, onClose }: DetailPanelPro
                       style={{ background: 'rgba(255,255,255,0.02)' }}
                     >
                       <span className="text-[#C9A96E] text-[9px] font-bold flex-shrink-0 mt-0.5">✓</span>
-                      <span className="font-body text-[10px] text-white/45">{doc}</span>
+                      <JargonText
+                        text={doc}
+                        onTermClick={(term) => { setSelectedTerm(term); setJargonOpen(true); }}
+                        className="font-body text-[10px] text-white/45"
+                      />
                     </motion.div>
                   ))}
                 </div>
@@ -288,10 +327,17 @@ export default function DetailPanel({ product, isOpen, onClose }: DetailPanelPro
 
               {/* Bottom padding */}
               <div className="h-4" />
-            </div>
+            </motion.div>
           </motion.div>
         </>
       )}
+
+      <JargonBottomSheet
+        term={selectedTerm}
+        isOpen={jargonOpen}
+        onClose={() => { setJargonOpen(false); setTimeout(() => setSelectedTerm(null), 300); }}
+        onBackgroundChange={(scale, opacity) => { setBgScale(scale); setBgOpacity(opacity); }}
+      />
     </AnimatePresence>
   );
 }

@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, Star, Shield, Zap, ExternalLink } from 'lucide-react';
 import { FinancialInstitution } from '@/lib/institutions';
 import JargonBottomSheet from './jargon-bottom-sheet';
+import JargonText from './jargon-text';
 import { useState, useEffect } from 'react';
 import { getProductsByCategory } from '@/lib/data-fetcher';
 import { getOverriddenColor } from './product-category-view';
@@ -30,7 +31,7 @@ interface AccountVariant {
   colorAccent: string;
 }
 
-function AccountDetailPage({ account, institution, onBack }: { account: AccountVariant; institution: FinancialInstitution; onBack: () => void }) {
+function AccountDetailPage({ account, institution, onBack, onTermClick }: { account: AccountVariant; institution: FinancialInstitution; onBack: () => void; onTermClick: (term: string) => void }) {
   return (
     <motion.div
       key="account-detail"
@@ -88,16 +89,20 @@ function AccountDetailPage({ account, institution, onBack }: { account: AccountV
           </h3>
           <div className="flex items-center justify-between py-1.5 border-b border-white/[0.04]">
             <span className="font-body text-[10px] text-white/35">Minimum Balance</span>
-            <span className="text-[11px]" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, color: 'rgba(255,255,255,0.70)' }}>
-              {account.minimumBalance}
-            </span>
+            <JargonText
+              text={account.minimumBalance}
+              onTermClick={onTermClick}
+              className="text-[11px] text-right"
+            />
           </div>
           {account.interestRate && (
             <div className="flex items-center justify-between py-1.5 border-b border-white/[0.04]">
               <span className="font-body text-[10px] text-white/35">Interest Rate</span>
-              <span className="text-[11px]" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, color: account.colorAccent }}>
-                {account.interestRate}
-              </span>
+              <JargonText
+                text={account.interestRate}
+                onTermClick={onTermClick}
+                className="text-[11px] text-right"
+              />
             </div>
           )}
           <div className="flex items-center justify-between py-1.5 border-b border-white/[0.04]">
@@ -132,7 +137,11 @@ function AccountDetailPage({ account, institution, onBack }: { account: AccountV
                   style={{ background: 'rgba(255,255,255,0.025)' }}
                 >
                   <Star size={10} style={{ color: account.colorAccent, marginTop: 2 }} className="flex-shrink-0" />
-                  <span className="font-body text-[10px] text-white/55">{feature}</span>
+                  <JargonText
+                    text={feature}
+                    onTermClick={onTermClick}
+                    className="font-body text-[10px] text-white/55"
+                  />
                 </div>
               ))}
             </div>
@@ -156,7 +165,11 @@ function AccountDetailPage({ account, institution, onBack }: { account: AccountV
                   style={{ background: 'rgba(255,255,255,0.02)' }}
                 >
                   <span className="text-[9px] font-bold flex-shrink-0 mt-0.5" style={{ color: account.colorAccent }}>✓</span>
-                  <span className="font-body text-[10px] text-white/45">{doc}</span>
+                  <JargonText
+                    text={doc}
+                    onTermClick={onTermClick}
+                    className="font-body text-[10px] text-white/45"
+                  />
                 </div>
               ))}
             </div>
@@ -187,6 +200,8 @@ function AccountDetailPage({ account, institution, onBack }: { account: AccountV
 export default function BankAccountPage({ institution, onBack }: BankAccountPageProps) {
   const [selectedTerm, setSelectedTerm] = useState<string | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [bgScale, setBgScale] = useState(1);
+  const [bgOpacity, setBgOpacity] = useState(1);
   const [accountVariants, setAccountVariants] = useState<AccountVariant[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedAccount, setSelectedAccount] = useState<AccountVariant | null>(null);
@@ -450,6 +465,7 @@ export default function BankAccountPage({ institution, onBack }: BankAccountPage
             account={selectedAccount}
             institution={institution}
             onBack={() => setSelectedAccount(null)}
+            onTermClick={handleTermClick}
           />
         )}
       </AnimatePresence>
@@ -458,7 +474,7 @@ export default function BankAccountPage({ institution, onBack }: BankAccountPage
         term={selectedTerm}
         isOpen={isSheetOpen}
         onClose={handleSheetClose}
-        onBackgroundChange={() => {}}
+        onBackgroundChange={(scale, opacity) => { setBgScale(scale); setBgOpacity(opacity); }}
       />
     </>
   );
