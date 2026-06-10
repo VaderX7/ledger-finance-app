@@ -2,6 +2,7 @@ import './globals.css';
 import { Inter } from 'next/font/google';
 import BottomNav from '@/components/bottom-nav';
 import { LanguageProvider } from '@/context/LanguageContext';
+import { AuthProvider } from '@/context/AuthContext';
 import type { Metadata } from 'next';
 
 const inter = Inter({
@@ -49,12 +50,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className={`${inter.variable} font-body bg-[#070A12] min-h-screen`}>
         <LanguageProvider>
-          <div className="relative flex flex-col min-h-screen max-w-md mx-auto">
-            <main className="flex-1 overflow-y-auto scrollbar-hidden pb-24">
-              {children}
-            </main>
-            <BottomNav />
-          </div>
+          <AuthProvider>
+            <div className="relative flex flex-col min-h-screen max-w-md mx-auto">
+              <main className="flex-1 overflow-y-auto scrollbar-hidden pb-24">
+                {children}
+              </main>
+              <BottomNav />
+            </div>
+          </AuthProvider>
         </LanguageProvider>
       </body>
     </html>

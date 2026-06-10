@@ -13,6 +13,7 @@ import BankAccountPage from '@/components/bank-account-page';
 import { getProducts } from '@/lib/data-fetcher';
 import { Product } from '@/lib/products';
 import { financialInstitutions, FinancialInstitution } from '@/lib/institutions';
+import { useAuth } from '@/context/AuthContext';
 
 function getFormattedBankType(bankType: string): string {
   if (!bankType) return '';
@@ -253,6 +254,7 @@ function LanguageSelectSheet({
 export default function ProfilePage() {
   const { lang, setLang, t } = useLang();
   const router = useRouter();
+  const { user, loading: authLoading, signIn, signOut } = useAuth();
   const [isLangSheetOpen, setIsLangSheetOpen] = useState(false);
   const [favourites, setFavourites] = useState<FavouriteItem[]>([]);
   const [showFavourites, setShowFavourites] = useState(false);
@@ -262,25 +264,38 @@ export default function ProfilePage() {
   const [removedFavId, setRemovedFavId] = useState<string | null>(null);
   const [filter, setFilter] = useState<'all' | 'bank' | 'savings' | 'current' | 'fds' | 'creditcards' | 'loans' | 'govtschemes' | 'insurance'>('all');
 
+  const [avatarError, setAvatarError] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
+
+  useEffect(() => {
+    setAvatarError(false);
+  }, [user]);
+
   useEffect(() => {
     setFavourites(getFavourites());
     getProducts().then(setAllProducts).catch(console.error);
-  }, []);
+  }, [user, authLoading]);
 
-  const handleRemoveFavourite = (id: string) => {
+  const handleGoogleSignIn = async () => {
+    setGoogleLoading(true);
+    await signIn();
+    setGoogleLoading(false);
+  };
+
+  const handleRemoveFavourite = async (id: string) => {
     const item = favourites.find(f => f.id === id);
     if (item) {
-      toggleFavourite(item);
+      await toggleFavourite(item);
       setFavourites(getFavourites());
     }
   };
 
   const handleStarRemovalWithAnimation = (id: string) => {
     setRemovedFavId(id);
-    setTimeout(() => {
+    setTimeout(async () => {
       const item = favourites.find(f => f.id === id);
       if (item) {
-        toggleFavourite(item);
+        await toggleFavourite(item);
         setFavourites(getFavourites());
       }
       setRemovedFavId(null);
@@ -349,9 +364,15 @@ export default function ProfilePage() {
     return init;
   });
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await signOut();
+    } catch (e) {
+      console.error('Error logging out from Firebase:', e);
+    }
     localStorage.removeItem('ledger_setup_done');
     localStorage.removeItem('ledger_user');
+    localStorage.removeItem('ledger_favourites');
     router.replace('/setup');
   };
 
@@ -392,10 +413,21 @@ export default function ProfilePage() {
         <div className="absolute -bottom-8 -right-8 w-36 h-36 rounded-full blur-3xl" style={{ background: 'rgba(201,169,110,0.06)' }} />
         <div className="relative z-10 flex items-center gap-4">
           <div
-            className="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0"
+            className="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 overflow-hidden"
             style={{ background: 'rgba(201,169,110,0.15)', border: '1px solid rgba(201,169,110,0.25)' }}
           >
-            {savedName ? (
+            {user && user.photoURL && !avatarError ? (
+              <img
+                src={user.photoURL}
+                alt={user.displayName || 'User'}
+                className="w-full h-full object-cover"
+                onError={() => setAvatarError(true)}
+              />
+            ) : user ? (
+              <span style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800, color: '#C9A96E', fontSize: 22 }}>
+                {(user.displayName || user.email || 'U').charAt(0).toUpperCase()}
+              </span>
+            ) : savedName ? (
               <span style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800, color: '#C9A96E', fontSize: 22 }}>
                 {savedName.charAt(0).toUpperCase()}
               </span>
@@ -403,20 +435,60 @@ export default function ProfilePage() {
               <Shield size={26} style={{ color: '#C9A96E' }} strokeWidth={1.5} />
             )}
           </div>
-          <div>
+          <div className="flex-1 min-w-0">
             <p
-              className="text-[18px] text-white/90"
+              className="text-[18px] text-white/90 truncate"
               style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800 }}
             >
-              {savedName || t.anonymousUser}
+              {user ? (user.displayName || 'User') : (savedName || t.anonymousUser)}
             </p>
-            <p className="font-body text-[11px] text-white/40 mt-0.5">{t.noAccountNeeded}</p>
+            {user ? (
+              <p className="font-body text-[11px] text-white/40 mt-0.5 truncate">{user.email}</p>
+            ) : (
+              <p className="font-body text-[11px] text-white/40 mt-0.5">{t.noAccountNeeded}</p>
+            )}
             <div className="flex items-center gap-1.5 mt-2">
               <div className="w-1.5 h-1.5 rounded-full bg-[#2DD4BF]" />
               <span className="font-body text-[10px] text-[#2DD4BF]">{t.fullyProtected}</span>
             </div>
           </div>
         </div>
+
+        {/* Google sign-in button if not logged in */}
+        {!user && (
+          <div className="relative z-10 mt-5 pt-4 border-t border-white/[0.06]">
+            <motion.button
+              whileTap={{ scale: 0.97 }}
+              onClick={handleGoogleSignIn}
+              disabled={googleLoading}
+              className="w-full py-3.5 rounded-2xl flex items-center justify-center gap-3 relative overflow-hidden transition-colors"
+              style={{
+                background: 'rgba(255,255,255,0.95)',
+                border: '1px solid rgba(255,255,255,0.15)',
+              }}
+            >
+              {googleLoading ? (
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }}
+                  className="w-5 h-5 rounded-full border-2 border-gray-300 border-t-gray-800"
+                />
+              ) : (
+                <>
+                  <svg width="18" height="18" viewBox="0 0 18 18">
+                    <path fill="#4285F4" d="M16.51 8.1h-7.4v2.89h4.26c-.39 2-2.15 3.07-4.26 3.07a4.67 4.67 0 0 1 0-9.33c1.17 0 2.22.4 3.05 1.07l2.09-2.1A8 8 0 1 0 9 17a7.82 7.82 0 0 0 8-7.9 7.17 7.17 0 0 0-.49-1Z"/>
+                    <path fill="#34A853" d="m2.74 9-2.09 1.57A8 8 0 0 0 9 17l2.5-1.94A4.68 4.68 0 0 1 9 14.06 4.67 4.67 0 0 1 4.67 9Z"/>
+                    <path fill="#FBBC05" d="M4.67 9A4.63 4.63 0 0 1 6.36 5.4L4.27 3.3A8 8 0 0 0 1 9l1.74 1.57Z"/>
+                    <path fill="#EA4335" d="M9 3.94a4.57 4.57 0 0 1 3.05 1.07l2.09-2.1A8 8 0 0 0 9 1a8 8 0 0 0-4.73 2.3l2.09 2.1A4.58 4.58 0 0 1 9 3.94Z"/>
+                  </svg>
+                  <span className="text-[14px] text-gray-800" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700 }}>
+                    Sign in with Google
+                  </span>
+                </>
+              )}
+            </motion.button>
+          </div>
+        )}
       </motion.div>
 
       {/* My Favourites settings row */}

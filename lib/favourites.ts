@@ -1,3 +1,6 @@
+import { db, auth } from './firebase';
+import { doc, setDoc, getDoc } from 'firebase/firestore';
+
 const KEY = 'ledger_favourites';
 
 export type FavouriteItem = {
@@ -21,17 +24,40 @@ export const getFavourites = (): FavouriteItem[] => {
 export const isFavourited = (id: string): boolean =>
   getFavourites().some(f => f.id === id);
 
-export const toggleFavourite = (item: FavouriteItem): boolean => {
+export const toggleFavourite = async (item: FavouriteItem): Promise<boolean> => {
   if (typeof window === 'undefined') return false;
   const favs = getFavourites();
   const idx = favs.findIndex(f => f.id === item.id);
   if (idx > -1) {
     favs.splice(idx, 1);
-    localStorage.setItem(KEY, JSON.stringify(favs));
-    return false; // removed
   } else {
     favs.unshift(item);
-    localStorage.setItem(KEY, JSON.stringify(favs));
-    return true; // added
+  }
+  localStorage.setItem(KEY, JSON.stringify(favs));
+
+  // Sync to Firestore if signed in
+  const user = auth.currentUser;
+  if (user) {
+    try {
+      await setDoc(doc(db, 'users', user.uid), { favourites: favs }, { merge: true });
+    } catch (e) {
+      console.error('Error syncing favourites to Firestore:', e);
+    }
+  }
+  return idx === -1;
+};
+
+export const loadFavouritesFromCloud = async (uid: string): Promise<void> => {
+  try {
+    const snap = await getDoc(doc(db, 'users', uid));
+    if (snap.exists()) {
+      const data = snap.data();
+      if (data.favourites) {
+        localStorage.setItem(KEY, JSON.stringify(data.favourites));
+      }
+    }
+  } catch (e) {
+    console.error('Error loading favourites from Firestore:', e);
   }
 };
+

@@ -475,10 +475,10 @@ export default function CategoryProductCard({
     {/* Star Button outside the card's clickable motion.div wrapper */}
     <motion.button
       whileTap={{ scale: 0.85 }}
-      onClick={(e) => {
+      onClick={async (e) => {
         e.stopPropagation();
         e.preventDefault();
-        const added = toggleFavourite({
+        const added = await toggleFavourite({
           id: product.id,
           type: product.category,
           lender: product.lender,

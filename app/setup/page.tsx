@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { useLang } from '@/context/LanguageContext';
 import LedgerLogo from '@/components/LedgerLogo';
+import { useAuth } from '@/context/AuthContext';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -223,16 +224,13 @@ function SplashStep({ onNext }: { onNext: () => void }) {
 
 function GoogleStep({ onNext, onBack, onSkip }: { onNext: () => void; onBack: () => void; onSkip: () => void }) {
   const [loading, setLoading] = useState(false);
+  const { signIn } = useAuth();
 
-  const handleGoogle = () => {
+  const handleGoogle = async () => {
     setLoading(true);
-    // In production: signIn('google') from next-auth
-    // import { signIn } from 'next-auth/react';
-    // signIn('google', { callbackUrl: '/setup?step=name' });
-    setTimeout(() => {
-      setLoading(false);
-      onNext();
-    }, 1400);
+    await signIn();
+    setLoading(false);
+    onNext();
   };
 
   return (

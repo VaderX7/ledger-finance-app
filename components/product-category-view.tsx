@@ -865,11 +865,11 @@ function BankCard({ group, setSelectedBank, logoErrors, setLogoErrors }: BankCar
       {/* Star Button outside card's motion.div wrapper */}
       <motion.button
         whileTap={{ scale: 0.85 }}
-        onClick={(e) => {
+        onClick={async (e) => {
           e.stopPropagation();
           e.preventDefault();
           const cardId = 'bank-' + lender;
-          const added = toggleFavourite({
+          const added = await toggleFavourite({
             id: cardId,
             type: 'bank',
             lender: lender,
