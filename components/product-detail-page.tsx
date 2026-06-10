@@ -101,6 +101,50 @@ const BANK_LOGO_MAP: Record<string, string> = {
   'Paytm Payments Bank': 'paytm_pb'
 };
 
+const LOGO_BG_MAP: Record<string, string> = {
+  'Bank of India': '#017dc5',
+  'Bank of India Limited': '#017dc5',
+  'Canara Bank': '#0069df',
+  'Canara Bank Limited': '#0069df',
+  'IDFC FIRST Bank': '#9e1d28',
+  'IDFC First Bank': '#9e1d28',
+  'YES BANK': '#004489',
+  'YES Bank': '#004489',
+  'AU Small Finance Bank': '#ee7025',
+  'IDBI Bank': '#299a85',
+  'Karur Vysya Bank': '#d1d01d',
+  'South Indian Bank': '#c4171c',
+  'Capital Small Finance Bank': '#d10e14',
+  'Unity Small Finance Bank': '#fdc937',
+};
+
+const getBankInitials = (lender: string): string => {
+  const nameUpper = lender.toUpperCase();
+  if (nameUpper.includes('STATE BANK OF INDIA')) return 'SBI';
+  if (nameUpper.includes('BANK OF BARODA')) return 'BOB';
+  if (nameUpper.includes('BANK OF INDIA')) return 'BOI';
+  if (nameUpper.includes('BANK OF MAHARASHTRA')) return 'BOM';
+  if (nameUpper.includes('CENTRAL BANK OF INDIA')) return 'CBI';
+  if (nameUpper.includes('PUNJAB & SIND')) return 'PSB';
+  if (nameUpper.includes('PUNJAB NATIONAL')) return 'PNB';
+  if (nameUpper.includes('UNION BANK OF INDIA')) return 'UBI';
+  if (nameUpper.includes('INDIAN OVERSEAS')) return 'IOB';
+  if (nameUpper.includes('JAMMU & KASHMIR')) return 'JKB';
+  if (nameUpper.includes('KARUR VYSYA')) return 'KVB';
+  if (nameUpper.includes('SOUTH INDIAN')) return 'SIB';
+  if (nameUpper.includes('TAMILNAD MERCANTILE')) return 'TMB';
+  if (nameUpper.includes('CITY UNION')) return 'CUB';
+  if (nameUpper.includes('DHANLAXMI')) return 'DLB';
+  if (nameUpper.includes('IDFC FIRST')) return 'IDFC';
+  
+  const cleanName = lender.replace(/bank/gi, '').trim();
+  const words = cleanName.split(/[\s-]+/).filter(Boolean);
+  if (words.length >= 2) {
+    return words.slice(0, 3).map(w => w[0].toUpperCase()).join('');
+  }
+  return cleanName.substring(0, 4).toUpperCase();
+};
+
 const METRIC_LABEL_MAP: Record<string, string> = {
   interestRate: "Interest Rate",
   baseYield: "Annual Yield",
@@ -142,6 +186,7 @@ export default function ProductDetailPage({ product, onBack }: ProductDetailPage
   const [eligibilityExpanded, setEligibilityExpanded] = useState(true);
   const [selectedTerm, setSelectedTerm] = useState<string | null>(null);
   const [jargonOpen, setJargonOpen] = useState(false);
+  const [logoErrors, setLogoErrors] = useState<Record<string, boolean>>({});
 
   const handleTermClick = (term: string) => { setSelectedTerm(term); setJargonOpen(true); };
 
@@ -356,15 +401,33 @@ export default function ProductDetailPage({ product, onBack }: ProductDetailPage
           {/* Bank Row */}
           <div className="flex items-center gap-2">
             <div 
-              className="w-6 h-6 rounded-md bg-white p-[2.5px] flex items-center justify-center overflow-hidden flex-shrink-0"
-              style={{ border: `1px solid rgba(255, 255, 255, 0.12)` }}
+              className="w-7 h-7 rounded-xl flex-shrink-0 flex items-center justify-center p-[6px] overflow-hidden"
+              style={{
+                background: LOGO_BG_MAP[product.lender] ?? '#FFFFFF',
+                border: `1px solid ${product.color || '#C9A96E'}40`,
+                boxShadow: `0 0 10px ${product.color || '#C9A96E'}35, 0 2px 8px rgba(0,0,0,0.15)`,
+              }}
             >
-              <img
-                src={logoUrl}
-                alt={product.lender}
-                className="max-w-full max-h-full object-contain"
-                onError={(e) => { e.currentTarget.style.display = 'none'; }}
-              />
+              {!(logoErrors[bankLogoId] || false) ? (
+                <img
+                  src={logoUrl}
+                  alt={product.lender}
+                  className="object-contain w-full h-full"
+                  onError={() => {
+                    setLogoErrors((prev) => ({ ...prev, [bankLogoId]: true }));
+                  }}
+                />
+              ) : (
+                <div 
+                  className="w-full h-full rounded-full flex items-center justify-center text-[8px] font-extrabold tracking-wider"
+                  style={{ 
+                    color: product.colorAccent || '#00F5A0', 
+                    background: `${product.color || '#C9A96E'}15`
+                  }}
+                >
+                  {getBankInitials(product.lender).substring(0, 2)}
+                </div>
+              )}
             </div>
             <span
               className="text-[12px] font-bold uppercase tracking-wide"

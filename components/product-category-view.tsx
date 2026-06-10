@@ -138,6 +138,22 @@ export const BANK_LOGO_MAP: Record<string, string> = {
   'Paytm Payments Bank Ltd': 'paytm_pb',
 };
 
+export const LOGO_BG_MAP: Record<string, string> = {
+  'Bank of India': '#017dc5',
+  'Bank of India Limited': '#017dc5',
+  'Canara Bank': '#0069df',
+  'Canara Bank Limited': '#0069df',
+  'IDFC FIRST Bank': '#9e1d28',
+  'IDFC First Bank': '#9e1d28',
+  'YES BANK': '#004489',
+  'YES Bank': '#004489',
+  'AU Small Finance Bank': '#ee7025',
+  'IDBI Bank': '#299a85',
+  'Karur Vysya Bank': '#d1d01d',
+  'South Indian Bank': '#c4171c',
+  'Capital Small Finance Bank': '#d10e14',
+  'Unity Small Finance Bank': '#fdc937',
+};
 
 export const BANK_COLORS_MAP: Record<string, { color: string; colorAccent: string }> = {
   "Axis Bank": { "color": "#98144D", "colorAccent": "#A01552" },
@@ -1247,8 +1263,9 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
                             <div 
                               className="w-12 h-12 rounded-xl flex-shrink-0 flex items-center justify-center p-[6px] overflow-hidden"
                               style={{
-                                background: 'rgba(255, 255, 255, 0.06)',
-                                border: '1px solid rgba(255, 255, 255, 0.08)',
+                                background: LOGO_BG_MAP[group.lender] ?? '#FFFFFF',
+                                border: `1px solid ${color}40`,
+                                boxShadow: `0 0 10px ${color}35, 0 2px 8px rgba(0,0,0,0.15)`,
                               }}
                             >
                               {!hasLogoError ? (
@@ -1424,10 +1441,11 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
                     <div className="flex items-center gap-2 flex-1 min-w-0">
                       {selectedBank && (
                         <div 
-                          className="w-7 h-7 rounded-lg flex-shrink-0 flex items-center justify-center p-[3px] overflow-hidden"
+                          className="w-7 h-7 rounded-xl flex-shrink-0 flex items-center justify-center p-[6px] overflow-hidden"
                           style={{
-                            background: 'rgba(255, 255, 255, 0.08)',
-                            border: '1px solid rgba(255, 255, 255, 0.12)',
+                            background: LOGO_BG_MAP[selectedBank] ?? '#FFFFFF',
+                            border: `1px solid ${color}40`,
+                            boxShadow: `0 0 10px ${color}35, 0 2px 8px rgba(0,0,0,0.15)`,
                           }}
                         >
                           {!hasLogoError ? (
@@ -1443,7 +1461,7 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
                             />
                           ) : (
                             <div 
-                              className="w-full h-full rounded-md flex items-center justify-center text-[8px] font-extrabold tracking-wider"
+                              className="w-full h-full rounded-full flex items-center justify-center text-[8px] font-extrabold tracking-wider"
                               style={{ 
                                 color: colorAccent, 
                                 background: `${color}15`
