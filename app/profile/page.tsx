@@ -1,12 +1,13 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { Shield, Eye, EyeOff, Bell, Globe, ChevronRight, Moon, HelpCircle, FileText, Info, LogOut, X, Check } from 'lucide-react';
-import { useState } from 'react';
+import { Shield, Eye, EyeOff, Bell, Globe, ChevronRight, Moon, HelpCircle, FileText, Info, LogOut, X, Check, Star } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useLang } from '@/context/LanguageContext';
+import { getFavourites, toggleFavourite, FavouriteItem } from '@/lib/favourites';
+import { BANK_LOGO_MAP, LOGO_BG_MAP } from '@/components/product-category-view';
 
 type SettingItem = {
   key?: string;
@@ -132,6 +133,41 @@ export default function ProfilePage() {
   const { lang, setLang, t } = useLang();
   const router = useRouter();
   const [isLangSheetOpen, setIsLangSheetOpen] = useState(false);
+  const [favourites, setFavourites] = useState<FavouriteItem[]>([]);
+  const [isFavsExpanded, setIsFavsExpanded] = useState(false);
+  const [filter, setFilter] = useState<'all' | 'bank' | 'savings' | 'current' | 'fds' | 'creditcards' | 'loans' | 'govtschemes' | 'insurance'>('all');
+
+  useEffect(() => {
+    setFavourites(getFavourites());
+  }, []);
+
+  const handleRemoveFavourite = (id: string) => {
+    const item = favourites.find(f => f.id === id);
+    if (item) {
+      toggleFavourite(item);
+      setFavourites(getFavourites());
+    }
+  };
+
+  const handleToggleExpand = () => {
+    const next = !isFavsExpanded;
+    setIsFavsExpanded(next);
+    if (next) {
+      setFavourites(getFavourites());
+    }
+  };
+
+  const filterPills: { id: typeof filter; label: string }[] = [
+    { id: 'all', label: 'All' },
+    { id: 'bank', label: 'Banks' },
+    { id: 'savings', label: 'Savings' },
+    { id: 'current', label: 'Current' },
+    { id: 'fds', label: 'FDs' },
+    { id: 'creditcards', label: 'Credit Cards' },
+    { id: 'loans', label: 'Loans' },
+    { id: 'govtschemes', label: 'Schemes' },
+    { id: 'insurance', label: 'Insurance' },
+  ];
 
   const settings: { group: string; icon: any; color: string; items: SettingItem[] }[] = [
     {
@@ -251,6 +287,251 @@ export default function ProfilePage() {
             </div>
           </div>
         </div>
+      </motion.div>
+
+      {/* Favourites section */}
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.15, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+        className="rounded-2xl overflow-hidden mb-7"
+        style={{
+          background: 'rgba(255,255,255,0.025)',
+          border: '1px solid rgba(255,255,255,0.06)',
+        }}
+      >
+        {/* Header Button */}
+        <motion.button
+          whileTap={{ scale: 0.99 }}
+          onClick={handleToggleExpand}
+          className="w-full flex items-center justify-between px-5 py-4 text-left cursor-pointer"
+        >
+          <div className="flex items-center gap-3">
+            <div
+              className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
+              style={{ background: 'rgba(201,169,110,0.15)' }}
+            >
+              <Star size={14} style={{ color: '#C9A96E' }} strokeWidth={2} fill="#C9A96E" />
+            </div>
+            <div>
+              <p className="text-[14px] text-white/90" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700 }}>
+                My Favourites
+              </p>
+              <p className="font-body text-[10px] text-white/30">Manage your saved institutions and accounts</p>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <span
+              className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold font-body"
+              style={{
+                background: favourites.length > 0 ? 'rgba(201,169,110,0.2)' : 'rgba(255,255,255,0.06)',
+                color: favourites.length > 0 ? '#C9A96E' : 'rgba(255,255,255,0.4)',
+                border: favourites.length > 0 ? '1px solid rgba(201,169,110,0.3)' : '1px solid transparent',
+              }}
+            >
+              {favourites.length}
+            </span>
+            <ChevronRight
+              size={15}
+              className="text-white/20 transition-transform duration-200"
+              style={{ transform: isFavsExpanded ? 'rotate(90deg)' : 'rotate(0deg)' }}
+            />
+          </div>
+        </motion.button>
+
+        {/* Collapsible Content */}
+        <AnimatePresence initial={false}>
+          {isFavsExpanded && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.25, ease: 'easeInOut' }}
+              className="overflow-hidden"
+            >
+              <div className="px-5 pb-5 pt-1 border-t border-white/[0.04] space-y-4">
+                
+                {/* Horizontally scrollable filter pills */}
+                {favourites.length > 0 && (
+                  <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
+                    {filterPills.map((pill) => {
+                      const isActive = filter === pill.id;
+                      return (
+                        <button
+                          key={pill.id}
+                          onClick={() => setFilter(pill.id)}
+                          className="px-3 py-1.5 rounded-full text-[10px] font-bold font-body whitespace-nowrap cursor-pointer transition-all border"
+                          style={{
+                            background: isActive ? 'rgba(201,169,110,0.18)' : 'transparent',
+                            color: isActive ? '#C9A96E' : 'rgba(255,255,255,0.4)',
+                            borderColor: isActive ? 'rgba(201,169,110,0.3)' : 'rgba(255,255,255,0.06)',
+                          }}
+                        >
+                          {pill.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {/* List of Favourited Items */}
+                {favourites.length > 0 ? (
+                  <div className="space-y-3">
+                    {favourites
+                      .filter((item) => filter === 'all' || item.type === filter)
+                      .map((item) => {
+                        const isBank = item.type === 'bank';
+                        if (isBank) {
+                          return (
+                            <motion.div
+                              key={item.id}
+                              initial={{ opacity: 0, scale: 0.95 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              exit={{ opacity: 0, scale: 0.95 }}
+                              className="relative overflow-hidden rounded-2xl p-4 border-l-[3px] flex items-center gap-3"
+                              style={{
+                                background: `linear-gradient(135deg, ${item.color}12 0%, ${item.colorAccent}08 100%)`,
+                                borderTop: `1px solid ${item.color}28`,
+                                borderRight: `1px solid ${item.color}28`,
+                                borderBottom: `1px solid ${item.color}28`,
+                                borderLeftColor: item.color,
+                              }}
+                            >
+                              {/* Logo */}
+                              <div 
+                                className="w-12 h-12 rounded-xl flex-shrink-0 flex items-center justify-center p-[6px] overflow-hidden"
+                                style={{
+                                  background: LOGO_BG_MAP[item.lender] ?? '#FFFFFF',
+                                  border: `1px solid ${item.color}40`,
+                                  boxShadow: `0 0 10px ${item.color}35, 0 2px 8px rgba(0,0,0,0.15)`,
+                                }}
+                              >
+                                <img
+                                  src={`/logos/${BANK_LOGO_MAP[item.lender] || item.lender.toLowerCase().replace(/bank/gi, '').replace(/[^a-z0-9]/g, '').trim()}.png`}
+                                  alt={`${item.lender} logo`}
+                                  className="object-contain w-full h-full"
+                                  onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                                />
+                              </div>
+                              
+                              <div className="flex-1 min-w-0 pr-8">
+                                <h3 className="text-[15px] leading-tight text-white/95 truncate font-extrabold" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+                                  {item.lender}
+                                </h3>
+                                <p className="font-body text-[9px] text-[#C9A96E]/80 mt-1 font-semibold uppercase tracking-wider">
+                                  Saved Bank
+                                </p>
+                              </div>
+                              
+                              {/* Star Button */}
+                              <motion.button
+                                whileTap={{ scale: 0.85 }}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleRemoveFavourite(item.id);
+                                }}
+                                className="absolute top-3 right-3 p-1.5 rounded-full bg-black/20 hover:bg-black/30 cursor-pointer"
+                              >
+                                <Star size={14} className="text-[#C9A96E]" fill="#C9A96E" />
+                              </motion.button>
+                            </motion.div>
+                          );
+                        }
+
+                        // Replicated Account Card
+                        return (
+                          <motion.div
+                            key={item.id}
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            className="relative overflow-hidden rounded-2xl p-4 flex flex-col justify-between"
+                            style={{
+                              background: `linear-gradient(135deg, color-mix(in srgb, ${item.color} 22%, transparent) 0%, color-mix(in srgb, ${item.colorAccent} 8%, transparent) 100%), #0d1117`,
+                              borderTop: `1px solid color-mix(in srgb, ${item.color} 50%, transparent)`,
+                              borderRight: `1px solid color-mix(in srgb, ${item.color} 50%, transparent)`,
+                              borderBottom: `1px solid color-mix(in srgb, ${item.color} 50%, transparent)`,
+                              borderLeft: `6px solid ${item.color}`,
+                            }}
+                          >
+                            {/* Header Row */}
+                            <div className="flex items-center gap-3 min-w-0 pr-8">
+                              {/* Logo */}
+                              <div 
+                                className="w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center p-[6px] overflow-hidden"
+                                style={{
+                                  background: LOGO_BG_MAP[item.lender] ?? '#FFFFFF',
+                                  border: `1px solid color-mix(in srgb, ${item.color} 40%, transparent)`,
+                                  boxShadow: `0 0 10px color-mix(in srgb, ${item.color} 35%, transparent), 0 2px 8px rgba(0,0,0,0.15)`,
+                                }}
+                              >
+                                <img
+                                  src={`/logos/${BANK_LOGO_MAP[item.lender] || item.lender.toLowerCase().replace(/bank/gi, '').replace(/[^a-z0-9]/g, '').trim()}.png`}
+                                  alt={item.lender}
+                                  className="w-full h-full object-contain"
+                                  onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                                />
+                              </div>
+                              
+                              <div className="flex flex-col min-w-0">
+                                <span className="text-[13px] font-bold text-white leading-tight truncate">
+                                  {item.lender}
+                                </span>
+                                <span className="text-[10px] text-white/40 leading-tight mt-0.5 font-body uppercase tracking-wider font-semibold">
+                                  {item.type}
+                                </span>
+                              </div>
+                            </div>
+                            
+                            <div className="border-t border-white/[0.05] my-3" />
+                            
+                            <div>
+                              <h3 className="text-[16px] font-bold text-white tracking-tight leading-snug pr-8" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+                                {item.name}
+                              </h3>
+                            </div>
+                            
+                            {/* Star Button */}
+                            <motion.button
+                              whileTap={{ scale: 0.85 }}
+                              onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleRemoveFavourite(item.id);
+                                }}
+                              className="absolute top-3 right-3 p-1.5 rounded-full bg-black/20 hover:bg-black/30 cursor-pointer"
+                            >
+                              <Star size={14} className="text-[#C9A96E]" fill="#C9A96E" />
+                            </motion.button>
+                          </motion.div>
+                        );
+                      })}
+                      
+                    {favourites.filter((item) => filter === 'all' || item.type === filter).length === 0 && (
+                      <div className="text-center py-8 text-white/25 font-body text-xs">
+                        No saved items in this category
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  /* Empty State */
+                  <div className="flex flex-col items-center justify-center py-10 px-4 text-center">
+                    <div className="w-12 h-12 rounded-full flex items-center justify-center bg-white/[0.03] border border-white/[0.05] mb-3">
+                      <Star size={20} className="text-white/20" />
+                    </div>
+                    <p className="text-[13px] text-white/70 font-semibold" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+                      No favourites yet
+                    </p>
+                    <p className="font-body text-[11px] text-white/35 mt-1 max-w-[240px] leading-relaxed">
+                      Tap the ★ on any bank or account to save it here
+                    </p>
+                  </div>
+                )}
+
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </motion.div>
 
       {/* Settings groups */}

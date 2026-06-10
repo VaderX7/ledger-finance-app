@@ -1,6 +1,9 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { Star } from 'lucide-react';
+import { toggleFavourite, isFavourited } from '@/lib/favourites';
 import { Product } from '@/lib/products';
 
 const BANK_LOGO_MAP: Record<string, string> = {
@@ -320,6 +323,11 @@ export default function CategoryProductCard({
   const baseColor = product.color || '#C9A96E';
   const { color: cardColor, colorAccent: cardColorAccent } = generateCardShade(baseColor, index);
   const bankTypeLabel = getFormattedBankType(product.bankType);
+  const [isFav, setIsFav] = useState(false);
+
+  useEffect(() => {
+    setIsFav(isFavourited(product.id));
+  }, [product.id]);
 
   const isProtected = product.category === 'savings' || product.category === 'fds' || 
                       product.highlights.some(h => h.toLowerCase().includes('dicgc')) || 
@@ -352,6 +360,36 @@ export default function CategoryProductCard({
         className="absolute -top-8 -right-8 w-28 h-28 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
         style={{ background: `color-mix(in srgb, ${cardColor} 14%, transparent)` }}
       />
+
+      {/* Star Button */}
+      <motion.button
+        whileTap={{ scale: 0.85 }}
+        onClick={(e) => {
+          e.stopPropagation();
+          const added = toggleFavourite({
+            id: product.id,
+            type: product.category,
+            lender: product.lender,
+            name: product.name,
+            color: product.color,
+            colorAccent: product.colorAccent,
+            savedAt: Date.now(),
+          });
+          setIsFav(added);
+        }}
+        className="absolute top-3 right-3 p-1.5 rounded-full bg-black/20 hover:bg-black/40 transition-colors z-10"
+      >
+        <motion.div
+          animate={isFav ? { scale: [1, 1.4, 1] } : { scale: 1 }}
+          transition={{ duration: 0.3, type: 'spring', stiffness: 300, damping: 15 }}
+        >
+          <Star
+            size={16}
+            style={{ color: isFav ? '#C9A96E' : 'rgba(255,255,255,0.3)' }}
+            fill={isFav ? "#C9A96E" : "transparent"}
+          />
+        </motion.div>
+      </motion.button>
 
       {/* Header Row */}
       <div className="relative z-10 flex items-center justify-between gap-3">

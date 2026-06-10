@@ -10,7 +10,8 @@ import CategoryViewHeader from './category-view-header';
 import CategoryProductCard from './category-product-card';
 import JargonBottomSheet from './jargon-bottom-sheet';
 import ProductDetailPage from './product-detail-page';
-import { Search, X, ChevronDown, Check, ChevronRight, ArrowLeft } from 'lucide-react';
+import { Search, X, ChevronDown, Check, ChevronRight, ArrowLeft, Star } from 'lucide-react';
+import { toggleFavourite, isFavourited, getFavourites } from '@/lib/favourites';
 import { useLang } from '@/context/LanguageContext';
 import { TranslationKey } from '@/lib/i18n';
 import { financialInstitutions } from '@/lib/institutions';
@@ -598,6 +599,302 @@ function InstitutionSelectSheet({
   );
 }
 
+const getBestUSP = (products: Product[]) => {
+  const allHighlights = Array.from(new Set(products.flatMap((p) => p.highlights)));
+  const priorityKeywords = [
+    'forex', 'sweep', 'atm', 'insurance', 'cashback', 'reward', 'cover', 'discount', 'lounge', 'waive',
+    'zero balance', 'high interest', 'no mab'
+  ];
+  for (const keyword of priorityKeywords) {
+    const matched = allHighlights.find((h) => h.toLowerCase().includes(keyword));
+    if (matched) return matched;
+  }
+  return allHighlights[0] || 'Premium Benefits';
+};
+
+const getRateRange = (products: Product[]) => {
+  const rates: number[] = [];
+  products.forEach((p) => {
+    const rateStr = String(p.metrics.interestRate || '');
+    const matches = rateStr.match(/\d+(\.\d+)?/g);
+    if (matches) {
+      matches.forEach((m) => rates.push(parseFloat(m)));
+    }
+  });
+  if (rates.length === 0) return '—';
+  const min = Math.min(...rates);
+  const max = Math.max(...rates);
+  if (min === max) return `${min.toFixed(2)}% p.a.`;
+  return `${min.toFixed(2)}% – ${max.toFixed(2)}% p.a.`;
+};
+
+const getLowestMinBalance = (products: Product[]) => {
+  let lowestVal = Infinity;
+  let lowestStr = '';
+  products.forEach((p) => {
+    const balStr = String(p.metrics.minBalance || '').trim();
+    const lower = balStr.toLowerCase();
+    if (lower.includes('nil') || lower.includes('zero') || lower.includes('free') || balStr.includes('0')) {
+      if (0 < lowestVal) {
+        lowestVal = 0;
+        lowestStr = '₹0';
+      }
+    } else {
+      const num = parseInt(balStr.replace(/[^\d]/g, ''), 10);
+      if (!isNaN(num) && num < lowestVal) {
+        lowestVal = num;
+        lowestStr = `₹${num.toLocaleString('en-IN')}`;
+      }
+    }
+  });
+  return lowestVal === Infinity ? '—' : lowestStr;
+};
+
+const getMaxInterest = (products: Product[]): number => {
+  let maxRate = 0;
+  products.forEach((p) => {
+    const rateStr = String(p.metrics.interestRate || '');
+    const matches = rateStr.match(/\d+(\.\d+)?/g);
+    if (matches) {
+      matches.forEach((m) => {
+        const rate = parseFloat(m);
+        if (rate > maxRate) maxRate = rate;
+      });
+    }
+  });
+  return maxRate;
+};
+
+const getMinInterest = (products: Product[]): number => {
+  let minRate = Infinity;
+  products.forEach((p) => {
+    const rateStr = String(p.metrics.interestRate || '');
+    const matches = rateStr.match(/\d+(\.\d+)?/g);
+    if (matches) {
+      matches.forEach((m) => {
+        const rate = parseFloat(m);
+        if (rate < minRate) minRate = rate;
+      });
+    }
+  });
+  return minRate === Infinity ? 0 : minRate;
+};
+
+const getMinBalanceValue = (products: Product[]): number => {
+  let lowestVal = Infinity;
+  products.forEach((p) => {
+    const balStr = String(p.metrics.minBalance || '').trim();
+    const lower = balStr.toLowerCase();
+    if (lower.includes('nil') || lower.includes('zero') || lower.includes('free') || balStr.includes('0')) {
+      if (0 < lowestVal) {
+        lowestVal = 0;
+      }
+    } else {
+      const num = parseInt(balStr.replace(/[^\d]/g, ''), 10);
+      if (!isNaN(num) && num < lowestVal) {
+        lowestVal = num;
+      }
+    }
+  });
+  return lowestVal === Infinity ? 999999999 : lowestVal;
+};
+
+const getPopularityIndex = (lender: string): number => {
+  const index = financialInstitutions.findIndex(
+    (inst) => inst.name.toLowerCase().includes(lender.toLowerCase()) || lender.toLowerCase().includes(inst.name.toLowerCase())
+  );
+  return index === -1 ? 999 : index;
+};
+
+interface BankCardProps {
+  group: { lender: string; products: Product[] };
+  setSelectedBank: (bank: string | null) => void;
+  logoErrors: Record<string, boolean>;
+  setLogoErrors: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
+}
+
+function BankCard({ group, setSelectedBank, logoErrors, setLogoErrors }: BankCardProps) {
+  const lender = group.lender;
+  const firstProduct = group.products[0];
+  const color = firstProduct.color || '#C9A96E';
+  const colorAccent = firstProduct.colorAccent || '#00F5A0';
+  const bankTypeName = firstProduct.bankType === 'public' ? 'PUBLIC' : firstProduct.bankType === 'private' ? 'PRIVATE' : firstProduct.bankType === 'sfb' ? 'SMALL FINANCE' : firstProduct.bankType === 'payments' ? 'PAYMENTS BANK' : 'NBFC';
+
+  const bankLogoId = BANK_LOGO_MAP[lender] || lender.toLowerCase().replace(/bank/gi, '').replace(/[^a-z0-9]/g, '').trim();
+  const logoUrl = `/logos/${bankLogoId}.png`;
+  const hasLogoError = logoErrors[bankLogoId] || false;
+
+  const bankName = lender;
+  const [isFav, setIsFav] = useState(() => isFavourited('bank-' + bankName));
+
+  useEffect(() => {
+    setIsFav(isFavourited('bank-' + bankName));
+  }, [bankName]);
+
+  const rateRange = getRateRange(group.products);
+  const highlights = firstProduct.highlights.slice(0, 3);
+
+  return (
+    <motion.div
+      whileTap={{ scale: 0.985 }}
+      onClick={() => setSelectedBank(lender)}
+      className="relative overflow-hidden rounded-2xl cursor-pointer group p-4 border-l-[3px]"
+      style={{
+        background: `linear-gradient(135deg, ${color}12 0%, ${colorAccent}08 100%)`,
+        borderTop: `1px solid ${color}28`,
+        borderRight: `1px solid ${color}28`,
+        borderBottom: `1px solid ${color}28`,
+        borderLeftColor: color,
+      }}
+    >
+      <div className="absolute -top-8 -right-8 w-28 h-28 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" style={{ background: `${color}14` }} />
+
+      {/* Star Button */}
+      <motion.button
+        whileTap={{ scale: 0.85 }}
+        onClick={(e) => {
+          e.stopPropagation();
+          const cardId = 'bank-' + lender;
+          const added = toggleFavourite({
+            id: cardId,
+            type: 'bank',
+            lender: lender,
+            name: lender,
+            color,
+            colorAccent,
+            savedAt: Date.now(),
+          });
+          setIsFav(added);
+        }}
+        className="absolute p-1.5 rounded-full bg-black/20 hover:bg-black/40 transition-colors z-10"
+        style={{ position: 'absolute', top: '12px', right: '12px' }}
+      >
+        <motion.div
+          animate={isFav ? { scale: [1, 1.4, 1] } : { scale: 1 }}
+          transition={{ duration: 0.3, type: 'spring', stiffness: 300, damping: 15 }}
+        >
+          <Star
+            size={16}
+            style={{ color: isFav ? '#C9A96E' : 'rgba(255,255,255,0.3)' }}
+            fill={isFav ? "#C9A96E" : "transparent"}
+          />
+        </motion.div>
+      </motion.button>
+
+      <div className="flex items-center gap-3 mb-3">
+        {/* Logo Container */}
+        <div 
+          className="w-12 h-12 rounded-xl flex-shrink-0 flex items-center justify-center p-[6px] overflow-hidden"
+          style={{
+            background: LOGO_BG_MAP[lender] ?? '#FFFFFF',
+            border: `1px solid ${color}40`,
+            boxShadow: `0 0 10px ${color}35, 0 2px 8px rgba(0,0,0,0.15)`,
+          }}
+        >
+          {!hasLogoError ? (
+            <Image
+              src={logoUrl}
+              alt={`${lender} logo`}
+              width={40}
+              height={40}
+              className="object-contain w-full h-full"
+              onError={() => {
+                setLogoErrors((prev) => ({ ...prev, [bankLogoId]: true }));
+              }}
+            />
+          ) : (
+            <div 
+              className="w-full h-full rounded-full flex items-center justify-center text-[10px] font-extrabold tracking-wider border"
+              style={{ 
+                borderColor: `${color}40`,
+                color: color, 
+                background: `${color}08`
+              }}
+            >
+              {getBankInitials(lender)}
+            </div>
+          )}
+        </div>
+
+        {/* Bank Name and Sector Badge */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-start justify-between gap-2">
+            <h3 className="text-[16px] leading-tight text-white/95 truncate pr-1" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800 }}>
+              {lender}
+            </h3>
+          </div>
+          <div className="flex items-center gap-1.5 mt-1">
+            <span 
+              className="text-[8px] font-body px-1.5 py-0.5 rounded-full font-bold uppercase tracking-wider"
+              style={{
+                background: firstProduct.bankType === 'public' 
+                  ? 'rgba(201,169,110,0.12)' 
+                  : firstProduct.bankType === 'private'
+                  ? 'rgba(56,189,248,0.12)'
+                  : firstProduct.bankType === 'sfb'
+                  ? 'rgba(45,212,191,0.12)'
+                  : 'rgba(251,113,133,0.12)',
+                color: firstProduct.bankType === 'public' 
+                  ? '#C9A96E' 
+                  : firstProduct.bankType === 'private'
+                  ? '#38BDF8'
+                  : firstProduct.bankType === 'sfb'
+                  ? '#2DD4BF'
+                  : '#FB7185',
+                border: `1px solid ${
+                  firstProduct.bankType === 'public' 
+                    ? 'rgba(201,169,110,0.25)' 
+                    : firstProduct.bankType === 'private'
+                    ? 'rgba(56,189,248,0.25)'
+                    : firstProduct.bankType === 'sfb'
+                    ? 'rgba(45,212,191,0.25)'
+                    : 'rgba(251,113,133,0.25)'
+                }`
+              }}
+            >
+              {bankTypeName}
+            </span>
+            <span className="w-1 h-1 rounded-full bg-white/20" />
+            <span className="text-[11px] text-white/50 font-body">
+              {group.products.length} {group.products.length === 1 ? 'savings option' : 'savings options'}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3 mb-3">
+        <div className="rounded-lg px-2.5 py-2" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
+          <p className="font-body text-[9px] text-white/30 mb-0.5 uppercase tracking-wide">Interest Rate</p>
+          <p className="text-[12px] font-bold" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: '#00F5A0' }}>
+            {rateRange}
+          </p>
+        </div>
+        <div className="rounded-lg px-2.5 py-2" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
+          <p className="font-body text-[9px] text-white/30 mb-0.5 uppercase tracking-wide">Best For</p>
+          <p className="text-[12px] font-bold truncate" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: '#00F5A0' }}>
+            {getBestUSP(group.products)}
+          </p>
+        </div>
+      </div>
+
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-1.5 flex-wrap">
+          {highlights.map((h) => (
+            <span
+              key={h}
+              className="px-2 py-0.5 rounded-md text-[9px] font-body text-white/40"
+              style={{ background: `${color}10`, border: `1px solid ${color}1e` }}
+            >
+              {h}
+            </span>
+          ))}
+        </div>
+        <ChevronRight size={16} className="text-white/30 group-hover:text-white/70 transition-colors" />
+      </div>
+    </motion.div>
+  );
+}
+
 interface ProductCategoryViewProps {
   category: ProductCategory;
   onBack: () => void;
@@ -620,113 +917,6 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
   const [logoErrors, setLogoErrors] = useState<Record<string, boolean>>({});
   const [searchFocused, setSearchFocused] = useState(false);
   const [activeChip, setActiveChip] = useState<string | null>(null);
-
-  const getBestUSP = (products: Product[]) => {
-    const allHighlights = Array.from(new Set(products.flatMap((p) => p.highlights)));
-    const priorityKeywords = [
-      'forex', 'sweep', 'atm', 'insurance', 'cashback', 'reward', 'cover', 'discount', 'lounge', 'waive',
-      'zero balance', 'high interest', 'no mab'
-    ];
-    for (const keyword of priorityKeywords) {
-      const matched = allHighlights.find((h) => h.toLowerCase().includes(keyword));
-      if (matched) return matched;
-    }
-    return allHighlights[0] || 'Premium Benefits';
-  };
-
-  const getRateRange = (products: Product[]) => {
-    const rates: number[] = [];
-    products.forEach((p) => {
-      const rateStr = String(p.metrics.interestRate || '');
-      const matches = rateStr.match(/\d+(\.\d+)?/g);
-      if (matches) {
-        matches.forEach((m) => rates.push(parseFloat(m)));
-      }
-    });
-    if (rates.length === 0) return '—';
-    const min = Math.min(...rates);
-    const max = Math.max(...rates);
-    if (min === max) return `${min.toFixed(2)}% p.a.`;
-    return `${min.toFixed(2)}% – ${max.toFixed(2)}% p.a.`;
-  };
-
-  const getLowestMinBalance = (products: Product[]) => {
-    let lowestVal = Infinity;
-    let lowestStr = '';
-    products.forEach((p) => {
-      const balStr = String(p.metrics.minBalance || '').trim();
-      const lower = balStr.toLowerCase();
-      if (lower.includes('nil') || lower.includes('zero') || lower.includes('free') || balStr.includes('0')) {
-        if (0 < lowestVal) {
-          lowestVal = 0;
-          lowestStr = '₹0';
-        }
-      } else {
-        const num = parseInt(balStr.replace(/[^\d]/g, ''), 10);
-        if (!isNaN(num) && num < lowestVal) {
-          lowestVal = num;
-          lowestStr = `₹${num.toLocaleString('en-IN')}`;
-        }
-      }
-    });
-    return lowestVal === Infinity ? '—' : lowestStr;
-  };
-
-  const getMaxInterest = (products: Product[]): number => {
-    let maxRate = 0;
-    products.forEach((p) => {
-      const rateStr = String(p.metrics.interestRate || '');
-      const matches = rateStr.match(/\d+(\.\d+)?/g);
-      if (matches) {
-        matches.forEach((m) => {
-          const rate = parseFloat(m);
-          if (rate > maxRate) maxRate = rate;
-        });
-      }
-    });
-    return maxRate;
-  };
-
-  const getMinInterest = (products: Product[]): number => {
-    let minRate = Infinity;
-    products.forEach((p) => {
-      const rateStr = String(p.metrics.interestRate || '');
-      const matches = rateStr.match(/\d+(\.\d+)?/g);
-      if (matches) {
-        matches.forEach((m) => {
-          const rate = parseFloat(m);
-          if (rate < minRate) minRate = rate;
-        });
-      }
-    });
-    return minRate === Infinity ? 0 : minRate;
-  };
-
-  const getMinBalanceValue = (products: Product[]): number => {
-    let lowestVal = Infinity;
-    products.forEach((p) => {
-      const balStr = String(p.metrics.minBalance || '').trim();
-      const lower = balStr.toLowerCase();
-      if (lower.includes('nil') || lower.includes('zero') || lower.includes('free') || balStr.includes('0')) {
-        if (0 < lowestVal) {
-          lowestVal = 0;
-        }
-      } else {
-        const num = parseInt(balStr.replace(/[^\d]/g, ''), 10);
-        if (!isNaN(num) && num < lowestVal) {
-          lowestVal = num;
-        }
-      }
-    });
-    return lowestVal === Infinity ? 999999999 : lowestVal;
-  };
-
-  const getPopularityIndex = (lender: string): number => {
-    const index = financialInstitutions.findIndex(
-      (inst) => inst.name.toLowerCase().includes(lender.toLowerCase()) || lender.toLowerCase().includes(inst.name.toLowerCase())
-    );
-    return index === -1 ? 999 : index;
-  };
 
   const getSortLabel = (sortByKey: string) => {
     if (lang === 'hi') {
@@ -1229,148 +1419,15 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
               {!loading && (
                 <div className="space-y-3">
                   {category === 'savings' ? (
-                    bankGroups.map((group, idx) => {
-                      const firstProduct = group.products[0];
-                      const color = firstProduct.color || '#C9A96E';
-                      const colorAccent = firstProduct.colorAccent || '#00F5A0';
-                      const bankTypeName = firstProduct.bankType === 'public' ? 'PUBLIC' : firstProduct.bankType === 'private' ? 'PRIVATE' : firstProduct.bankType === 'sfb' ? 'SMALL FINANCE' : firstProduct.bankType === 'payments' ? 'PAYMENTS BANK' : 'NBFC';
-                      const rateRange = getRateRange(group.products);
-                      const lowestMinBal = getLowestMinBalance(group.products);
-                      const highlights = firstProduct.highlights.slice(0, 3);
-
-                      const bankLogoId = BANK_LOGO_MAP[group.lender] || group.lender.toLowerCase().replace(/bank/gi, '').replace(/[^a-z0-9]/g, '').trim();
-                      const logoUrl = `/logos/${bankLogoId}.png`;
-                      const hasLogoError = logoErrors[bankLogoId] || false;
-
-                      return (
-                        <motion.div
-                          key={group.lender}
-                          whileTap={{ scale: 0.985 }}
-                          onClick={() => setSelectedBank(group.lender)}
-                          className="relative overflow-hidden rounded-2xl cursor-pointer group p-4 border-l-[3px]"
-                          style={{
-                            background: `linear-gradient(135deg, ${color}12 0%, ${colorAccent}08 100%)`,
-                            borderTop: `1px solid ${color}28`,
-                            borderRight: `1px solid ${color}28`,
-                            borderBottom: `1px solid ${color}28`,
-                            borderLeftColor: color,
-                          }}
-                        >
-                          <div className="absolute -top-8 -right-8 w-28 h-28 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" style={{ background: `${color}14` }} />
-
-                          <div className="flex items-center gap-3 mb-3">
-                            {/* Logo Container */}
-                            <div 
-                              className="w-12 h-12 rounded-xl flex-shrink-0 flex items-center justify-center p-[6px] overflow-hidden"
-                              style={{
-                                background: LOGO_BG_MAP[group.lender] ?? '#FFFFFF',
-                                border: `1px solid ${color}40`,
-                                boxShadow: `0 0 10px ${color}35, 0 2px 8px rgba(0,0,0,0.15)`,
-                              }}
-                            >
-                              {!hasLogoError ? (
-                                <Image
-                                  src={logoUrl}
-                                  alt={`${group.lender} logo`}
-                                  width={40}
-                                  height={40}
-                                  className="object-contain w-full h-full"
-                                  onError={() => {
-                                    setLogoErrors((prev) => ({ ...prev, [bankLogoId]: true }));
-                                  }}
-                                />
-                              ) : (
-                                <div 
-                                  className="w-full h-full rounded-full flex items-center justify-center text-[10px] font-extrabold tracking-wider border"
-                                  style={{ 
-                                    borderColor: `${color}40`,
-                                    color: color, 
-                                    background: `${color}08`
-                                  }}
-                                >
-                                  {getBankInitials(group.lender)}
-                                </div>
-                              )}
-                            </div>
-
-                            {/* Bank Name and Sector Badge */}
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-start justify-between gap-2">
-                                <h3 className="text-[16px] leading-tight text-white/95 truncate pr-1" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800 }}>
-                                  {group.lender}
-                                </h3>
-                              </div>
-                              <div className="flex items-center gap-1.5 mt-1">
-                                <span 
-                                  className="text-[8px] font-body px-1.5 py-0.5 rounded-full font-bold uppercase tracking-wider"
-                                  style={{
-                                    background: firstProduct.bankType === 'public' 
-                                      ? 'rgba(201,169,110,0.12)' 
-                                      : firstProduct.bankType === 'private'
-                                      ? 'rgba(56,189,248,0.12)'
-                                      : firstProduct.bankType === 'sfb'
-                                      ? 'rgba(45,212,191,0.12)'
-                                      : 'rgba(251,113,133,0.12)',
-                                    color: firstProduct.bankType === 'public' 
-                                      ? '#C9A96E' 
-                                      : firstProduct.bankType === 'private'
-                                      ? '#38BDF8'
-                                      : firstProduct.bankType === 'sfb'
-                                      ? '#2DD4BF'
-                                      : '#FB7185',
-                                    border: `1px solid ${
-                                      firstProduct.bankType === 'public' 
-                                        ? 'rgba(201,169,110,0.25)' 
-                                        : firstProduct.bankType === 'private'
-                                        ? 'rgba(56,189,248,0.25)'
-                                        : firstProduct.bankType === 'sfb'
-                                        ? 'rgba(45,212,191,0.25)'
-                                        : 'rgba(251,113,133,0.25)'
-                                    }`
-                                  }}
-                                >
-                                  {bankTypeName}
-                                </span>
-                                <span className="w-1 h-1 rounded-full bg-white/20" />
-                                <span className="text-[11px] text-white/50 font-body">
-                                  {group.products.length} {group.products.length === 1 ? 'savings option' : 'savings options'}
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="grid grid-cols-2 gap-3 mb-3">
-                            <div className="rounded-lg px-2.5 py-2" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
-                              <p className="font-body text-[9px] text-white/30 mb-0.5 uppercase tracking-wide">Interest Rate</p>
-                              <p className="text-[12px] font-bold" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: '#00F5A0' }}>
-                                {rateRange}
-                              </p>
-                            </div>
-                            <div className="rounded-lg px-2.5 py-2" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
-                              <p className="font-body text-[9px] text-white/30 mb-0.5 uppercase tracking-wide">Best For</p>
-                              <p className="text-[12px] font-bold truncate" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: '#00F5A0' }}>
-                                {getBestUSP(group.products)}
-                              </p>
-                            </div>
-                          </div>
-
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-1.5 flex-wrap">
-                              {highlights.map((h) => (
-                                <span
-                                  key={h}
-                                  className="px-2 py-0.5 rounded-md text-[9px] font-body text-white/40"
-                                  style={{ background: `${color}10`, border: `1px solid ${color}1e` }}
-                                >
-                                  {h}
-                                </span>
-                              ))}
-                            </div>
-                            <ChevronRight size={16} className="text-white/30 group-hover:text-white/70 transition-colors" />
-                          </div>
-                        </motion.div>
-                      );
-                    })
+                    bankGroups.map((group) => (
+                      <BankCard
+                        key={group.lender}
+                        group={group}
+                        setSelectedBank={setSelectedBank}
+                        logoErrors={logoErrors}
+                        setLogoErrors={setLogoErrors}
+                      />
+                    ))
                   ) : (
                     <AnimatePresence mode="popLayout">
                       {filtered.map((product, idx) => (
