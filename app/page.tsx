@@ -10,10 +10,12 @@ import { useLang } from '@/context/LanguageContext';
 import { getGreeting } from '@/lib/i18n';
 import LedgerLogo from '@/components/LedgerLogo';
 import { getProductsByCategory } from '@/lib/data-fetcher';
+import SplashScreen from '@/components/SplashScreen';
 
 type AppView = 'home' | ProductCategory;
 
 export default function HomePage() {
+  const [splashDone, setSplashDone] = useState(false);
   const [activeView, setActiveView] = useState<AppView>('home');
   const [ready, setReady] = useState(false);
   const [userName, setUserName] = useState('');
@@ -29,7 +31,18 @@ export default function HomePage() {
   const router = useRouter();
   const { t, lang } = useLang();
 
+  // 1. Session check to skip splash if already shown
   useEffect(() => {
+    const shown = sessionStorage.getItem('splash_shown');
+    if (shown === 'true') {
+      setSplashDone(true);
+    }
+  }, []);
+
+  // 2. Setup redirect & count data loading (only runs after splash completes)
+  useEffect(() => {
+    if (!splashDone) return;
+
     const done = localStorage.getItem('ledger_setup_done');
     if (!done) {
       router.replace('/setup');
@@ -44,7 +57,6 @@ export default function HomePage() {
     } catch { }
     setReady(true);
 
-    // Fetch product counts dynamically for all categories
     const loadCounts = async () => {
       const categories: ProductCategory[] = ['savings', 'current', 'fds', 'creditcards', 'loans', 'govtschemes', 'insurance'];
       try {
@@ -68,7 +80,18 @@ export default function HomePage() {
       }
     };
     loadCounts();
-  }, [router]);
+  }, [splashDone, router]);
+
+  if (!splashDone) {
+    return (
+      <SplashScreen
+        onComplete={() => {
+          sessionStorage.setItem('splash_shown', 'true');
+          setSplashDone(true);
+        }}
+      />
+    );
+  }
 
   if (!ready) return null;
 
@@ -90,7 +113,7 @@ export default function HomePage() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0, scale: 0.97 }}
-          transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
           className="min-h-screen bg-[#070A12] px-5 pt-14"
         >
           {/* Top bar */}
