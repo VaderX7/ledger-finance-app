@@ -142,16 +142,16 @@ const LOGO_BG_MAP: Record<string, string> = {
 function generateCardShade(baseColor: string, index: number): { color: string; colorAccent: string } {
   // Parse the base hex color and shift hue/lightness slightly per index
   const shadeVariants = [
-    { lighten: 0, saturate: 0 },    // index 0: original
-    { lighten: 15, saturate: -10 }, // index 1: lighter
-    { lighten: -12, saturate: 10 }, // index 2: darker/richer
-    { lighten: 20, saturate: 15 },  // index 3: bright
-    { lighten: -20, saturate: -5 }, // index 4: deep/muted
-    { lighten: 8, saturate: 20 },   // index 5: vivid
-    { lighten: -8, saturate: -15 }, // index 6: cool/muted
-    { lighten: 25, saturate: 5 },   // index 7: very light
-    { lighten: -25, saturate: 8 },  // index 8: very deep
-    { lighten: 12, saturate: -20 }, // index 9: soft
+    { lighten: 0  },   // index 0: original base color
+    { lighten: 35 },   // index 1: noticeably lighter
+    { lighten: -30 },  // index 2: noticeably darker
+    { lighten: 50 },   // index 3: much lighter/pastel
+    { lighten: -45 },  // index 4: much darker/deep
+    { lighten: 20 },   // index 5: medium light
+    { lighten: -20 },  // index 6: medium dark
+    { lighten: 60 },   // index 7: very light
+    { lighten: -55 },  // index 8: very deep
+    { lighten: 40 },   // index 9: bright
   ];
 
   const variant = shadeVariants[index % shadeVariants.length];
@@ -339,11 +339,11 @@ export default function CategoryProductCard({
       onClick={() => onDetailsClick(product)}
       className="relative overflow-hidden cursor-pointer group p-4 flex flex-col justify-between"
       style={{
-        background: '#0d1117',
-        borderTop: '1px solid rgba(0, 229, 255, 0.12)',
-        borderRight: '1px solid rgba(0, 229, 255, 0.12)',
-        borderBottom: '1px solid rgba(0, 229, 255, 0.12)',
-        borderLeft: `3px solid ${cardColor}`,
+        background: `linear-gradient(135deg, color-mix(in srgb, ${cardColor} 22%, transparent) 0%, color-mix(in srgb, ${cardColorAccent} 8%, transparent) 100%), #0d1117`,
+        borderTop: `1px solid color-mix(in srgb, ${cardColor} 50%, transparent)`,
+        borderRight: `1px solid color-mix(in srgb, ${cardColor} 50%, transparent)`,
+        borderBottom: `1px solid color-mix(in srgb, ${cardColor} 50%, transparent)`,
+        borderLeft: `6px solid ${cardColor}`,
         borderRadius: '16px',
       }}
     >
@@ -416,7 +416,10 @@ export default function CategoryProductCard({
 
       {/* Key Metric Highlight */}
       <div className="relative z-10 flex items-baseline gap-2 mt-2.5">
-        <span className="text-[28px] font-bold text-[#00F5A0] leading-none tracking-tight">
+        <span 
+          className="text-[28px] font-bold leading-none tracking-tight"
+          style={{ color: cardColor }}
+        >
           {metricHighlight.value}
         </span>
         <span className="text-[12px] text-white/35 font-body">
