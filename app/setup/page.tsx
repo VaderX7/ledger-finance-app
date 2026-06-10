@@ -418,7 +418,7 @@ function NameStep({ onNext, onBack, profile, setProfile }: {
             onChange={(e) => setProfile((p) => ({ ...p, name: e.target.value }))}
             onFocus={() => setFocused(true)}
             onBlur={() => setFocused(false)}
-            placeholder="Arjun, Priya, Rahul…"
+            placeholder="Arjun, Aanya, Rahul…"
             autoFocus
             className="w-full bg-transparent outline-none text-white/90 placeholder-white/20 px-5 py-4 text-[17px]"
             style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 600 }}
