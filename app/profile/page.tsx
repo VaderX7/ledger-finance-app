@@ -3,11 +3,132 @@
 import React, { useState, useEffect } from 'react';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { Shield, Eye, EyeOff, Bell, Globe, ChevronRight, Moon, HelpCircle, FileText, Info, LogOut, X, Check, Star } from 'lucide-react';
+import { Shield, Eye, EyeOff, Bell, Globe, ChevronRight, Moon, HelpCircle, FileText, Info, LogOut, X, Check, Star, ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useLang } from '@/context/LanguageContext';
 import { getFavourites, toggleFavourite, FavouriteItem } from '@/lib/favourites';
 import { BANK_LOGO_MAP, LOGO_BG_MAP } from '@/components/product-category-view';
+import ProductDetailPage from '@/components/product-detail-page';
+import BankAccountPage from '@/components/bank-account-page';
+import { getProducts } from '@/lib/data-fetcher';
+import { Product } from '@/lib/products';
+import { financialInstitutions, FinancialInstitution } from '@/lib/institutions';
+
+function getFormattedBankType(bankType: string): string {
+  if (!bankType) return '';
+  const bt = bankType.toLowerCase();
+  if (bt === 'sfb') return 'SFB';
+  if (bt === 'nbfc') return 'NBFC';
+  if (bt === 'payments') return 'Payments';
+  return bt.charAt(0).toUpperCase() + bt.slice(1);
+}
+
+function formatMinBalance(balance: string | number | undefined): string {
+  if (balance === undefined || balance === null) return '₹0';
+  const balanceStr = String(balance).toLowerCase().trim();
+  if (balanceStr === 'nil' || balanceStr === '0' || balanceStr === '₹0' || balanceStr === 'none') return '₹0';
+  if (balanceStr.includes('k')) return balanceStr;
+  
+  const str = balanceStr.replace(/[,]/g, '');
+  const match = str.match(/₹?\s*(\d+)/);
+  if (match) {
+    const num = parseInt(match[1], 10);
+    if (num >= 1000) {
+      return `₹${Math.round(num / 1000)}k`;
+    }
+    return `₹${num}`;
+  }
+  return String(balance);
+}
+
+function getProductMetricHighlight(product: Product) {
+  const cat = product.category;
+  
+  if (cat === 'savings') {
+    const interestRate = String(product.metrics.interestRate || 'N/A');
+    const rate = interestRate.match(/[\d.]+%/)?.[0] ?? interestRate;
+    let minBal = String(product.metrics.minBalance || '₹0');
+    if (product.id === 'hdfc-savings' || minBal === '₹10,000' || minBal === '10000') {
+      minBal = '₹10k';
+    } else {
+      minBal = formatMinBalance(minBal);
+    }
+    return {
+      value: rate,
+      subtitle: `p.a. interest · ${minBal} min balance`
+    };
+  }
+  
+  if (cat === 'fds') {
+    let yieldVal = String(product.metrics.baseYield || 'N/A');
+    if (yieldVal.includes('-')) {
+      yieldVal = yieldVal.split('-')[0].trim();
+    }
+    if (!yieldVal.endsWith('%') && yieldVal !== 'N/A') {
+      yieldVal = `${yieldVal}%`;
+    }
+    const tenure = String(product.metrics.tenureRange || 'N/A');
+    return {
+      value: yieldVal,
+      subtitle: `p.a. yield · ${tenure} tenure`
+    };
+  }
+  
+  if (cat === 'loans') {
+    let rate = String(product.metrics.minRate || 'N/A');
+    if (rate.includes('-')) {
+      rate = rate.split('-')[0].trim();
+    }
+    const tenure = String(product.metrics.maxTenure || 'N/A');
+    return {
+      value: rate.endsWith('%') ? rate : `${rate}%`,
+      subtitle: `p.a. starting rate · ${tenure} max tenure`
+    };
+  }
+  
+  if (cat === 'creditcards') {
+    const joining = String(product.metrics.joiningFee || '₹0');
+    const annual = String(product.metrics.annualFee || '₹0');
+    return {
+      value: joining,
+      subtitle: `joining fee · ${annual} annual`
+    };
+  }
+  
+  if (cat === 'current') {
+    let mab = String(product.metrics.monthlyAvgBalance || 'N/A');
+    if (mab.includes('-')) {
+      mab = mab.split('-')[0].trim();
+    }
+    const deposit = String(product.metrics.freeCashDeposit || 'N/A');
+    return {
+      value: mab,
+      subtitle: `avg balance · ${deposit} free deposit`
+    };
+  }
+  
+  // Fallback
+  const firstKey = Object.keys(product.metrics)[0];
+  const firstVal = String(product.metrics[firstKey] || 'N/A');
+  return {
+    value: firstVal,
+    subtitle: firstKey ? firstKey.replace(/([A-Z])/g, ' $1').toLowerCase() : 'primary metric'
+  };
+}
+
+function formatLenderName(lender: string): string {
+  if (!lender) return '';
+  const lower = lender.toLowerCase();
+  if (lower.includes('state bank of india')) return 'SBI';
+  if (lower.includes('housing development') || lower.includes('hdfc')) return 'HDFC Bank';
+  if (lower.includes('icici')) return 'ICICI Bank';
+  if (lower.includes('axis')) return 'Axis Bank';
+  if (lower.includes('equitas')) return 'Equitas Bank';
+  if (lower.includes('bajaj')) return 'Bajaj Finserv';
+  if (lower.includes('sidbi')) return 'SIDBI';
+  if (lower.includes('mudra')) return 'Mudra Scheme';
+  return lender;
+}
 
 type SettingItem = {
   key?: string;
@@ -134,11 +255,16 @@ export default function ProfilePage() {
   const router = useRouter();
   const [isLangSheetOpen, setIsLangSheetOpen] = useState(false);
   const [favourites, setFavourites] = useState<FavouriteItem[]>([]);
-  const [isFavsExpanded, setIsFavsExpanded] = useState(false);
+  const [showFavourites, setShowFavourites] = useState(false);
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [selectedInstitution, setSelectedInstitution] = useState<FinancialInstitution | null>(null);
+  const [removedFavId, setRemovedFavId] = useState<string | null>(null);
   const [filter, setFilter] = useState<'all' | 'bank' | 'savings' | 'current' | 'fds' | 'creditcards' | 'loans' | 'govtschemes' | 'insurance'>('all');
 
   useEffect(() => {
     setFavourites(getFavourites());
+    getProducts().then(setAllProducts).catch(console.error);
   }, []);
 
   const handleRemoveFavourite = (id: string) => {
@@ -149,12 +275,16 @@ export default function ProfilePage() {
     }
   };
 
-  const handleToggleExpand = () => {
-    const next = !isFavsExpanded;
-    setIsFavsExpanded(next);
-    if (next) {
-      setFavourites(getFavourites());
-    }
+  const handleStarRemovalWithAnimation = (id: string) => {
+    setRemovedFavId(id);
+    setTimeout(() => {
+      const item = favourites.find(f => f.id === id);
+      if (item) {
+        toggleFavourite(item);
+        setFavourites(getFavourites());
+      }
+      setRemovedFavId(null);
+    }, 300);
   };
 
   const filterPills: { id: typeof filter; label: string }[] = [
@@ -289,35 +419,34 @@ export default function ProfilePage() {
         </div>
       </motion.div>
 
-      {/* Favourites section */}
+      {/* My Favourites settings row */}
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.15, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-        className="rounded-2xl overflow-hidden mb-7"
-        style={{
-          background: 'rgba(255,255,255,0.025)',
-          border: '1px solid rgba(255,255,255,0.06)',
-        }}
+        className="rounded-2xl overflow-hidden mb-3"
+        style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.06)' }}
       >
-        {/* Header Button */}
         <motion.button
           whileTap={{ scale: 0.99 }}
-          onClick={handleToggleExpand}
-          className="w-full flex items-center justify-between px-5 py-4 text-left cursor-pointer"
+          onClick={() => {
+            setFavourites(getFavourites());
+            setShowFavourites(true);
+          }}
+          className="w-full flex items-center justify-between px-5 py-4 cursor-pointer text-left"
         >
           <div className="flex items-center gap-3">
             <div
               className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
-              style={{ background: 'rgba(201,169,110,0.15)' }}
+              style={{ background: 'rgba(201,169,110,0.12)' }}
             >
               <Star size={14} style={{ color: '#C9A96E' }} strokeWidth={2} fill="#C9A96E" />
             </div>
             <div>
-              <p className="text-[14px] text-white/90" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700 }}>
+              <p className="text-[13px] text-white/75 font-semibold" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
                 My Favourites
               </p>
-              <p className="font-body text-[10px] text-white/30">Manage your saved institutions and accounts</p>
+              <p className="font-body text-[10px] text-white/28">View and manage your saved items</p>
             </div>
           </div>
           
@@ -325,71 +454,110 @@ export default function ProfilePage() {
             <span
               className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold font-body"
               style={{
-                background: favourites.length > 0 ? 'rgba(201,169,110,0.2)' : 'rgba(255,255,255,0.06)',
-                color: favourites.length > 0 ? '#C9A96E' : 'rgba(255,255,255,0.4)',
-                border: favourites.length > 0 ? '1px solid rgba(201,169,110,0.3)' : '1px solid transparent',
+                background: 'rgba(201,169,110,0.2)',
+                color: '#C9A96E',
+                border: '1px solid rgba(201,169,110,0.3)',
               }}
             >
               {favourites.length}
             </span>
-            <ChevronRight
-              size={15}
-              className="text-white/20 transition-transform duration-200"
-              style={{ transform: isFavsExpanded ? 'rotate(90deg)' : 'rotate(0deg)' }}
-            />
+            <ChevronRight size={15} className="text-white/20" />
           </div>
         </motion.button>
+      </motion.div>
 
-        {/* Collapsible Content */}
-        <AnimatePresence initial={false}>
-          {isFavsExpanded && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.25, ease: 'easeInOut' }}
-              className="overflow-hidden"
+      {/* Favourites Overlay Page */}
+      <AnimatePresence>
+        {showFavourites && (
+          <motion.div
+            initial={{ x: '100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '100%' }}
+            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+            className="fixed inset-0 z-[60] bg-[#070A12] flex flex-col max-w-md mx-auto overflow-hidden shadow-2xl"
+          >
+            {/* Header */}
+            <div
+              className="flex-shrink-0 flex items-center gap-3 px-4 py-3"
+              style={{
+                background: 'rgba(7, 10, 18, 0.90)',
+                backdropFilter: 'blur(20px)',
+                WebkitBackdropFilter: 'blur(20px)',
+                borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
+              }}
             >
-              <div className="px-5 pb-5 pt-1 border-t border-white/[0.04] space-y-4">
-                
-                {/* Horizontally scrollable filter pills */}
-                {favourites.length > 0 && (
-                  <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
-                    {filterPills.map((pill) => {
-                      const isActive = filter === pill.id;
-                      return (
-                        <button
-                          key={pill.id}
-                          onClick={() => setFilter(pill.id)}
-                          className="px-3 py-1.5 rounded-full text-[10px] font-bold font-body whitespace-nowrap cursor-pointer transition-all border"
-                          style={{
-                            background: isActive ? 'rgba(201,169,110,0.18)' : 'transparent',
-                            color: isActive ? '#C9A96E' : 'rgba(255,255,255,0.4)',
-                            borderColor: isActive ? 'rgba(201,169,110,0.3)' : 'rgba(255,255,255,0.06)',
-                          }}
-                        >
-                          {pill.label}
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
+              <motion.button
+                whileTap={{ scale: 0.88 }}
+                onClick={() => setShowFavourites(false)}
+                className="flex-shrink-0 w-10 h-10 rounded-2xl flex items-center justify-center cursor-pointer"
+                style={{ background: 'rgba(255, 255, 255, 0.06)', border: '1px solid rgba(255, 255, 255, 0.10)' }}
+              >
+                <ArrowLeft size={18} className="text-white/80" strokeWidth={2} />
+              </motion.button>
+              <div className="flex-1 min-w-0 flex items-center gap-2">
+                <p
+                  className="text-[16px] font-extrabold"
+                  style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: 'rgba(255,255,255,0.92)' }}
+                >
+                  My Favourites
+                </p>
+                <span
+                  className="px-2 py-0.5 rounded-full text-[9px] font-extrabold font-body"
+                  style={{
+                    background: 'rgba(201,169,110,0.2)',
+                    color: '#C9A96E',
+                    border: '1px solid rgba(201,169,110,0.3)',
+                  }}
+                >
+                  {favourites.length}
+                </span>
+              </div>
+            </div>
 
-                {/* List of Favourited Items */}
-                {favourites.length > 0 ? (
-                  <div className="space-y-3">
-                    {favourites
-                      .filter((item) => filter === 'all' || item.type === filter)
-                      .map((item) => {
-                        const isBank = item.type === 'bank';
-                        if (isBank) {
-                          return (
+            {/* Scrollable Content */}
+            <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4 pb-12 flex flex-col">
+              {/* Horizontally scrollable filter pills */}
+              {favourites.length > 0 && (
+                <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1 flex-shrink-0">
+                  {filterPills.map((pill) => {
+                    const isActive = filter === pill.id;
+                    return (
+                      <button
+                        key={pill.id}
+                        onClick={() => setFilter(pill.id)}
+                        className="px-3 py-1.5 rounded-full text-[10px] font-bold font-body whitespace-nowrap cursor-pointer transition-all border"
+                        style={{
+                          background: isActive ? 'rgba(201,169,110,0.18)' : 'rgba(255,255,255,0.05)',
+                          color: isActive ? '#C9A96E' : 'rgba(255,255,255,0.4)',
+                          borderColor: isActive ? 'rgba(201,169,110,0.3)' : 'rgba(255,255,255,0.06)',
+                        }}
+                      >
+                        {pill.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Favourites list */}
+              {favourites.length > 0 && favourites.filter((item) => filter === 'all' || item.type === filter).length > 0 ? (
+                <div className="space-y-3">
+                  {favourites
+                    .filter((item) => filter === 'all' || item.type === filter)
+                    .map((item, idx) => {
+                      const isBank = item.type === 'bank';
+                      if (isBank) {
+                        return (
+                          <div key={item.id} className="relative group">
                             <motion.div
-                              key={item.id}
-                              initial={{ opacity: 0, scale: 0.95 }}
-                              animate={{ opacity: 1, scale: 1 }}
-                              exit={{ opacity: 0, scale: 0.95 }}
-                              className="relative overflow-hidden rounded-2xl p-4 border-l-[3px] flex items-center gap-3"
+                              whileTap={{ scale: 0.985 }}
+                              onClick={() => {
+                                const inst = financialInstitutions.find(fi => fi.name === item.lender);
+                                if (inst) {
+                                  setSelectedInstitution(inst);
+                                }
+                              }}
+                              className="overflow-hidden rounded-2xl p-4 border-l-[3px] flex items-center gap-3 cursor-pointer text-left"
                               style={{
                                 background: `linear-gradient(135deg, ${item.color}12 0%, ${item.colorAccent}08 100%)`,
                                 borderTop: `1px solid ${item.color}28`,
@@ -423,116 +591,242 @@ export default function ProfilePage() {
                                   Saved Bank
                                 </p>
                               </div>
-                              
-                              {/* Star Button */}
-                              <motion.button
-                                whileTap={{ scale: 0.85 }}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleRemoveFavourite(item.id);
-                                }}
-                                className="absolute top-3 right-3 p-1.5 rounded-full bg-black/20 hover:bg-black/30 cursor-pointer"
+                            </motion.div>
+                            
+                            {/* Star Button outside the main clickable area */}
+                            <motion.button
+                              whileTap={{ scale: 0.85 }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                e.preventDefault();
+                                handleStarRemovalWithAnimation(item.id);
+                              }}
+                              className="absolute top-3 right-3 p-1.5 rounded-full bg-black/20 hover:bg-black/30 cursor-pointer z-10"
+                            >
+                              <motion.div
+                                animate={removedFavId === item.id ? { scale: [1, 1.4, 0] } : { scale: 1 }}
+                                transition={{ duration: 0.3 }}
                               >
                                 <Star size={14} className="text-[#C9A96E]" fill="#C9A96E" />
-                              </motion.button>
-                            </motion.div>
-                          );
-                        }
+                              </motion.div>
+                            </motion.button>
+                          </div>
+                        );
+                      }
 
-                        // Replicated Account Card
-                        return (
+                      // Replicated Account Card
+                      // Look up the full product if available
+                      const fullProduct = allProducts.find((p) => p.id === item.id);
+                      const productData = (fullProduct || {
+                        id: item.id,
+                        name: item.name,
+                        lender: item.lender,
+                        category: item.type as any,
+                        description: 'Saved Account',
+                        highlights: [],
+                        documents: [],
+                        color: item.color,
+                        colorAccent: item.colorAccent,
+                        portalUrl: '',
+                        bankType: 'private' as any,
+                        metrics: {},
+                      }) as Product;
+
+                      const isTopPick = productData.topPick || ['hdfc-savings', 'equitas-savings', 'hdfc-fd', 'icici-cc', 'mudra-shishu'].includes(productData.id);
+                      const bankTypeLabel = getFormattedBankType(productData.bankType);
+                      const isProtected = productData.category === 'savings' || productData.category === 'fds' || 
+                                          (productData.highlights && productData.highlights.some(h => h.toLowerCase().includes('dicgc'))) || 
+                                          (productData.description && productData.description.toLowerCase().includes('dicgc'));
+                      const subtitleText = `${bankTypeLabel} · ${isProtected ? 'DICGC Protected' : 'RBI Registered'}`;
+                      const metricHighlight = getProductMetricHighlight(productData);
+                      const highlights = productData.highlights || [];
+
+                      return (
+                        <div key={item.id} className="relative group">
                           <motion.div
-                            key={item.id}
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.95 }}
-                            className="relative overflow-hidden rounded-2xl p-4 flex flex-col justify-between"
+                            whileTap={{ scale: 0.985 }}
+                            onClick={() => {
+                              setSelectedProduct(productData);
+                            }}
+                            className="overflow-hidden rounded-2xl cursor-pointer p-4 flex flex-col justify-between text-left"
                             style={{
                               background: `linear-gradient(135deg, color-mix(in srgb, ${item.color} 22%, transparent) 0%, color-mix(in srgb, ${item.colorAccent} 8%, transparent) 100%), #0d1117`,
                               borderTop: `1px solid color-mix(in srgb, ${item.color} 50%, transparent)`,
                               borderRight: `1px solid color-mix(in srgb, ${item.color} 50%, transparent)`,
                               borderBottom: `1px solid color-mix(in srgb, ${item.color} 50%, transparent)`,
                               borderLeft: `6px solid ${item.color}`,
+                              borderRadius: '16px',
                             }}
                           >
+                            {/* Ambient glow */}
+                            <div
+                              className="absolute -top-8 -right-8 w-28 h-28 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                              style={{ background: `color-mix(in srgb, ${item.color} 14%, transparent)` }}
+                            />
+
                             {/* Header Row */}
-                            <div className="flex items-center gap-3 min-w-0 pr-8">
-                              {/* Logo */}
-                              <div 
-                                className="w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center p-[6px] overflow-hidden"
-                                style={{
-                                  background: LOGO_BG_MAP[item.lender] ?? '#FFFFFF',
-                                  border: `1px solid color-mix(in srgb, ${item.color} 40%, transparent)`,
-                                  boxShadow: `0 0 10px color-mix(in srgb, ${item.color} 35%, transparent), 0 2px 8px rgba(0,0,0,0.15)`,
-                                }}
-                              >
-                                <img
-                                  src={`/logos/${BANK_LOGO_MAP[item.lender] || item.lender.toLowerCase().replace(/bank/gi, '').replace(/[^a-z0-9]/g, '').trim()}.png`}
-                                  alt={item.lender}
-                                  className="w-full h-full object-contain"
-                                  onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                                />
+                            <div className="relative z-10 flex items-center justify-between gap-3">
+                              {/* Left: Avatar + Bank Details */}
+                              <div className="flex items-center gap-3 min-w-0">
+                                {/* Bank Avatar */}
+                                <div
+                                  className="w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center p-[6px] overflow-hidden"
+                                  style={{
+                                    background: LOGO_BG_MAP[item.lender] ?? '#FFFFFF',
+                                    border: `1px solid color-mix(in srgb, ${item.color} 40%, transparent)`,
+                                    boxShadow: `0 0 10px color-mix(in srgb, ${item.color} 35%, transparent), 0 2px 8px rgba(0,0,0,0.15)`,
+                                  }}
+                                >
+                                  <img
+                                    src={`/logos/${BANK_LOGO_MAP[item.lender] || item.lender.toLowerCase().replace(/bank/gi, '').replace(/[^a-z0-9]/g, '').trim()}.png`}
+                                    alt={item.lender}
+                                    className="w-full h-full object-contain"
+                                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                                  />
+                                </div>
+                                
+                                {/* Bank Name + Subtitle */}
+                                <div className="flex flex-col min-w-0">
+                                  <span className="text-[14px] font-bold text-white leading-tight truncate">
+                                    {formatLenderName(item.lender)}
+                                  </span>
+                                  <span className="text-[11px] text-white/40 leading-tight mt-0.5 font-body">
+                                    {subtitleText}
+                                  </span>
+                                </div>
                               </div>
-                              
-                              <div className="flex flex-col min-w-0">
-                                <span className="text-[13px] font-bold text-white leading-tight truncate">
-                                  {item.lender}
-                                </span>
-                                <span className="text-[10px] text-white/40 leading-tight mt-0.5 font-body uppercase tracking-wider font-semibold">
-                                  {item.type}
-                                </span>
-                              </div>
+
+                              {/* Right: Top Pick Badge */}
+                              {isTopPick && (
+                                <div 
+                                  className="flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold"
+                                  style={{
+                                    backgroundColor: 'rgba(0, 229, 255, 0.08)',
+                                    color: '#00E5FF',
+                                    border: '1px solid rgba(0, 229, 255, 0.25)',
+                                  }}
+                                >
+                                  <span className="text-[10px] leading-none">★</span>
+                                  <span>Top Pick</span>
+                                </div>
+                              )}
                             </div>
-                            
+
+                            {/* Divider 1 */}
                             <div className="border-t border-white/[0.05] my-3" />
-                            
-                            <div>
-                              <h3 className="text-[16px] font-bold text-white tracking-tight leading-snug pr-8" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+
+                            {/* Product Name */}
+                            <div className="relative z-10">
+                              <h3
+                                className="text-[20px] font-bold text-white tracking-tight leading-snug pr-8"
+                                style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+                              >
                                 {item.name}
                               </h3>
                             </div>
-                            
-                            {/* Star Button */}
-                            <motion.button
-                              whileTap={{ scale: 0.85 }}
-                              onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleRemoveFavourite(item.id);
+
+                            {/* Key Metric Highlight */}
+                            <div className="relative z-10 flex items-baseline gap-2 mt-2.5">
+                              <span 
+                                className="text-[28px] font-bold leading-none tracking-tight"
+                                style={{ color: item.color }}
+                              >
+                                {metricHighlight.value}
+                              </span>
+                              <span className="text-[12px] text-white/35 font-body">
+                                {metricHighlight.subtitle}
+                              </span>
+                            </div>
+
+                            {/* Divider 2 */}
+                            {highlights.length > 0 && (
+                              <div className="border-t border-white/[0.05] my-3" />
+                            )}
+
+                            {/* Tags Row */}
+                            <div className="relative z-10 flex items-center justify-between gap-4">
+                              {/* Highlights */}
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                {highlights.slice(0, 3).map((h) => (
+                                  <span
+                                    key={h}
+                                    className="px-2 py-0.5 rounded text-[10px] font-body text-white/40 bg-white/[0.02] border border-white/[0.08]"
+                                  >
+                                    {h}
+                                  </span>
+                                ))}
+                              </div>
+                              <button
+                                className="flex items-center gap-1 px-3.5 py-1.5 rounded-xl text-[11px] font-bold border transition-all duration-300 hover:bg-[#00E5FF]/10 flex-shrink-0"
+                                style={{
+                                  borderColor: 'rgba(0, 229, 255, 0.35)',
+                                  color: '#00E5FF',
+                                  background: 'transparent',
                                 }}
-                              className="absolute top-3 right-3 p-1.5 rounded-full bg-black/20 hover:bg-black/30 cursor-pointer"
+                              >
+                                <span>View details</span>
+                                <span>→</span>
+                              </button>
+                            </div>
+                          </motion.div>
+                          
+                          {/* Star Button outside the main clickable area */}
+                          <motion.button
+                            whileTap={{ scale: 0.85 }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              e.preventDefault();
+                              handleStarRemovalWithAnimation(item.id);
+                            }}
+                            className="absolute top-3 right-3 p-1.5 rounded-full bg-black/20 hover:bg-black/30 cursor-pointer z-10"
+                          >
+                            <motion.div
+                              animate={removedFavId === item.id ? { scale: [1, 1.4, 0] } : { scale: 1 }}
+                              transition={{ duration: 0.3 }}
                             >
                               <Star size={14} className="text-[#C9A96E]" fill="#C9A96E" />
-                            </motion.button>
-                          </motion.div>
-                        );
-                      })}
-                      
-                    {favourites.filter((item) => filter === 'all' || item.type === filter).length === 0 && (
-                      <div className="text-center py-8 text-white/25 font-body text-xs">
-                        No saved items in this category
-                      </div>
-                    )}
+                            </motion.div>
+                          </motion.button>
+                        </div>
+                      );
+                    })}
+                </div>
+              ) : (
+                /* Empty State */
+                <div className="flex flex-col items-center justify-center py-20 px-4 text-center flex-1">
+                  <div className="w-16 h-16 rounded-full flex items-center justify-center bg-white/[0.02] border border-white/[0.05] mb-4">
+                    <Star size={24} className="text-[#C9A96E]/40" style={{ color: '#C9A96E' }} />
                   </div>
-                ) : (
-                  /* Empty State */
-                  <div className="flex flex-col items-center justify-center py-10 px-4 text-center">
-                    <div className="w-12 h-12 rounded-full flex items-center justify-center bg-white/[0.03] border border-white/[0.05] mb-3">
-                      <Star size={20} className="text-white/20" />
-                    </div>
-                    <p className="text-[13px] text-white/70 font-semibold" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-                      No favourites yet
-                    </p>
-                    <p className="font-body text-[11px] text-white/35 mt-1 max-w-[240px] leading-relaxed">
-                      Tap the ★ on any bank or account to save it here
-                    </p>
-                  </div>
-                )}
+                  <p className="text-[15px] text-white/60 font-semibold">
+                    No favourites yet
+                  </p>
+                  <p className="font-body text-[12px] text-white/30 mt-1.5 max-w-[240px] leading-relaxed">
+                    Tap the ★ on any bank or account to save it here
+                  </p>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.div>
+      <AnimatePresence>
+        {selectedProduct && (
+          <ProductDetailPage
+            product={selectedProduct}
+            onBack={() => setSelectedProduct(null)}
+          />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {selectedInstitution && (
+          <BankAccountPage
+            institution={selectedInstitution}
+            onBack={() => setSelectedInstitution(null)}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Settings groups */}
       <div className="space-y-3">

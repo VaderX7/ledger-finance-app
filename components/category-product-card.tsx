@@ -338,58 +338,29 @@ export default function CategoryProductCard({
   const metricHighlight = getProductMetricHighlight(product);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 14, scale: 0.97 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.96 }}
-      transition={{ type: 'spring', stiffness: 260, damping: 24, delay: index * 0.05 }}
-      whileTap={{ scale: 0.985 }}
-      onClick={() => onDetailsClick(product)}
-      className="relative overflow-hidden cursor-pointer group p-4 flex flex-col justify-between"
-      style={{
-        background: `linear-gradient(135deg, color-mix(in srgb, ${cardColor} 22%, transparent) 0%, color-mix(in srgb, ${cardColorAccent} 8%, transparent) 100%), #0d1117`,
-        borderTop: `1px solid color-mix(in srgb, ${cardColor} 50%, transparent)`,
-        borderRight: `1px solid color-mix(in srgb, ${cardColor} 50%, transparent)`,
-        borderBottom: `1px solid color-mix(in srgb, ${cardColor} 50%, transparent)`,
-        borderLeft: `6px solid ${cardColor}`,
-        borderRadius: '16px',
-      }}
-    >
-      {/* Ambient glow */}
-      <div
-        className="absolute -top-8 -right-8 w-28 h-28 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-        style={{ background: `color-mix(in srgb, ${cardColor} 14%, transparent)` }}
-      />
-
-      {/* Star Button */}
-      <motion.button
-        whileTap={{ scale: 0.85 }}
-        onClick={(e) => {
-          e.stopPropagation();
-          const added = toggleFavourite({
-            id: product.id,
-            type: product.category,
-            lender: product.lender,
-            name: product.name,
-            color: product.color,
-            colorAccent: product.colorAccent,
-            savedAt: Date.now(),
-          });
-          setIsFav(added);
+    <div className="relative group">
+      <motion.div
+        initial={{ opacity: 0, y: 14, scale: 0.97 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.96 }}
+        transition={{ type: 'spring', stiffness: 260, damping: 24, delay: index * 0.05 }}
+        whileTap={{ scale: 0.985 }}
+        onClick={() => onDetailsClick(product)}
+        className="overflow-hidden cursor-pointer p-4 flex flex-col justify-between"
+        style={{
+          background: `linear-gradient(135deg, color-mix(in srgb, ${cardColor} 22%, transparent) 0%, color-mix(in srgb, ${cardColorAccent} 8%, transparent) 100%), #0d1117`,
+          borderTop: `1px solid color-mix(in srgb, ${cardColor} 50%, transparent)`,
+          borderRight: `1px solid color-mix(in srgb, ${cardColor} 50%, transparent)`,
+          borderBottom: `1px solid color-mix(in srgb, ${cardColor} 50%, transparent)`,
+          borderLeft: `6px solid ${cardColor}`,
+          borderRadius: '16px',
         }}
-        className="absolute top-3 right-3 p-1.5 rounded-full bg-black/20 hover:bg-black/40 transition-colors z-10"
       >
-        <motion.div
-          animate={isFav ? { scale: [1, 1.4, 1] } : { scale: 1 }}
-          transition={{ duration: 0.3, type: 'spring', stiffness: 300, damping: 15 }}
-        >
-          <Star
-            size={16}
-            style={{ color: isFav ? '#C9A96E' : 'rgba(255,255,255,0.3)' }}
-            fill={isFav ? "#C9A96E" : "transparent"}
-          />
-        </motion.div>
-      </motion.button>
+        {/* Ambient glow */}
+        <div
+          className="absolute -top-8 -right-8 w-28 h-28 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+          style={{ background: `color-mix(in srgb, ${cardColor} 14%, transparent)` }}
+        />
 
       {/* Header Row */}
       <div className="relative z-10 flex items-center justify-between gap-3">
@@ -500,5 +471,37 @@ export default function CategoryProductCard({
         </button>
       </div>
     </motion.div>
+
+    {/* Star Button outside the card's clickable motion.div wrapper */}
+    <motion.button
+      whileTap={{ scale: 0.85 }}
+      onClick={(e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        const added = toggleFavourite({
+          id: product.id,
+          type: product.category,
+          lender: product.lender,
+          name: product.name,
+          color: product.color,
+          colorAccent: product.colorAccent,
+          savedAt: Date.now(),
+        });
+        setIsFav(added);
+      }}
+      className="absolute top-3 right-3 p-1.5 rounded-full bg-black/20 hover:bg-black/40 transition-colors z-10"
+    >
+      <motion.div
+        animate={isFav ? { scale: [1, 1.4, 1] } : { scale: 1 }}
+        transition={{ duration: 0.3, type: 'spring', stiffness: 300, damping: 15 }}
+      >
+        <Star
+          size={16}
+          style={{ color: isFav ? '#C9A96E' : 'rgba(255,255,255,0.3)' }}
+          fill={isFav ? "#C9A96E" : "transparent"}
+        />
+      </motion.div>
+    </motion.button>
+  </div>
   );
 }

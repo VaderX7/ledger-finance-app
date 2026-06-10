@@ -735,25 +735,139 @@ function BankCard({ group, setSelectedBank, logoErrors, setLogoErrors }: BankCar
   const highlights = firstProduct.highlights.slice(0, 3);
 
   return (
-    <motion.div
-      whileTap={{ scale: 0.985 }}
-      onClick={() => setSelectedBank(lender)}
-      className="relative overflow-hidden rounded-2xl cursor-pointer group p-4 border-l-[3px]"
-      style={{
-        background: `linear-gradient(135deg, ${color}12 0%, ${colorAccent}08 100%)`,
-        borderTop: `1px solid ${color}28`,
-        borderRight: `1px solid ${color}28`,
-        borderBottom: `1px solid ${color}28`,
-        borderLeftColor: color,
-      }}
-    >
-      <div className="absolute -top-8 -right-8 w-28 h-28 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" style={{ background: `${color}14` }} />
+    <div className="relative group">
+      <motion.div
+        whileTap={{ scale: 0.985 }}
+        onClick={() => setSelectedBank(lender)}
+        className="overflow-hidden rounded-2xl cursor-pointer p-4 border-l-[3px]"
+        style={{
+          background: `linear-gradient(135deg, ${color}12 0%, ${colorAccent}08 100%)`,
+          borderTop: `1px solid ${color}28`,
+          borderRight: `1px solid ${color}28`,
+          borderBottom: `1px solid ${color}28`,
+          borderLeftColor: color,
+        }}
+      >
+        <div className="absolute -top-8 -right-8 w-28 h-28 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" style={{ background: `${color}14` }} />
 
-      {/* Star Button */}
+        <div className="flex items-center gap-3 mb-3">
+          {/* Logo Container */}
+          <div 
+            className="w-12 h-12 rounded-xl flex-shrink-0 flex items-center justify-center p-[6px] overflow-hidden"
+            style={{
+              background: LOGO_BG_MAP[lender] ?? '#FFFFFF',
+              border: `1px solid ${color}40`,
+              boxShadow: `0 0 10px ${color}35, 0 2px 8px rgba(0,0,0,0.15)`,
+            }}
+          >
+            {!hasLogoError ? (
+              <Image
+                src={logoUrl}
+                alt={`${lender} logo`}
+                width={40}
+                height={40}
+                className="object-contain w-full h-full"
+                onError={() => {
+                  setLogoErrors((prev) => ({ ...prev, [bankLogoId]: true }));
+                }}
+              />
+            ) : (
+              <div 
+                className="w-full h-full rounded-full flex items-center justify-center text-[10px] font-extrabold tracking-wider border"
+                style={{ 
+                  borderColor: `${color}40`,
+                  color: color, 
+                  background: `${color}08`
+                }}
+              >
+                {getBankInitials(lender)}
+              </div>
+            )}
+          </div>
+
+          {/* Bank Name and Sector Badge */}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-start justify-between gap-2">
+              <h3 className="text-[16px] leading-tight text-white/95 truncate pr-1" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800 }}>
+                {lender}
+              </h3>
+            </div>
+            <div className="flex items-center gap-1.5 mt-1">
+              <span 
+                className="text-[8px] font-body px-1.5 py-0.5 rounded-full font-bold uppercase tracking-wider"
+                style={{
+                  background: firstProduct.bankType === 'public' 
+                    ? 'rgba(201,169,110,0.12)' 
+                    : firstProduct.bankType === 'private'
+                    ? 'rgba(56,189,248,0.12)'
+                    : firstProduct.bankType === 'sfb'
+                    ? 'rgba(45,212,191,0.12)'
+                    : 'rgba(251,113,133,0.12)',
+                  color: firstProduct.bankType === 'public' 
+                    ? '#C9A96E' 
+                    : firstProduct.bankType === 'private'
+                    ? '#38BDF8'
+                    : firstProduct.bankType === 'sfb'
+                    ? '#2DD4BF'
+                    : '#FB7185',
+                  border: `1px solid ${
+                    firstProduct.bankType === 'public' 
+                      ? 'rgba(201,169,110,0.25)' 
+                      : firstProduct.bankType === 'private'
+                      ? 'rgba(56,189,248,0.25)'
+                      : firstProduct.bankType === 'sfb'
+                      ? 'rgba(45,212,191,0.25)'
+                      : 'rgba(251,113,133,0.25)'
+                  }`
+                }}
+              >
+                {bankTypeName}
+              </span>
+              <span className="w-1 h-1 rounded-full bg-white/20" />
+              <span className="text-[11px] text-white/50 font-body">
+                {group.products.length} {group.products.length === 1 ? 'savings option' : 'savings options'}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3 mb-3">
+          <div className="rounded-lg px-2.5 py-2" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
+            <p className="font-body text-[9px] text-white/30 mb-0.5 uppercase tracking-wide">Interest Rate</p>
+            <p className="text-[12px] font-bold" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: '#00F5A0' }}>
+              {rateRange}
+            </p>
+          </div>
+          <div className="rounded-lg px-2.5 py-2" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
+            <p className="font-body text-[9px] text-white/30 mb-0.5 uppercase tracking-wide">Best For</p>
+            <p className="text-[12px] font-bold truncate" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: '#00F5A0' }}>
+              {getBestUSP(group.products)}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1.5 flex-wrap">
+            {highlights.map((h) => (
+              <span
+                key={h}
+                className="px-2 py-0.5 rounded-md text-[9px] font-body text-white/40"
+                style={{ background: `${color}10`, border: `1px solid ${color}1e` }}
+              >
+                {h}
+              </span>
+            ))}
+          </div>
+          <ChevronRight size={16} className="text-white/30 group-hover:text-white/70 transition-colors" />
+        </div>
+      </motion.div>
+
+      {/* Star Button outside card's motion.div wrapper */}
       <motion.button
         whileTap={{ scale: 0.85 }}
         onClick={(e) => {
           e.stopPropagation();
+          e.preventDefault();
           const cardId = 'bank-' + lender;
           const added = toggleFavourite({
             id: cardId,
@@ -780,118 +894,7 @@ function BankCard({ group, setSelectedBank, logoErrors, setLogoErrors }: BankCar
           />
         </motion.div>
       </motion.button>
-
-      <div className="flex items-center gap-3 mb-3">
-        {/* Logo Container */}
-        <div 
-          className="w-12 h-12 rounded-xl flex-shrink-0 flex items-center justify-center p-[6px] overflow-hidden"
-          style={{
-            background: LOGO_BG_MAP[lender] ?? '#FFFFFF',
-            border: `1px solid ${color}40`,
-            boxShadow: `0 0 10px ${color}35, 0 2px 8px rgba(0,0,0,0.15)`,
-          }}
-        >
-          {!hasLogoError ? (
-            <Image
-              src={logoUrl}
-              alt={`${lender} logo`}
-              width={40}
-              height={40}
-              className="object-contain w-full h-full"
-              onError={() => {
-                setLogoErrors((prev) => ({ ...prev, [bankLogoId]: true }));
-              }}
-            />
-          ) : (
-            <div 
-              className="w-full h-full rounded-full flex items-center justify-center text-[10px] font-extrabold tracking-wider border"
-              style={{ 
-                borderColor: `${color}40`,
-                color: color, 
-                background: `${color}08`
-              }}
-            >
-              {getBankInitials(lender)}
-            </div>
-          )}
-        </div>
-
-        {/* Bank Name and Sector Badge */}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-start justify-between gap-2">
-            <h3 className="text-[16px] leading-tight text-white/95 truncate pr-1" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800 }}>
-              {lender}
-            </h3>
-          </div>
-          <div className="flex items-center gap-1.5 mt-1">
-            <span 
-              className="text-[8px] font-body px-1.5 py-0.5 rounded-full font-bold uppercase tracking-wider"
-              style={{
-                background: firstProduct.bankType === 'public' 
-                  ? 'rgba(201,169,110,0.12)' 
-                  : firstProduct.bankType === 'private'
-                  ? 'rgba(56,189,248,0.12)'
-                  : firstProduct.bankType === 'sfb'
-                  ? 'rgba(45,212,191,0.12)'
-                  : 'rgba(251,113,133,0.12)',
-                color: firstProduct.bankType === 'public' 
-                  ? '#C9A96E' 
-                  : firstProduct.bankType === 'private'
-                  ? '#38BDF8'
-                  : firstProduct.bankType === 'sfb'
-                  ? '#2DD4BF'
-                  : '#FB7185',
-                border: `1px solid ${
-                  firstProduct.bankType === 'public' 
-                    ? 'rgba(201,169,110,0.25)' 
-                    : firstProduct.bankType === 'private'
-                    ? 'rgba(56,189,248,0.25)'
-                    : firstProduct.bankType === 'sfb'
-                    ? 'rgba(45,212,191,0.25)'
-                    : 'rgba(251,113,133,0.25)'
-                }`
-              }}
-            >
-              {bankTypeName}
-            </span>
-            <span className="w-1 h-1 rounded-full bg-white/20" />
-            <span className="text-[11px] text-white/50 font-body">
-              {group.products.length} {group.products.length === 1 ? 'savings option' : 'savings options'}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-3 mb-3">
-        <div className="rounded-lg px-2.5 py-2" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
-          <p className="font-body text-[9px] text-white/30 mb-0.5 uppercase tracking-wide">Interest Rate</p>
-          <p className="text-[12px] font-bold" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: '#00F5A0' }}>
-            {rateRange}
-          </p>
-        </div>
-        <div className="rounded-lg px-2.5 py-2" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
-          <p className="font-body text-[9px] text-white/30 mb-0.5 uppercase tracking-wide">Best For</p>
-          <p className="text-[12px] font-bold truncate" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: '#00F5A0' }}>
-            {getBestUSP(group.products)}
-          </p>
-        </div>
-      </div>
-
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1.5 flex-wrap">
-          {highlights.map((h) => (
-            <span
-              key={h}
-              className="px-2 py-0.5 rounded-md text-[9px] font-body text-white/40"
-              style={{ background: `${color}10`, border: `1px solid ${color}1e` }}
-            >
-              {h}
-            </span>
-          ))}
-        </div>
-        <ChevronRight size={16} className="text-white/30 group-hover:text-white/70 transition-colors" />
-      </div>
-    </motion.div>
+    </div>
   );
 }
 
