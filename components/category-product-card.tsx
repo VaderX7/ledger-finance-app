@@ -139,6 +139,35 @@ const LOGO_BG_MAP: Record<string, string> = {
   'Unity Small Finance Bank': '#fdc937',
 };
 
+function generateCardShade(baseColor: string, index: number): { color: string; colorAccent: string } {
+  // Parse the base hex color and shift hue/lightness slightly per index
+  const shadeVariants = [
+    { lighten: 0, saturate: 0 },    // index 0: original
+    { lighten: 15, saturate: -10 }, // index 1: lighter
+    { lighten: -12, saturate: 10 }, // index 2: darker/richer
+    { lighten: 20, saturate: 15 },  // index 3: bright
+    { lighten: -20, saturate: -5 }, // index 4: deep/muted
+    { lighten: 8, saturate: 20 },   // index 5: vivid
+    { lighten: -8, saturate: -15 }, // index 6: cool/muted
+    { lighten: 25, saturate: 5 },   // index 7: very light
+    { lighten: -25, saturate: 8 },  // index 8: very deep
+    { lighten: 12, saturate: -20 }, // index 9: soft
+  ];
+
+  const variant = shadeVariants[index % shadeVariants.length];
+
+  // Use CSS color-mix or a simple hex manipulation
+  // Easiest: mix the base color with white (lighten) or black (darken)
+  const mixRatio = Math.abs(variant.lighten);
+  const mixColor = variant.lighten > 0 ? '#ffffff' : '#000000';
+
+  // Return as CSS color-mix string for the color, slightly shifted accent
+  return {
+    color: `color-mix(in srgb, ${baseColor} ${100 - mixRatio}%, ${mixColor})`,
+    colorAccent: `color-mix(in srgb, ${baseColor} ${90 - mixRatio}%, ${variant.lighten > 0 ? '#ffffff' : '#001133'})`,
+  };
+}
+
 interface CategoryProductCardProps {
   product: Product;
   index: number;
@@ -288,7 +317,8 @@ export default function CategoryProductCard({
   const isTopPick = product.topPick || ['hdfc-savings', 'equitas-savings', 'hdfc-fd', 'icici-cc', 'mudra-shishu'].includes(product.id);
   
   const bankInitials = getBankInitials(product.lender);
-  const avatarBgColor = product.color || '#C9A96E';
+  const baseColor = product.color || '#C9A96E';
+  const { color: cardColor, colorAccent: cardColorAccent } = generateCardShade(baseColor, index);
   const bankTypeLabel = getFormattedBankType(product.bankType);
 
   const isProtected = product.category === 'savings' || product.category === 'fds' || 
@@ -313,14 +343,14 @@ export default function CategoryProductCard({
         borderTop: '1px solid rgba(0, 229, 255, 0.12)',
         borderRight: '1px solid rgba(0, 229, 255, 0.12)',
         borderBottom: '1px solid rgba(0, 229, 255, 0.12)',
-        borderLeft: `3px solid ${product.color || '#C9A96E'}`,
+        borderLeft: `3px solid ${cardColor}`,
         borderRadius: '16px',
       }}
     >
       {/* Ambient glow */}
       <div
         className="absolute -top-8 -right-8 w-28 h-28 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-        style={{ background: `${product.color}14` }}
+        style={{ background: `color-mix(in srgb, ${cardColor} 14%, transparent)` }}
       />
 
       {/* Header Row */}
@@ -332,8 +362,8 @@ export default function CategoryProductCard({
             className="w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center p-[6px] overflow-hidden"
             style={{
               background: LOGO_BG_MAP[product.lender] ?? '#FFFFFF',
-              border: `1px solid ${(product.color || '#C9A96E')}40`,
-              boxShadow: `0 0 10px ${(product.color || '#C9A96E')}35, 0 2px 8px rgba(0,0,0,0.15)`,
+              border: `1px solid color-mix(in srgb, ${cardColor} 40%, transparent)`,
+              boxShadow: `0 0 10px color-mix(in srgb, ${cardColor} 35%, transparent), 0 2px 8px rgba(0,0,0,0.15)`,
             }}
           >
             <img 
