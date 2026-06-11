@@ -1254,7 +1254,11 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
   const showSavingsLevel2 = category === 'savings' && selectedBank !== null;
 
   return (
-    <>
+    <motion.div
+      layoutId={`card-${category}`}
+      className="fixed inset-0 z-[50] bg-[#070A12]"
+      transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+    >
       <AnimatePresence mode="wait">
         {!showSavingsLevel2 ? (
           <motion.div
@@ -1747,6 +1751,6 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
         onClose={handleSheetClose}
 
       />
-    </>
+    </motion.div>
   );
 }
