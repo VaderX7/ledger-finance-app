@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { Shield, Eye, EyeOff, Bell, Globe, ChevronRight, Moon, HelpCircle, FileText, Info, LogOut, X, Check, Star, ArrowLeft } from 'lucide-react';
+import { Shield, Eye, EyeOff, Bell, Globe, ChevronRight, Moon, HelpCircle, FileText, Info, LogOut, X, Check, Star, ArrowLeft, UserPen } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useLang } from '@/context/LanguageContext';
 import { getFavourites, toggleFavourite, FavouriteItem } from '@/lib/favourites';
@@ -14,6 +14,7 @@ import { getProducts } from '@/lib/data-fetcher';
 import { Product } from '@/lib/products';
 import { financialInstitutions, FinancialInstitution } from '@/lib/institutions';
 import { useAuth } from '@/context/AuthContext';
+import { saveUserNameToCloud } from '@/lib/userProfile';
 
 function getFormattedBankType(bankType: string): string {
   if (!bankType) return '';
@@ -251,6 +252,151 @@ function LanguageSelectSheet({
   );
 }
 
+function EditProfileSheet({
+  isOpen,
+  currentName,
+  userUid,
+  onSave,
+  onClose,
+}: {
+  isOpen: boolean;
+  currentName: string;
+  userUid?: string;
+  onSave: (name: string) => void;
+  onClose: () => void;
+}) {
+  const [editName, setEditName] = useState(currentName);
+  const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      setEditName(currentName);
+      setSaved(false);
+    }
+  }, [isOpen, currentName]);
+
+  const handleSave = () => {
+    const trimmedName = editName.trim();
+    const raw = localStorage.getItem('ledger_user');
+    const userObj = raw ? JSON.parse(raw) : {};
+    userObj.name = trimmedName;
+    localStorage.setItem('ledger_user', JSON.stringify(userObj));
+    if (userUid) {
+      saveUserNameToCloud(userUid, trimmedName).catch(console.error);
+    }
+    onSave(trimmedName);
+    setSaved(true);
+    setTimeout(() => {
+      setSaved(false);
+      onClose();
+    }, 1500);
+  };
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/60 z-50 max-w-md mx-auto"
+            onClick={onClose}
+          />
+          <motion.div
+            initial={{ y: '100%' }}
+            animate={{ y: 0 }}
+            exit={{ y: '100%' }}
+            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+            className="fixed bottom-0 inset-x-0 mx-auto max-w-md bg-[#0D1220] rounded-t-3xl z-50 overflow-hidden flex flex-col"
+            style={{
+              borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+              boxShadow: '0 -4px 40px rgba(0, 0, 0, 0.6)',
+              maxHeight: '70vh',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-center pt-3 pb-1 flex-shrink-0">
+              <div className="w-8 h-1 rounded-full bg-white/10" />
+            </div>
+            <div className="flex items-center justify-between px-5 py-3 border-b border-white/[0.06] flex-shrink-0">
+              <p
+                style={{
+                  fontFamily: "'Plus Jakarta Sans', sans-serif",
+                  fontWeight: 700,
+                  color: 'rgba(255, 255, 255, 0.88)',
+                  fontSize: 15,
+                }}
+              >
+                Edit Profile
+              </p>
+              <button onClick={onClose} className="p-1 rounded-lg hover:bg-white/5 transition-all">
+                <X size={18} className="text-white/40" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto px-5 pt-5 pb-8 space-y-6">
+              {/* Name field */}
+              <div>
+                <label
+                  className="block text-[11px] font-bold uppercase tracking-wider mb-2"
+                  style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: 'rgba(255,255,255,0.35)' }}
+                >
+                  Display Name
+                </label>
+                <input
+                  type="text"
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  placeholder="Your name"
+                  className="w-full outline-none text-[14px] font-semibold"
+                  style={{
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.08)',
+                    color: 'rgba(255,255,255,0.88)',
+                    borderRadius: 12,
+                    padding: '12px 16px',
+                    fontFamily: "'Plus Jakarta Sans', sans-serif",
+                  }}
+                  onFocus={(e) => { e.currentTarget.style.borderColor = 'rgba(201,169,110,0.4)'; }}
+                  onBlur={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; }}
+                />
+              </div>
+
+              {/* Save button / Saved feedback */}
+              {saved ? (
+                <div
+                  className="w-full py-3.5 rounded-2xl flex items-center justify-center text-[14px] font-bold"
+                  style={{
+                    background: 'rgba(45,212,191,0.12)',
+                    color: '#2DD4BF',
+                    border: '1px solid rgba(45,212,191,0.25)',
+                    fontFamily: "'Plus Jakarta Sans', sans-serif",
+                  }}
+                >
+                  Saved ✓
+                </div>
+              ) : (
+                <motion.button
+                  whileTap={{ scale: 0.97 }}
+                  onClick={handleSave}
+                  className="w-full py-3.5 rounded-2xl text-[14px] font-bold text-white"
+                  style={{
+                    background: 'linear-gradient(135deg, #C9A96E, #B8924A)',
+                    fontFamily: "'Plus Jakarta Sans', sans-serif",
+                  }}
+                >
+                  Save Changes
+                </motion.button>
+              )}
+            </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+  );
+}
+
 export default function ProfilePage() {
   const { lang, setLang, t } = useLang();
   const router = useRouter();
@@ -266,6 +412,8 @@ export default function ProfilePage() {
 
   const [avatarError, setAvatarError] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [showEditProfile, setShowEditProfile] = useState(false);
+  const [userName, setUserName] = useState('');
 
   useEffect(() => {
     setAvatarError(false);
@@ -274,6 +422,13 @@ export default function ProfilePage() {
   useEffect(() => {
     setFavourites(getFavourites());
     getProducts().then(setAllProducts).catch(console.error);
+    try {
+      const raw = localStorage.getItem('ledger_user');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed?.name) setUserName(parsed.name);
+      }
+    } catch {}
   }, [user, authLoading]);
 
   const handleGoogleSignIn = async () => {
@@ -376,11 +531,7 @@ export default function ProfilePage() {
     router.replace('/setup');
   };
 
-  let savedName = '';
-  try {
-    const raw = typeof window !== 'undefined' ? localStorage.getItem('ledger_user') : null;
-    if (raw) savedName = JSON.parse(raw)?.name ?? '';
-  } catch {}
+  const displayedName = userName || user?.displayName || '';
 
   return (
     <div className="min-h-screen bg-[#070A12] px-5 pt-14 pb-28">
@@ -419,17 +570,17 @@ export default function ProfilePage() {
             {user && user.photoURL && !avatarError ? (
               <img
                 src={user.photoURL}
-                alt={user.displayName || 'User'}
+                alt={displayedName || 'User'}
                 className="w-full h-full object-cover"
                 onError={() => setAvatarError(true)}
               />
             ) : user ? (
               <span style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800, color: '#C9A96E', fontSize: 22 }}>
-                {(user.displayName || user.email || 'U').charAt(0).toUpperCase()}
+                {(displayedName || user.email || 'U').charAt(0).toUpperCase()}
               </span>
-            ) : savedName ? (
+            ) : userName ? (
               <span style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800, color: '#C9A96E', fontSize: 22 }}>
-                {savedName.charAt(0).toUpperCase()}
+                {userName.charAt(0).toUpperCase()}
               </span>
             ) : (
               <Shield size={26} style={{ color: '#C9A96E' }} strokeWidth={1.5} />
@@ -440,7 +591,7 @@ export default function ProfilePage() {
               className="text-[18px] text-white/90 truncate"
               style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800 }}
             >
-              {user ? (user.displayName || 'User') : (savedName || t.anonymousUser)}
+              {displayedName || t.anonymousUser}
             </p>
             {user ? (
               <p className="font-body text-[11px] text-white/40 mt-0.5 truncate">{user.email}</p>
@@ -489,6 +640,47 @@ export default function ProfilePage() {
             </motion.button>
           </div>
         )}
+      </motion.div>
+
+      {/* Edit Profile row */}
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.12, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+        className="rounded-2xl overflow-hidden mb-3"
+        style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.06)' }}
+      >
+        <motion.button
+          whileTap={{ scale: 0.99 }}
+          onClick={() => {
+            try {
+              const raw = localStorage.getItem('ledger_user');
+              if (raw) {
+                const parsed = JSON.parse(raw);
+                if (parsed?.name) setUserName(parsed.name);
+              }
+            } catch {}
+            setFavourites(getFavourites());
+            setShowEditProfile(true);
+          }}
+          className="w-full flex items-center justify-between px-5 py-4 cursor-pointer text-left"
+        >
+          <div className="flex items-center gap-3">
+            <div
+              className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
+              style={{ background: 'rgba(45,212,191,0.12)' }}
+            >
+              <UserPen size={14} style={{ color: '#2DD4BF' }} strokeWidth={2} />
+            </div>
+            <div>
+              <p className="text-[13px] text-white/75 font-semibold" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+                Edit Profile
+              </p>
+              <p className="font-body text-[10px] text-white/28">Update your name and favourites</p>
+            </div>
+          </div>
+          <ChevronRight size={15} className="text-white/20" />
+        </motion.button>
       </motion.div>
 
       {/* My Favourites settings row */}
@@ -999,6 +1191,16 @@ export default function ProfilePage() {
       >
         {t.footerNote}
       </motion.p>
+
+      <EditProfileSheet
+        isOpen={showEditProfile}
+        currentName={user ? (user.displayName || '') : userName}
+        userUid={user?.uid}
+        onSave={(name) => {
+          setUserName(name);
+        }}
+        onClose={() => setShowEditProfile(false)}
+      />
 
       <LanguageSelectSheet
         isOpen={isLangSheetOpen}

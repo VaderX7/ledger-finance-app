@@ -14,6 +14,8 @@ import {
 import { useLang } from '@/context/LanguageContext';
 import LedgerLogo from '@/components/LedgerLogo';
 import { useAuth } from '@/context/AuthContext';
+import { saveUserNameToCloud, loadUserNameFromCloud } from '@/lib/userProfile';
+import { auth } from '@/lib/firebase';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -222,13 +224,27 @@ function SplashStep({ onNext }: { onNext: () => void }) {
   );
 }
 
-function GoogleStep({ onNext, onBack, onSkip }: { onNext: () => void; onBack: () => void; onSkip: () => void }) {
+function GoogleStep({ onNext, onBack, onSkip, onReturningUser }: { onNext: () => void; onBack: () => void; onSkip: () => void; onReturningUser: (name: string) => void }) {
   const [loading, setLoading] = useState(false);
   const { signIn } = useAuth();
 
   const handleGoogle = async () => {
     setLoading(true);
     await signIn();
+
+    // Check if returning user — load name directly from Firestore
+    try {
+      const currentUser = auth.currentUser;
+      if (currentUser) {
+        const cloudName = await loadUserNameFromCloud(currentUser.uid);
+        if (cloudName) {
+          setLoading(false);
+          onReturningUser(cloudName);
+          return;
+        }
+      }
+    } catch {}
+
     setLoading(false);
     onNext();
   };
@@ -638,6 +654,12 @@ function DoneStep({ profile }: { profile: UserProfile }) {
     localStorage.setItem('ledger_user', JSON.stringify(profile));
     setLang(profile.language);
 
+    // Sync display name to Firestore if Google user
+    const currentUser = auth.currentUser;
+    if (currentUser?.uid && profile.name) {
+      saveUserNameToCloud(currentUser.uid, profile.name).catch(console.error);
+    }
+
     const timer = setTimeout(() => {
       router.replace('/');
     }, 2800);
@@ -678,9 +700,11 @@ function DoneStep({ profile }: { profile: UserProfile }) {
         animate={{ opacity: 1, y: 0 }}
         transition={{ ...easeOut, delay: 0.45 }}
         className="text-[30px] tracking-[-0.04em] mb-3"
-        style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800, color: 'rgba(255,255,255,0.95)' }}
+        style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800, color: profile.googleConnected && profile.name ? GOLD : 'rgba(255,255,255,0.95)' }}
       >
-        You're all set{profile.name ? `, ${profile.name.trim()}` : ''}!
+        {profile.googleConnected && profile.name
+          ? `Welcome Back, ${profile.name.trim()}!`
+          : `You're all set${profile.name ? `, ${profile.name.trim()}` : ''}!`}
       </motion.h2>
 
       <motion.p
@@ -791,6 +815,10 @@ export default function SetupPage() {
                 }}
                 onBack={goBack}
                 onSkip={goNext}
+                onReturningUser={(name) => {
+                  setProfile((p) => ({ ...p, name, googleConnected: true }));
+                  setStepIndex(STEP_ORDER.length - 1); // jump to done
+                }}
               />
             )}
             {currentStep === 'name' && (

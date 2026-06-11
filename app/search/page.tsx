@@ -2,12 +2,13 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, X, ArrowUpRight, ChevronRight, PiggyBank, FileText, TrendingUp, CreditCard, Landmark, Flag, Shield } from 'lucide-react';
+import { Search, X, ArrowUpRight, ChevronRight, PiggyBank, FileText, TrendingUp, CreditCard, Landmark, Flag, Shield, Sparkles, Brain, BarChart2, Calculator } from 'lucide-react';
 import { Product, ProductCategory } from '@/lib/products';
 import { getProducts, getProductsByCategory } from '@/lib/data-fetcher';
 import { useLang } from '@/context/LanguageContext';
 import ProductCategoryView from '@/components/product-category-view';
 import BankBrowserPage from '@/components/bank-browser-page';
+import Link from 'next/link';
 
 type SearchView = 'search' | ProductCategory | 'banks';
 
@@ -304,6 +305,72 @@ export default function SearchPage() {
                 </div>
               </motion.button>
 
+              {/* AI Financial Advisor — hero card */}
+              <Link href="/tools?tool=ai-advisor">
+                <motion.div
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ type: 'spring', stiffness: 220, damping: 26, delay: 0.38 }}
+                  whileTap={{ scale: 0.97 }}
+                  className="w-full relative overflow-hidden rounded-2xl p-5 text-left mb-6 cursor-pointer"
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(139,92,246,0.18) 0%, rgba(99,102,241,0.08) 100%)',
+                    border: '1px solid rgba(139,92,246,0.35)',
+                    boxShadow: '0 8px 32px rgba(139,92,246,0.12)',
+                  }}
+                >
+                  {/* Shimmer sweep */}
+                  <motion.div
+                    animate={{ x: ['-100%', '200%'] }}
+                    transition={{ duration: 3, repeat: Infinity, ease: 'linear', delay: 1.5 }}
+                    className="absolute inset-y-0 w-1/3 skew-x-12 pointer-events-none"
+                    style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent)' }}
+                  />
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div
+                        className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                        style={{ background: 'rgba(139,92,246,0.20)', border: '1px solid rgba(139,92,246,0.35)' }}
+                      >
+                        <Brain size={20} style={{ color: '#A78BFA' }} strokeWidth={2} />
+                      </div>
+                      <div>
+                        <p
+                          className="text-[11px] uppercase tracking-widest font-bold mb-0.5"
+                          style={{ color: '#A78BFA', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+                        >
+                          AI POWERED
+                        </p>
+                        <h3
+                          className="text-[20px] tracking-tight text-white/95"
+                          style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800 }}
+                        >
+                          AI Financial Advisor
+                        </h3>
+                        <p
+                          className="text-[11px] text-white/35 mt-0.5"
+                          style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+                        >
+                          Ask anything about your finances, get personalized advice
+                      </p>
+                    </div>
+                  </div>
+                  <div
+                    className="px-4 py-2 rounded-xl flex-shrink-0 ml-2 flex items-center gap-1.5"
+                    style={{ background: 'rgba(139,92,246,0.20)', border: '1px solid rgba(139,92,246,0.35)' }}
+                  >
+                    <span
+                      className="text-[12px] font-bold"
+                      style={{ color: '#A78BFA', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+                    >
+                      Try Now
+                    </span>
+                    <span className="text-[12px]" style={{ color: '#A78BFA' }}>→</span>
+                  </div>
+                </div>
+              </motion.div>
+              </Link>
+
               {/* Section heading — product type */}
               <motion.p
                 initial={{ opacity: 0 }}
@@ -367,6 +434,59 @@ export default function SearchPage() {
                     </motion.button>
                   );
                 })}
+              </div>
+
+              {/* Financial Calculators */}
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.6 }}
+                className="text-[10px] tracking-widest uppercase text-white/25 mb-4 mt-8"
+                style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700 }}
+              >
+                FINANCIAL CALCULATORS
+              </motion.p>
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { label: 'SIP Calculator', desc: 'Plan your investments', icon: TrendingUp, color: '#00F5A0', id: 'sip' },
+                  { label: 'EMI Calculator', desc: 'Calculate loan EMIs', icon: Landmark, color: '#FB7185', id: 'emi' },
+                  { label: 'FD Calculator', desc: 'Fixed deposit returns', icon: PiggyBank, color: '#C9A96E', id: 'fd' },
+                  { label: 'Tax on FD', desc: 'Tax on FD interest', icon: Calculator, color: '#FF9933', id: 'fdtax' },
+                ].map((tool, i) => (
+                  <Link key={tool.label} href={`/tools?tool=${tool.id}`}>
+                    <motion.button
+                      initial={{ opacity: 0, y: 16 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ type: 'spring', stiffness: 220, damping: 26, delay: 0.65 + i * 0.05 }}
+                      whileTap={{ scale: 0.96 }}
+                      className="relative overflow-hidden rounded-2xl p-4 text-left w-full"
+                      style={{
+                        background: `linear-gradient(135deg, ${tool.color}10 0%, ${tool.color}06 100%)`,
+                        border: `1px solid ${tool.color}25`,
+                      }}
+                    >
+                      <div
+                        className="w-9 h-9 rounded-xl flex items-center justify-center mb-2.5"
+                        style={{ background: `${tool.color}18` }}
+                      >
+                        <tool.icon size={16} style={{ color: tool.color }} strokeWidth={1.75} />
+                      </div>
+                      <p
+                        className="text-[13px] leading-tight mb-0.5"
+                        style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, color: 'rgba(255,255,255,0.85)' }}
+                      >
+                        {tool.label}
+                      </p>
+                      <p className="font-body text-[10px] leading-relaxed" style={{ color: 'rgba(255,255,255,0.30)' }}>
+                        {tool.desc}
+                      </p>
+                      <div
+                        className="absolute bottom-0 left-0 right-0 h-px"
+                        style={{ background: `linear-gradient(90deg, transparent, ${tool.color}50, transparent)` }}
+                      />
+                    </motion.button>
+                  </Link>
+                ))}
               </div>
             </>
           )}

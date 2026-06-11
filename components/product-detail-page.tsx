@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { useLang } from '@/context/LanguageContext';
 import { TranslationKey } from '@/lib/i18n';
+import { isFavourited, toggleFavourite } from '@/lib/favourites';
 import JargonText from './jargon-text';
 import JargonBottomSheet from './jargon-bottom-sheet';
 
@@ -187,6 +188,7 @@ export default function ProductDetailPage({ product, onBack }: ProductDetailPage
   const [selectedTerm, setSelectedTerm] = useState<string | null>(null);
   const [jargonOpen, setJargonOpen] = useState(false);
   const [logoErrors, setLogoErrors] = useState<Record<string, boolean>>({});
+  const [isFav, setIsFav] = useState(() => isFavourited(product.id));
 
   const handleTermClick = (term: string) => { setSelectedTerm(term); setJargonOpen(true); };
 
@@ -382,10 +384,33 @@ export default function ProductDetailPage({ product, onBack }: ProductDetailPage
           </h1>
         </div>
 
-        <div
-          className="w-2 h-2 rounded-full flex-shrink-0"
-          style={{ background: product.colorAccent, boxShadow: `0 0 8px ${product.colorAccent}88` }}
-        />
+        <motion.button
+          whileTap={{ scale: 0.85 }}
+          onClick={async () => {
+            const added = await toggleFavourite({
+              id: product.id,
+              type: product.category as any,
+              lender: product.lender,
+              name: product.name,
+              color: product.color,
+              colorAccent: product.colorAccent,
+              savedAt: Date.now(),
+            });
+            setIsFav(added);
+          }}
+          className="flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center"
+          style={{
+            background: isFav ? `${product.color}20` : 'rgba(255,255,255,0.05)',
+            border: `1px solid ${isFav ? `${product.color}40` : 'rgba(255,255,255,0.08)'}`,
+          }}
+        >
+          <Star
+            size={16}
+            style={{ color: isFav ? '#C9A96E' : 'rgba(255,255,255,0.4)' }}
+            fill={isFav ? '#C9A96E' : 'none'}
+            strokeWidth={2}
+          />
+        </motion.button>
       </div>
 
       {/* Scrollable content */}

@@ -162,6 +162,7 @@ export const translations = {
     navHome: 'Home',
     navSearch: 'Search',
     navTools: 'Tools',
+    navMyFinance: 'My Finance',
     navProfile: 'Profile',
 
     // AI Advisor
@@ -410,6 +411,7 @@ export const translations = {
     navHome: 'होम',
     navSearch: 'खोज',
     navTools: 'उपकरण',
+    navMyFinance: 'मेरा वित्त',
     navProfile: 'प्रोफ़ाइल',
 
     // AI Advisor
@@ -658,6 +660,7 @@ export const translations = {
     navHome: 'Home',
     navSearch: 'Search',
     navTools: 'Tools',
+    navMyFinance: 'My Finance',
     navProfile: 'Profile',
 
     // AI Advisor

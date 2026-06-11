@@ -1,12 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TrendingUp, CreditCard, PiggyBank, Landmark, Calculator, BarChart2, Sparkles, Brain, AlertCircle } from 'lucide-react';
 import { products, Product } from '@/lib/products';
 import ProductDetailPage from '@/components/product-detail-page';
 import { useLang } from '@/context/LanguageContext';
 import { TranslationKey } from '@/lib/i18n';
+import { useSearchParams } from 'next/navigation';
 
 // ── Shared helpers ──────────────────────────────────────────────────────────
 
@@ -300,18 +301,7 @@ function TaxOnFD() {
 function AIAdvisor() {
   const { t, lang } = useLang();
   const [step, setStep] = useState<'form' | 'loading' | 'results'>('form');
-  const [inputMode, setInputMode] = useState<'structured' | 'custom'>('structured');
-  
-  // Structured form states (default to empty string as requested)
-  const [income, setIncome] = useState('');
-  const [age, setAge] = useState('');
-  const [occupation, setOccupation] = useState('salaried');
-  const [dependents, setDependents] = useState('');
-  const [goal, setGoal] = useState('Wealth Growth');
-  
-  // Custom manual prompt state
   const [customPrompt, setCustomPrompt] = useState('');
-  
   const [recommendations, setRecommendations] = useState<Array<{ productId: string; matchReason: string; estimatedValue: string; product: Product }>>([]);
   const [selectedFilter, setSelectedFilter] = useState<string>('all');
   const [error, setError] = useState('');
@@ -319,51 +309,32 @@ function AIAdvisor() {
 
   const handleGetAdvice = async () => {
     setError('');
-
-    // Validation checks
-    if (inputMode === 'structured') {
-      if (!income.trim() || !age.trim() || !dependents.trim()) {
-        setError(lang === 'hi' 
-          ? 'कृपया सभी फ़ॉर्म फ़ील्ड भरें या "कस्टम प्रॉम्प्ट" मोड पर जाएँ।' 
-          : lang === 'hinglish' 
-          ? 'Please saare form fields fill karein ya "Custom Prompt" mode par switch karein.' 
-          : 'Please fill in all form fields or switch to "Custom Prompt" mode.');
-        return;
-      }
-    } else {
-      if (!customPrompt.trim()) {
-        setError(lang === 'hi' 
-          ? 'कृपया प्रॉम्प्ट बॉक्स में अपनी स्थिति/विवरण लिखें।' 
-          : lang === 'hinglish' 
-          ? 'Please prompt box mein apna profile/situation describe karein.' 
-          : 'Please describe your profile/situation in the prompt box.');
-        return;
-      }
+    if (!customPrompt.trim()) {
+      setError(lang === 'hi'
+        ? 'कृपया बताएं आपको किस तरह की वित्तीय सलाह चाहिए।'
+        : lang === 'hinglish'
+        ? 'Please batao aapko kis tarah ki financial advice chahiye.'
+        : 'Please describe what kind of financial advice you need.');
+      return;
     }
 
     setStep('loading');
     try {
-      const payload = inputMode === 'structured' 
-        ? { income, age, occupation, dependents, financialGoal: goal, language: lang }
-        : { customPrompt, language: lang };
-
       const response = await fetch('/api/ai-advisor', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ customPrompt, language: lang }),
       });
       const data = await response.json();
-      if (data.error) {
-        throw new Error(data.error);
-      }
+      if (data.error) throw new Error(data.error);
       setRecommendations(data.recommendations || []);
       setStep('results');
     } catch (err: any) {
       console.error(err);
-      setError(err.message || (lang === 'hi' 
-        ? 'AI सलाहकार से कनेक्ट करने में विफल। कृपया अपनी API कुंजी जांचें।' 
-        : lang === 'hinglish' 
-        ? 'AI agent se connect nahi ho paya. Please apni API key check karein.' 
+      setError(err.message || (lang === 'hi'
+        ? 'AI सलाहकार से कनेक्ट करने में विफल। कृपया अपनी API कुंजी जांचें।'
+        : lang === 'hinglish'
+        ? 'AI agent se connect nahi ho paya. Please apni API key check karein.'
         : 'Failed to connect to the AI agent. Please check your API key.'));
       setStep('form');
     }
@@ -378,55 +349,12 @@ function AIAdvisor() {
     );
   }
 
-  const occupations = [
-    { id: 'salaried', label: t.salaried },
-    { id: 'self-employed', label: t.selfEmployed },
-  ];
-
-  const goals = [
-    { id: 'Wealth Growth', label: t.wealthGrowth },
-    { id: 'Emergency Fund', label: t.emergencyFund },
-    { id: 'Debt Reduction', label: t.debtReduction },
-    { id: 'Save Tax', label: t.saveTax },
-  ];
-
   return (
     <div className="space-y-5">
       {step === 'form' && (
         <div className="space-y-4">
-          {/* Mode Selector Toggle */}
-          <div className="flex p-1 rounded-xl bg-white/[0.03] border border-white/[0.06] mb-2">
-            <button
-              type="button"
-              onClick={() => { setInputMode('structured'); setError(''); }}
-              className="flex-1 py-2 rounded-lg font-body text-[11px] font-semibold text-center transition-all cursor-pointer"
-              style={{
-                background: inputMode === 'structured' ? 'rgba(168,85,247,0.15)' : 'transparent',
-                border: inputMode === 'structured' ? '1px solid rgba(168,85,247,0.30)' : '1px solid transparent',
-                color: inputMode === 'structured' ? '#C084FC' : 'rgba(255,255,255,0.40)',
-              }}
-            >
-              {t.structuredForm}
-            </button>
-            <button
-              type="button"
-              onClick={() => { setInputMode('custom'); setError(''); }}
-              className="flex-1 py-2 rounded-lg font-body text-[11px] font-semibold text-center transition-all cursor-pointer"
-              style={{
-                background: inputMode === 'custom' ? 'rgba(168,85,247,0.15)' : 'transparent',
-                border: inputMode === 'custom' ? '1px solid rgba(168,85,247,0.30)' : '1px solid transparent',
-                color: inputMode === 'custom' ? '#C084FC' : 'rgba(255,255,255,0.40)',
-              }}
-            >
-              {t.customPrompt}
-            </button>
-          </div>
-
           <p className="font-body text-[11px] text-white/50 leading-relaxed">
-            {inputMode === 'structured' 
-              ? t.aiAdvisorFormDesc
-              : t.aiAdvisorCustomDesc
-            }
+            {t.aiAdvisorCustomDesc}
           </p>
 
           {error && (
@@ -436,82 +364,24 @@ function AIAdvisor() {
             </div>
           )}
 
-          {inputMode === 'structured' ? (
-            <div className="space-y-4">
-              <InputField label={t.monthlySalary} value={income} onChange={setIncome} prefix="₹" placeholder={t.enterIncome} />
-              <InputField label={t.yourAge} value={age} onChange={setAge} suffix={lang === 'hi' ? 'वर्ष' : lang === 'hinglish' ? 'saal' : 'years'} placeholder={t.enterAge} />
-              <InputField label={t.dependentsFamilyMembers} value={dependents} onChange={setDependents} suffix={lang === 'hi' ? 'सदस्य' : lang === 'hinglish' ? 'members' : 'members'} placeholder={t.enterCount} />
-
-              {/* Occupation Selection */}
-              <div>
-                <label className="font-body text-[10px] uppercase tracking-widest text-white/35 mb-1.5 block"
-                  style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 600 }}>
-                  {t.employmentType}
-                </label>
-                <div className="grid grid-cols-2 gap-2">
-                  {occupations.map((o) => (
-                    <button
-                      key={o.id}
-                      type="button"
-                      onClick={() => setOccupation(o.id)}
-                      className="py-2.5 px-3 rounded-xl font-body text-[11px] text-center transition-all cursor-pointer"
-                      style={{
-                        background: occupation === o.id ? 'rgba(168,85,247,0.15)' : 'rgba(255,255,255,0.04)',
-                        border: occupation === o.id ? '1px solid rgba(168,85,247,0.40)' : '1px solid rgba(255,255,255,0.08)',
-                        color: occupation === o.id ? '#C084FC' : 'rgba(255,255,255,0.50)',
-                      }}
-                    >
-                      {o.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Goal Selection */}
-              <div>
-                <label className="font-body text-[10px] uppercase tracking-widest text-white/35 mb-1.5 block"
-                  style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 600 }}>
-                  {t.primaryGoal}
-                </label>
-                <div className="grid grid-cols-2 gap-2">
-                  {goals.map((g) => (
-                    <button
-                      key={g.id}
-                      type="button"
-                      onClick={() => setGoal(g.id)}
-                      className="py-2.5 px-3 rounded-xl font-body text-[11px] text-center transition-all cursor-pointer"
-                      style={{
-                        background: goal === g.id ? 'rgba(168,85,247,0.15)' : 'rgba(255,255,255,0.04)',
-                        border: goal === g.id ? '1px solid rgba(168,85,247,0.40)' : '1px solid rgba(255,255,255,0.08)',
-                        color: goal === g.id ? '#C084FC' : 'rgba(255,255,255,0.50)',
-                      }}
-                    >
-                      {g.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div>
-              <label className="font-body text-[10px] uppercase tracking-widest text-white/35 mb-1.5 block"
-                style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 600 }}>
-                {t.describeFinancialSituation}
-              </label>
-              <textarea
-                value={customPrompt}
-                onChange={(e) => setCustomPrompt(e.target.value)}
-                rows={5}
-                placeholder={t.customPromptPlaceholder}
-                className="w-full p-4 rounded-xl font-body text-[13px] text-white/85 outline-none resize-none"
-                style={{
-                  background: 'rgba(255,255,255,0.05)',
-                  border: '1px solid rgba(255,255,255,0.09)',
-                  lineHeight: '1.6',
-                }}
-              />
-            </div>
-          )}
+          <div>
+            <label className="font-body text-[10px] uppercase tracking-widest text-white/35 mb-1.5 block"
+              style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 600 }}>
+              {t.describeFinancialSituation}
+            </label>
+            <textarea
+              value={customPrompt}
+              onChange={(e) => setCustomPrompt(e.target.value)}
+              rows={5}
+              placeholder={t.customPromptPlaceholder}
+              className="w-full p-4 rounded-xl font-body text-[13px] text-white/85 outline-none resize-none"
+              style={{
+                background: 'rgba(255,255,255,0.05)',
+                border: '1px solid rgba(255,255,255,0.09)',
+                lineHeight: '1.6',
+              }}
+            />
+          </div>
 
           <motion.button
             whileTap={{ scale: 0.96 }}
@@ -558,12 +428,7 @@ function AIAdvisor() {
           <div className="flex items-center justify-between px-3 py-2 rounded-lg bg-white/[0.02] border border-white/[0.05]">
             <span className="font-body text-[9px] uppercase tracking-wider text-white/30">{t.profileSummary}</span>
             <span className="font-body text-[9.5px] text-white/60 truncate max-w-[220px]">
-              {inputMode === 'structured' 
-                ? (lang === 'hi' 
-                   ? `उम्र ${age} • ₹${parseInt(income).toLocaleString('en-IN')}/माह • ${(t as any)[goal === 'Wealth Growth' ? 'wealthGrowth' : goal === 'Emergency Fund' ? 'emergencyFund' : goal === 'Debt Reduction' ? 'debtReduction' : goal === 'Save Tax' ? 'saveTax' : goal] || goal}`
-                   : `Age ${age} • ₹${parseInt(income).toLocaleString('en-IN')}/mo • ${(t as any)[goal === 'Wealth Growth' ? 'wealthGrowth' : goal === 'Emergency Fund' ? 'emergencyFund' : goal === 'Debt Reduction' ? 'debtReduction' : goal === 'Save Tax' ? 'saveTax' : goal] || goal}`)
-                : t.customDescriptionInput
-              }
+              {t.customDescriptionInput}
             </span>
           </div>
 
@@ -605,7 +470,7 @@ function AIAdvisor() {
               </button>
             </div>
           ) : (
-            <div className="space-y-3.5">
+            <div className="space-y-3">
               {(() => {
                 const filteredRecs = selectedFilter === 'all'
                   ? recommendations
@@ -638,59 +503,61 @@ function AIAdvisor() {
                     key={rec.productId}
                     initial={{ opacity: 0, y: 12 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.1 }}
-                    className="rounded-xl p-4 text-left border"
+                    transition={{ delay: i * 0.08 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => setSelectedProduct(product)}
+                    className="rounded-2xl p-5 text-left border cursor-pointer transition-all"
                     style={{
-                      borderColor: `${product.color}25`,
-                      background: `linear-gradient(135deg, ${product.color}08 0%, ${product.colorAccent}03 100%)`,
+                      borderColor: `${product.color}30`,
+                      background: `linear-gradient(135deg, ${product.color}10 0%, ${product.colorAccent}05 100%)`,
                     }}
                   >
-                    <div className="flex items-start justify-between mb-2">
-                      <div>
-                        <span className="font-body text-[9px] uppercase tracking-wider text-white/30">
-                          {catLabels[product.category] || product.category}
-                        </span>
-                        <h4 className="text-[14px] leading-tight text-white/95 mt-0.5"
-                          style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700 }}>
-                          {product.name}
-                        </h4>
-                      </div>
+                    {/* Category + Estimated Value */}
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="font-body text-[10px] uppercase tracking-wider text-white/35">
+                        {catLabels[product.category] || product.category}
+                      </span>
                       <span
-                        className="px-2 py-0.5 rounded font-body text-[9px] font-semibold uppercase tracking-wider"
-                        style={{ background: `${product.color}22`, color: product.colorAccent }}
+                        className="px-2.5 py-1 rounded-lg font-body text-[10px] font-bold uppercase tracking-wider"
+                        style={{ background: `${product.color}20`, color: product.colorAccent }}
                       >
                         {rec.estimatedValue}
                       </span>
                     </div>
 
-                    {/* Advisor matching bubble */}
-                    <div className="pl-3 py-1.5 my-3 border-l-2 border-purple-500/50 bg-purple-500/05 rounded-r">
-                      <p className="font-body text-[10px] text-white/50 leading-relaxed italic">
-                        "{rec.matchReason}"
+                    {/* Product Name */}
+                    <h4 className="text-[17px] leading-tight text-white/95 mb-1"
+                      style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800 }}>
+                      {product.name}
+                    </h4>
+                    <p className="font-body text-[11px] text-white/35 mb-3">
+                      {lang === 'hi' ? `${product.lender} द्वारा` : lang === 'hinglish' ? `${product.lender} ke dwara` : `By ${product.lender}`}
+                    </p>
+
+                    {/* AI Summary — the key insight */}
+                    <div className="pl-4 py-3 my-1 border-l-[3px] border-purple-500/60 bg-purple-500/[0.07] rounded-r-xl">
+                      <p className="font-body text-[11.5px] text-white/65 leading-relaxed">
+                        {rec.matchReason}
                       </p>
                     </div>
 
-                    <div className="flex items-center justify-between pt-1">
-                      <span className="font-body text-[9.5px] text-white/35">
-                        {lang === 'hi' ? `${product.lender} द्वारा` : lang === 'hinglish' ? `${product.lender} ke dwara` : `By ${product.lender}`}
+                    {/* Tap to view */}
+                    <div className="flex items-center justify-end mt-3 pt-2 border-t border-white/[0.05]">
+                      <span className="font-body text-[11px] font-semibold text-purple-400 flex items-center gap-1">
+                        {lang === 'hi' ? 'पूरी जानकारी देखें' : lang === 'hinglish' ? 'Full details dekho' : 'View full details'}
+                        <span className="text-[13px]">→</span>
                       </span>
-                      <button
-                        onClick={() => setSelectedProduct(product)}
-                        className="font-body text-[10.5px] font-semibold text-purple-400 hover:text-purple-300 transition-colors flex items-center gap-1 cursor-pointer"
-                      >
-                        View Full Specs →
-                    </button>
-                  </div>
-                </motion.div>
-              );
-            });
+                    </div>
+                  </motion.div>
+                );
+              });
           })()}
 
               <button
                 onClick={() => { setStep('form'); setSelectedFilter('all'); }}
                 className="w-full py-3 rounded-xl font-body text-[11px] text-white/50 hover:text-white/70 text-center transition-all bg-white/[0.02] border border-white/[0.06] hover:bg-white/[0.04] cursor-pointer"
               >
-                Reset & Try Another Profile
+                {lang === 'hi' ? 'नया प्रॉम्प्ट आज़माएं' : lang === 'hinglish' ? 'Naya prompt try karo' : 'Try Another Prompt'}
               </button>
             </div>
           )}
@@ -762,7 +629,11 @@ const toolConfig = [
 
 // ── Page ─────────────────────────────────────────────────────────────────────
 export default function ToolsPage() {
-  const [activeTool, setActiveTool] = useState<string | null>(null);
+  const searchParams = useSearchParams();
+  const initialTool = searchParams.get('tool');
+  const [activeTool, setActiveTool] = useState<string | null>(
+    initialTool && toolConfig.some((tc) => tc.id === initialTool) ? initialTool : null
+  );
   const { t } = useLang();
   const tool = toolConfig.find((t) => t.id === activeTool);
 
@@ -864,12 +735,16 @@ export default function ToolsPage() {
             </div>
 
             {/* Tool content */}
-            <div
-              className="rounded-2xl p-5"
-              style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.07)' }}
-            >
-              {tool && <tool.component />}
-            </div>
+            {activeTool === 'ai-advisor' ? (
+              <div>{tool && <tool.component />}</div>
+            ) : (
+              <div
+                className="rounded-2xl p-5"
+                style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.07)' }}
+              >
+                {tool && <tool.component />}
+              </div>
+            )}
           </motion.div>
         )}
       </AnimatePresence>

@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Home, Search, Calculator, User } from 'lucide-react';
+import { Home, Search, Wallet, User } from 'lucide-react';
 import { useLang } from '@/context/LanguageContext';
 
 export default function BottomNav() {
@@ -16,7 +16,7 @@ export default function BottomNav() {
   const navItems = [
     { href: '/', label: t.navHome, icon: Home },
     { href: '/search', label: t.navSearch, icon: Search },
-    { href: '/tools', label: t.navTools, icon: Calculator },
+    { href: '/myfinance', label: t.navMyFinance ?? 'My Finance', icon: Wallet },
     { href: '/profile', label: t.navProfile, icon: User },
   ];
 
