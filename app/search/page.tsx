@@ -873,14 +873,14 @@ const toolConfig: { id: ToolId; label: string; desc: string; icon: any; color: s
                       className="absolute inset-y-0 w-1/3 skew-x-12 pointer-events-none"
                       style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent)' }}
                     />
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-start gap-3">
                       <div
                         className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
                         style={{ background: 'rgba(139,92,246,0.20)', border: '1px solid rgba(139,92,246,0.35)' }}
                       >
                         <Brain size={20} style={{ color: '#A78BFA' }} strokeWidth={2} />
                       </div>
-                      <div>
+                      <div className="flex-1 min-w-0">
                         <p
                           className="text-[11px] uppercase tracking-widest font-bold mb-0.5"
                           style={{ color: '#A78BFA', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
@@ -901,17 +901,19 @@ const toolConfig: { id: ToolId; label: string; desc: string; icon: any; color: s
                         </p>
                       </div>
                     </div>
-                    <div
-                      className="absolute bottom-1.5 right-3 px-2.5 py-1 rounded-lg flex items-center gap-1"
-                      style={{ background: 'rgba(139,92,246,0.20)', border: '1px solid rgba(139,92,246,0.35)' }}
-                    >
-                      <span
-                        className="text-[10px] font-bold"
-                        style={{ color: '#A78BFA', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+                    <div className="flex justify-end mt-3">
+                      <div
+                        className="px-2.5 py-1 rounded-lg flex items-center gap-1"
+                        style={{ background: 'rgba(139,92,246,0.20)', border: '1px solid rgba(139,92,246,0.35)' }}
                       >
-                        Try Now
-                      </span>
-                      <span className="text-[10px]" style={{ color: '#A78BFA' }}>→</span>
+                        <span
+                          className="text-[10px] font-bold"
+                          style={{ color: '#A78BFA', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+                        >
+                          Try Now
+                        </span>
+                        <span className="text-[10px]" style={{ color: '#A78BFA' }}>→</span>
+                      </div>
                     </div>
                   </motion.div>
 
