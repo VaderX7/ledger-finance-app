@@ -902,7 +902,7 @@ const toolConfig: { id: ToolId; label: string; desc: string; icon: any; color: s
                       </div>
                     </div>
                     <div
-                      className="absolute bottom-3 right-3 px-2.5 py-1 rounded-lg flex items-center gap-1"
+                      className="absolute bottom-1.5 right-3 px-2.5 py-1 rounded-lg flex items-center gap-1"
                       style={{ background: 'rgba(139,92,246,0.20)', border: '1px solid rgba(139,92,246,0.35)' }}
                     >
                       <span
