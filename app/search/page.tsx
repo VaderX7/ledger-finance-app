@@ -873,47 +873,45 @@ const toolConfig: { id: ToolId; label: string; desc: string; icon: any; color: s
                       className="absolute inset-y-0 w-1/3 skew-x-12 pointer-events-none"
                       style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent)' }}
                     />
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div
-                          className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-                          style={{ background: 'rgba(139,92,246,0.20)', border: '1px solid rgba(139,92,246,0.35)' }}
+                    <div className="flex items-center gap-3">
+                      <div
+                        className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                        style={{ background: 'rgba(139,92,246,0.20)', border: '1px solid rgba(139,92,246,0.35)' }}
+                      >
+                        <Brain size={20} style={{ color: '#A78BFA' }} strokeWidth={2} />
+                      </div>
+                      <div>
+                        <p
+                          className="text-[11px] uppercase tracking-widest font-bold mb-0.5"
+                          style={{ color: '#A78BFA', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
                         >
-                          <Brain size={20} style={{ color: '#A78BFA' }} strokeWidth={2} />
-                        </div>
-                        <div>
-                          <p
-                            className="text-[11px] uppercase tracking-widest font-bold mb-0.5"
-                            style={{ color: '#A78BFA', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
-                          >
-                            AI POWERED
-                          </p>
-                          <h3
-                            className="text-[20px] tracking-tight text-white/95"
-                            style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800 }}
-                          >
-                            AI Financial Advisor
-                          </h3>
-                          <p
-                            className="text-[11px] text-white/35 mt-0.5"
-                            style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
-                          >
-                            Ask anything about your finances, get personalized advice
-                          </p>
-                        </div>
+                          AI POWERED
+                        </p>
+                        <h3
+                          className="text-[20px] tracking-tight text-white/95"
+                          style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800 }}
+                        >
+                          AI Financial Advisor
+                        </h3>
+                        <p
+                          className="text-[11px] text-white/35 mt-0.5"
+                          style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+                        >
+                          Ask anything about your finances, get personalized advice
+                        </p>
                       </div>
                     </div>
                     <div
-                      className="px-4 py-2 rounded-xl flex-shrink-0 ml-2 flex items-center gap-1.5"
+                      className="absolute bottom-3 right-3 px-2.5 py-1 rounded-lg flex items-center gap-1"
                       style={{ background: 'rgba(139,92,246,0.20)', border: '1px solid rgba(139,92,246,0.35)' }}
                     >
                       <span
-                        className="text-[12px] font-bold"
+                        className="text-[10px] font-bold"
                         style={{ color: '#A78BFA', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
                       >
                         Try Now
                       </span>
-                      <span className="text-[12px]" style={{ color: '#A78BFA' }}>→</span>
+                      <span className="text-[10px]" style={{ color: '#A78BFA' }}>→</span>
                     </div>
                   </motion.div>
 
