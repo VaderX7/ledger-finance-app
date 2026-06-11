@@ -493,7 +493,7 @@ export default function CategoryProductCard({
     >
       <motion.div
         animate={isFav ? { scale: [1, 1.4, 1] } : { scale: 1 }}
-        transition={{ duration: 0.3, type: 'spring', stiffness: 300, damping: 15 }}
+        transition={{ duration: 0.3, type: 'tween', ease: 'easeInOut' }}
       >
         <Star
           size={16}

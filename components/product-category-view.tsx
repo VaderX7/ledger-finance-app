@@ -276,7 +276,42 @@ export const BANK_COLORS_MAP: Record<string, { color: string; colorAccent: strin
   "Union Bank of India Ltd": { "color": "#00589D", "colorAccent": "#DC251C" },
   "India Post Payments Bank": { "color": "#005A9C", "colorAccent": "#FF9933" },
   "IPPB": { "color": "#005A9C", "colorAccent": "#FF9933" },
-  "Fincare Small Finance Bank": { "color": "#0A85B3", "colorAccent": "#F58220" }
+  "Fincare Small Finance Bank": { "color": "#0A85B3", "colorAccent": "#F58220" },
+  "Bajaj Finance Limited": { "color": "#E81F24", "colorAccent": "#F5C6C0" },
+  "Bajaj Finance Ltd": { "color": "#E81F24", "colorAccent": "#F5C6C0" },
+  "Bajaj Finserv": { "color": "#E81F24", "colorAccent": "#F5C6C0" },
+  "SIDBI Mudra Scheme": { "color": "#1A4D8F", "colorAccent": "#6BA3D6" },
+  "DBS Bank India (Digibank)": { "color": "#E31837", "colorAccent": "#F2B8B5" },
+  "DBS Bank India": { "color": "#E31837", "colorAccent": "#F2B8B5" },
+  "Standard Chartered Bank": { "color": "#0072AA", "colorAccent": "#8DC8E8" },
+  "HSBC Bank India": { "color": "#DB0011", "colorAccent": "#F2B8B5" },
+  "HSBC": { "color": "#DB0011", "colorAccent": "#F2B8B5" },
+  "DBS": { "color": "#E31837", "colorAccent": "#F2B8B5" },
+  "Nainital Bank Limited": { "color": "#E3BFC0", "colorAccent": "#BD6B6E" },
+  "Nainital Bank Ltd": { "color": "#E3BFC0", "colorAccent": "#BD6B6E" },
+  "Bandhan Bank Limited": { "color": "#D83726", "colorAccent": "#EBAAA4" },
+  "Bandhan Bank Ltd": { "color": "#D83726", "colorAccent": "#EBAAA4" },
+  "Karnataka Bank Limited": { "color": "#883188", "colorAccent": "#C4A2C3" },
+  "Karnataka Bank Ltd": { "color": "#883188", "colorAccent": "#C4A2C3" },
+  "IndusInd Bank Limited": { "color": "#853030", "colorAccent": "#894242" },
+  "RBL Bank Limited": { "color": "#742E5A", "colorAccent": "#CCB1C0" },
+  "RBL Bank Ltd": { "color": "#742E5A", "colorAccent": "#CCB1C0" },
+  "South Indian Bank Limited": { "color": "#C5191E", "colorAccent": "#E69FA1" },
+  "South Indian Bank Ltd": { "color": "#C5191E", "colorAccent": "#E69FA1" },
+  "Federal Bank Limited": { "color": "#004CBE", "colorAccent": "#0051CA" },
+  "Federal Bank Ltd": { "color": "#004CBE", "colorAccent": "#0051CA" },
+  "DCB Bank Limited": { "color": "#2F4492", "colorAccent": "#C0C5DC" },
+  "DCB Bank Ltd": { "color": "#2F4492", "colorAccent": "#C0C5DC" },
+  "Dhanlaxmi Bank Limited": { "color": "#540043", "colorAccent": "#5D004A" },
+  "Dhanlaxmi Bank Ltd": { "color": "#540043", "colorAccent": "#5D004A" },
+  "City Union Bank Limited": { "color": "#2D3093", "colorAccent": "#32359F" },
+  "City Union Bank Ltd": { "color": "#2D3093", "colorAccent": "#32359F" },
+  "CSB Bank Limited": { "color": "#FF601E", "colorAccent": "#FF6620" },
+  "CSB Bank Ltd": { "color": "#FF601E", "colorAccent": "#FF6620" },
+  "Kotak Mahindra Bank Limited": { "color": "#18346F", "colorAccent": "#C0BACA" },
+  "Kotak Mahindra Bank Ltd": { "color": "#18346F", "colorAccent": "#C0BACA" },
+  "IDBI Bank Limited": { "color": "#F8915B", "colorAccent": "#088970" },
+  "IDBI Bank Ltd": { "color": "#F8915B", "colorAccent": "#088970" }
 };
 
 export const getOverriddenColor = (lender: string, field: 'color' | 'colorAccent', fallback: string): string => {
@@ -347,6 +382,51 @@ export const getOverriddenColor = (lender: string, field: 'color' | 'colorAccent
   if (lenderUpper.includes('NORTH EAST')) {
     return BANK_COLORS_MAP['North East Small Finance Bank']?.[field] || fallback;
   }
+  if (lenderUpper.includes('BAJAJ')) {
+    return BANK_COLORS_MAP['Bajaj Finance Limited']?.[field] || fallback;
+  }
+  if (lenderUpper.includes('SIDBI') || lenderUpper.includes('MUDRA')) {
+    return BANK_COLORS_MAP['SIDBI Mudra Scheme']?.[field] || fallback;
+  }
+  if (lenderUpper.includes('DBS')) {
+    return BANK_COLORS_MAP['DBS Bank India (Digibank)']?.[field] || fallback;
+  }
+  if (lenderUpper.includes('STANDARD CHARTERED')) {
+    return BANK_COLORS_MAP['Standard Chartered Bank']?.[field] || fallback;
+  }
+  if (lenderUpper.includes('HSBC')) {
+    return BANK_COLORS_MAP['HSBC Bank India']?.[field] || fallback;
+  }
+  if (lenderUpper.includes('SHIVALIK')) {
+    return BANK_COLORS_MAP['Shivalik Small Finance Bank']?.[field] || fallback;
+  }
+  if (lenderUpper.includes('KARNATAKA')) {
+    return BANK_COLORS_MAP['Karnataka Bank']?.[field] || fallback;
+  }
+  if (lenderUpper.includes('DHANLAXMI') || lenderUpper.includes('DHANLAKSHMI')) {
+    return BANK_COLORS_MAP['Dhanlaxmi Bank']?.[field] || fallback;
+  }
+  if (lenderUpper.includes('CITY UNION')) {
+    return BANK_COLORS_MAP['City Union Bank']?.[field] || fallback;
+  }
+  if (lenderUpper.includes('INDUSIND')) {
+    return BANK_COLORS_MAP['IndusInd Bank']?.[field] || fallback;
+  }
+  if (lenderUpper.includes('FEDERAL')) {
+    return BANK_COLORS_MAP['Federal Bank']?.[field] || fallback;
+  }
+  if (lenderUpper.includes('DCB')) {
+    return BANK_COLORS_MAP['DCB Bank']?.[field] || fallback;
+  }
+  if (lenderUpper.includes('KOTAK')) {
+    return BANK_COLORS_MAP['Kotak Mahindra Bank']?.[field] || fallback;
+  }
+  if (lenderUpper.includes('RBL') || lenderUpper.includes('RATNAKAR')) {
+    return BANK_COLORS_MAP['RBL Bank']?.[field] || fallback;
+  }
+  if (lenderUpper.includes('NAINITAL')) {
+    return BANK_COLORS_MAP['Nainital Bank']?.[field] || fallback;
+  }
 
   return fallback;
 };
@@ -369,7 +449,7 @@ const getBankInitials = (lender: string): string => {
   if (nameUpper.includes('CITY UNION')) return 'CUB';
   if (nameUpper.includes('DHANLAXMI')) return 'DLB';
   if (nameUpper.includes('IDFC FIRST')) return 'IDFC';
-  
+
   const cleanName = lender.replace(/bank/gi, '').trim();
   const words = cleanName.split(/[\s-]+/).filter(Boolean);
   if (words.length >= 2) {
@@ -752,7 +832,7 @@ function BankCard({ group, setSelectedBank, logoErrors, setLogoErrors }: BankCar
 
         <div className="flex items-center gap-3 mb-3">
           {/* Logo Container */}
-          <div 
+          <div
             className="w-12 h-12 rounded-xl flex-shrink-0 flex items-center justify-center p-[6px] overflow-hidden"
             style={{
               background: LOGO_BG_MAP[lender] ?? '#FFFFFF',
@@ -772,11 +852,11 @@ function BankCard({ group, setSelectedBank, logoErrors, setLogoErrors }: BankCar
                 }}
               />
             ) : (
-              <div 
+              <div
                 className="w-full h-full rounded-full flex items-center justify-center text-[10px] font-extrabold tracking-wider border"
-                style={{ 
+                style={{
                   borderColor: `${color}40`,
-                  color: color, 
+                  color: color,
                   background: `${color}08`
                 }}
               >
@@ -793,32 +873,31 @@ function BankCard({ group, setSelectedBank, logoErrors, setLogoErrors }: BankCar
               </h3>
             </div>
             <div className="flex items-center gap-1.5 mt-1">
-              <span 
+              <span
                 className="text-[8px] font-body px-1.5 py-0.5 rounded-full font-bold uppercase tracking-wider"
                 style={{
-                  background: firstProduct.bankType === 'public' 
-                    ? 'rgba(201,169,110,0.12)' 
+                  background: firstProduct.bankType === 'public'
+                    ? 'rgba(201,169,110,0.12)'
                     : firstProduct.bankType === 'private'
-                    ? 'rgba(56,189,248,0.12)'
-                    : firstProduct.bankType === 'sfb'
-                    ? 'rgba(45,212,191,0.12)'
-                    : 'rgba(251,113,133,0.12)',
-                  color: firstProduct.bankType === 'public' 
-                    ? '#C9A96E' 
-                    : firstProduct.bankType === 'private'
-                    ? '#38BDF8'
-                    : firstProduct.bankType === 'sfb'
-                    ? '#2DD4BF'
-                    : '#FB7185',
-                  border: `1px solid ${
-                    firstProduct.bankType === 'public' 
-                      ? 'rgba(201,169,110,0.25)' 
-                      : firstProduct.bankType === 'private'
-                      ? 'rgba(56,189,248,0.25)'
+                      ? 'rgba(56,189,248,0.12)'
                       : firstProduct.bankType === 'sfb'
-                      ? 'rgba(45,212,191,0.25)'
-                      : 'rgba(251,113,133,0.25)'
-                  }`
+                        ? 'rgba(45,212,191,0.12)'
+                        : 'rgba(251,113,133,0.12)',
+                  color: firstProduct.bankType === 'public'
+                    ? '#C9A96E'
+                    : firstProduct.bankType === 'private'
+                      ? '#38BDF8'
+                      : firstProduct.bankType === 'sfb'
+                        ? '#2DD4BF'
+                        : '#FB7185',
+                  border: `1px solid ${firstProduct.bankType === 'public'
+                      ? 'rgba(201,169,110,0.25)'
+                      : firstProduct.bankType === 'private'
+                        ? 'rgba(56,189,248,0.25)'
+                        : firstProduct.bankType === 'sfb'
+                          ? 'rgba(45,212,191,0.25)'
+                          : 'rgba(251,113,133,0.25)'
+                    }`
                 }}
               >
                 {bankTypeName}
@@ -885,7 +964,7 @@ function BankCard({ group, setSelectedBank, logoErrors, setLogoErrors }: BankCar
       >
         <motion.div
           animate={isFav ? { scale: [1, 1.4, 1] } : { scale: 1 }}
-          transition={{ duration: 0.3, type: 'spring', stiffness: 300, damping: 15 }}
+          transition={{ duration: 0.3, type: 'tween', ease: 'easeInOut' }}
         >
           <Star
             size={16}
@@ -1500,7 +1579,7 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
 
                     <div className="flex items-center gap-2 flex-1 min-w-0">
                       {selectedBank && (
-                        <div 
+                        <div
                           className="w-7 h-7 rounded-xl flex-shrink-0 flex items-center justify-center p-[6px] overflow-hidden"
                           style={{
                             background: LOGO_BG_MAP[selectedBank] ?? '#FFFFFF',
@@ -1520,10 +1599,10 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
                               }}
                             />
                           ) : (
-                            <div 
+                            <div
                               className="w-full h-full rounded-full flex items-center justify-center text-[8px] font-extrabold tracking-wider"
-                              style={{ 
-                                color: colorAccent, 
+                              style={{
+                                color: colorAccent,
                                 background: `${color}15`
                               }}
                             >
@@ -1539,12 +1618,12 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
                         <p className="text-[10px] text-white/45 font-body mt-0.5">
                           {bankProducts.length} {
                             category === 'savings' ? 'savings options' :
-                            category === 'current' ? 'current account options' :
-                            category === 'fds' ? 'FD options' :
-                            category === 'creditcards' ? 'credit card options' :
-                            category === 'loans' ? 'loan options' :
-                            category === 'govtschemes' ? 'schemes' :
-                            'options'
+                              category === 'current' ? 'current account options' :
+                                category === 'fds' ? 'FD options' :
+                                  category === 'creditcards' ? 'credit card options' :
+                                    category === 'loans' ? 'loan options' :
+                                      category === 'govtschemes' ? 'schemes' :
+                                        'options'
                           }
                         </p>
                       </div>

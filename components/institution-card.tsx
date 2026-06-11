@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import { FinancialInstitution } from '@/lib/institutions';
 import { ArrowRight, Badge, Zap } from 'lucide-react';
+import { LOGO_BG_MAP } from './product-category-view';
 
 interface InstitutionCardProps {
   institution: FinancialInstitution;
@@ -69,7 +70,10 @@ export default function InstitutionCard({
           <div className="flex-1">
             {/* Logo */}
             {institution.logoUrl ? (
-              <div className="w-12 h-12 bg-white rounded-xl p-2 flex items-center justify-center overflow-hidden shrink-0 mb-3">
+              <div
+                className="w-12 h-12 rounded-xl p-2 flex items-center justify-center overflow-hidden shrink-0 mb-3"
+                style={{ background: LOGO_BG_MAP[institution.name] ?? '#FFFFFF' }}
+              >
                 <img
                   src={institution.logoUrl}
                   alt={institution.name}
