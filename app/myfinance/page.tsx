@@ -986,7 +986,31 @@ Examples:
 
   /* ────────────── MAIN RENDER ────────────── */
   return (
-    <div className="min-h-screen bg-[#070A12] px-5 pt-14 pb-28 relative">
+    <div className="min-h-screen bg-[#070A12] px-5 pt-14 pb-28 relative overflow-hidden">
+      {/* Page color orb */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{
+          opacity: [0.85, 1, 0.85],
+          scale: [0.95, 1.05, 0.95],
+        }}
+        transition={{
+          opacity: { duration: 6, repeat: Infinity, ease: 'easeInOut' },
+          scale: { duration: 6, repeat: Infinity, ease: 'easeInOut' },
+          delay: 1.2,
+        }}
+        className="fixed top-0 left-1/2 -translate-x-1/2 pointer-events-none"
+        style={{
+          width: 420,
+          height: 420,
+          borderRadius: '50%',
+          background: 'radial-gradient(circle, #00F5A028 0%, transparent 70%)',
+          filter: 'blur(60px)',
+          zIndex: 0,
+          top: -40,
+        }}
+      />
+
       {/* Gold Grid Overlay */}
       <div
         className="fixed inset-0 pointer-events-none z-0"

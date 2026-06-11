@@ -534,7 +534,32 @@ export default function ProfilePage() {
   const displayedName = userName || user?.displayName || '';
 
   return (
-    <div className="min-h-screen bg-[#070A12] px-5 pt-14 pb-28">
+    <div className="min-h-screen bg-[#070A12] px-5 pt-14 pb-28 relative overflow-hidden">
+      {/* Page color orb */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{
+          opacity: [0.85, 1, 0.85],
+          scale: [0.95, 1.05, 0.95],
+        }}
+        transition={{
+          opacity: { duration: 6, repeat: Infinity, ease: 'easeInOut' },
+          scale: { duration: 6, repeat: Infinity, ease: 'easeInOut' },
+          delay: 1.2,
+        }}
+        className="fixed top-0 left-1/2 -translate-x-1/2 pointer-events-none"
+        style={{
+          width: 420,
+          height: 420,
+          borderRadius: '50%',
+          background: 'radial-gradient(circle, #8B5CF628 0%, transparent 70%)',
+          filter: 'blur(60px)',
+          zIndex: 0,
+          top: -40,
+        }}
+      />
+
+      <div className="relative z-10">
       <motion.div
         initial={{ opacity: 0, y: -16 }}
         animate={{ opacity: 1, y: 0 }}
@@ -1209,6 +1234,7 @@ export default function ProfilePage() {
         onClose={() => setIsLangSheetOpen(false)}
         t={t}
       />
+      </div>
     </div>
   );
 }
