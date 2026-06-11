@@ -13,6 +13,7 @@ import { TranslationKey } from '@/lib/i18n';
 import { isFavourited, toggleFavourite } from '@/lib/favourites';
 import JargonText from './jargon-text';
 import JargonBottomSheet from './jargon-bottom-sheet';
+import FDTenureRates from './fd-tenure-rates';
 
 interface ProductDetailPageProps {
   product: Product;
@@ -507,7 +508,7 @@ export default function ProductDetailPage({ product, onBack }: ProductDetailPage
           </motion.div>
         )}
 
-        {/* SECTION 3: Key Details Cards */}
+        {/* SECTION 3: Key Details */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
@@ -521,35 +522,55 @@ export default function ProductDetailPage({ product, onBack }: ProductDetailPage
             {t.keyDetails || "Key Details"}
           </h3>
           
-          <div className="space-y-2.5">
-            {Object.entries(product.metrics)
-              .filter(([key]) => key !== heroRateKey && key !== 'dicgcProtected' && isNaN(Number(key)))
-              .map(([key, value]) => {
-                const label = METRIC_LABEL_MAP[key] || key.replace(/([A-Z])/g, ' $1').trim();
-                return (
-                  <div
-                    key={key}
-                    className="flex items-center gap-3.5 p-4 rounded-2xl bg-white/[0.04] border border-white/[0.07]"
-                  >
-                    {/* Left Icon container */}
-                    <div
-                      className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
-                      style={{ background: `${product.color || '#C9A96E'}24` }}
-                    >
-                      {getMetricIcon(key, product.colorAccent || '#00F5A0')}
-                    </div>
-                    
-                    {/* Content */}
-                    <div className="flex-1 min-w-0">
-                      <span className="block text-[10px] uppercase tracking-wider text-white/30 font-semibold font-body">
+          {product.category === 'fds' ? (
+            /* Compact 2-column grid for FD products */
+            <div
+              className="grid grid-cols-2 gap-2 p-3 rounded-xl"
+              style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.06)' }}
+            >
+              {Object.entries(product.metrics)
+                .filter(([key]) => key !== heroRateKey && isNaN(Number(key)))
+                .map(([key, value]) => {
+                  const label = METRIC_LABEL_MAP[key] || key.replace(/([A-Z])/g, ' $1').trim();
+                  return (
+                    <div key={key} className="flex flex-col gap-0.5 px-2 py-1.5">
+                      <span className="text-[9px] uppercase tracking-wider text-white/30 font-semibold font-body">
                         {label}
                       </span>
-                      <JargonText text={String(value ?? '')} onTermClick={handleTermClick} className="block text-[13px] text-white/85 font-medium mt-0.5 leading-relaxed font-display" />
+                      <JargonText text={String(value ?? '')} onTermClick={handleTermClick} className="text-[12px] text-white/85 font-bold leading-tight" />
                     </div>
-                  </div>
-                );
-              })}
-          </div>
+                  );
+                })}
+            </div>
+          ) : (
+            /* Card layout for non-FD products */
+            <div className="space-y-2.5">
+              {Object.entries(product.metrics)
+                .filter(([key]) => key !== heroRateKey && key !== 'dicgcProtected' && isNaN(Number(key)))
+                .map(([key, value]) => {
+                  const label = METRIC_LABEL_MAP[key] || key.replace(/([A-Z])/g, ' $1').trim();
+                  return (
+                    <div
+                      key={key}
+                      className="flex items-center gap-3.5 p-4 rounded-2xl bg-white/[0.04] border border-white/[0.07]"
+                    >
+                      <div
+                        className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
+                        style={{ background: `${product.color || '#C9A96E'}24` }}
+                      >
+                        {getMetricIcon(key, product.colorAccent || '#00F5A0')}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <span className="block text-[10px] uppercase tracking-wider text-white/30 font-semibold font-body">
+                          {label}
+                        </span>
+                        <JargonText text={String(value ?? '')} onTermClick={handleTermClick} className="block text-[13px] text-white/85 font-medium mt-0.5 leading-relaxed font-display" />
+                      </div>
+                    </div>
+                  );
+                })}
+            </div>
+          )}
 
           {/* DICGC Special trust banner */}
           {product.category === 'savings' && product.metrics.dicgcProtected && (
@@ -561,6 +582,11 @@ export default function ProductDetailPage({ product, onBack }: ProductDetailPage
             </div>
           )}
         </motion.div>
+
+        {/* SECTION 3.5: FD Tenure-wise Interest Rates */}
+        {product.category === 'fds' && (
+          <FDTenureRates productId={product.id} accentColor={product.colorAccent || product.color || '#C9A96E'} />
+        )}
 
         {/* SECTION 4: Required Documents Accordion */}
         {documentsList.length > 0 && (

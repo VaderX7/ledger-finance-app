@@ -14,8 +14,22 @@ const SHEET_URLS: Partial<Record<ProductCategory, string>> = {
 
 const FALLBACK_URL = `${BASE}?output=csv`;
 
+const FD_RATES_URL = `${BASE}?gid=525203686&single=true&output=csv`;
+
+export interface TenureRate {
+  fd_id: string;
+  lender: string;
+  tenure_label: string;
+  tenure_days: number;
+  rate_general: number;
+  rate_senior: number;
+  is_special_tenure: string;
+  notes: string;
+}
+
 const CACHE_DURATION_MS = 5 * 60 * 1000;
 const cacheMap = new Map<string, { data: Product[]; fetchedAt: number }>();
+const fdRatesCache = new Map<string, { data: TenureRate[]; fetchedAt: number }>();
 
 async function fetchFromSheet(url: string, cacheKey: string): Promise<Product[]> {
   const cached = cacheMap.get(cacheKey);
@@ -93,6 +107,51 @@ function parseCSVLine(line: string): string[] {
   }
   result.push(current);
   return result;
+}
+
+function parseTenureRates(csv: string): TenureRate[] {
+  const lines = csv.trim().split('\n');
+  if (lines.length < 2) return [];
+  const headers = parseCSVLine(lines[0]);
+  const rates: TenureRate[] = [];
+  for (let i = 1; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (!line) continue;
+    const values = parseCSVLine(line);
+    const row: Record<string, string> = {};
+    headers.forEach((h, idx) => { row[h.trim()] = (values[idx] ?? '').trim(); });
+    if (!row['fd_id'] || !row['tenure_label']) continue;
+    rates.push({
+      fd_id: row['fd_id'],
+      lender: row['lender'] || '',
+      tenure_label: row['tenure_label'],
+      tenure_days: Number(row['tenure_days']) || 0,
+      rate_general: Number(row['rate_general']) || 0,
+      rate_senior: Number(row['rate_senior']) || 0,
+      is_special_tenure: row['is_special_tenure'] || 'No',
+      notes: row['notes'] || '',
+    });
+  }
+  return rates;
+}
+
+export async function fetchFDRates(fdId: string): Promise<TenureRate[]> {
+  const cacheKey = `fd_rates_${fdId}`;
+  const cached = fdRatesCache.get('fd_rates_all');
+  if (cached && Date.now() - cached.fetchedAt < CACHE_DURATION_MS) {
+    return cached.data.filter((r) => r.fd_id === fdId);
+  }
+  try {
+    const res = await fetch(FD_RATES_URL, { next: { revalidate: 300 } });
+    if (!res.ok) throw new Error(`FD Rates fetch failed: ${res.status}`);
+    const csv = await res.text();
+    const allRates = parseTenureRates(csv);
+    fdRatesCache.set('fd_rates_all', { data: allRates, fetchedAt: Date.now() });
+    return allRates.filter((r) => r.fd_id === fdId);
+  } catch (err) {
+    console.error(`[SUTRA] Failed to fetch FD rates:`, err);
+    return fdRatesCache.get('fd_rates_all')?.data.filter((r) => r.fd_id === fdId) ?? [];
+  }
 }
 
 function rowToProduct(row: Record<string, string>): Product {
