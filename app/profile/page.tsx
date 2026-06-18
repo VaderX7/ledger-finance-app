@@ -14,7 +14,6 @@ import { getProducts } from '@/lib/data-fetcher';
 import { Product } from '@/lib/products';
 import { financialInstitutions, FinancialInstitution } from '@/lib/institutions';
 import { useAuth } from '@/context/AuthContext';
-import { saveUserNameToCloud } from '@/lib/userProfile';
 
 function getFormattedBankType(bankType: string): string {
   if (!bankType) return '';
@@ -281,9 +280,7 @@ function EditProfileSheet({
     const userObj = raw ? JSON.parse(raw) : {};
     userObj.name = trimmedName;
     localStorage.setItem('ledger_user', JSON.stringify(userObj));
-    if (userUid) {
-      saveUserNameToCloud(userUid, trimmedName).catch(console.error);
-    }
+
     onSave(trimmedName);
     setSaved(true);
     setTimeout(() => {

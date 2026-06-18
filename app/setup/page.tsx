@@ -14,7 +14,6 @@ import {
 import { useLang } from '@/context/LanguageContext';
 import TruelyMoneyLogo from '@/components/TruelyMoneyLogo';
 import { useAuth } from '@/context/AuthContext';
-import { saveUserNameToCloud, loadUserNameFromCloud } from '@/lib/userProfile';
 import { auth } from '@/lib/firebase';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -231,20 +230,6 @@ function GoogleStep({ onNext, onBack, onSkip, onReturningUser }: { onNext: () =>
   const handleGoogle = async () => {
     setLoading(true);
     await signIn();
-
-    // Check if returning user — load name directly from Firestore
-    try {
-      const currentUser = auth.currentUser;
-      if (currentUser) {
-        const cloudName = await loadUserNameFromCloud(currentUser.uid);
-        if (cloudName) {
-          setLoading(false);
-          onReturningUser(cloudName);
-          return;
-        }
-      }
-    } catch {}
-
     setLoading(false);
     onNext();
   };
@@ -654,11 +639,7 @@ function DoneStep({ profile }: { profile: UserProfile }) {
     localStorage.setItem('ledger_user', JSON.stringify(profile));
     setLang(profile.language);
 
-    // Sync display name to Firestore if Google user
-    const currentUser = auth.currentUser;
-    if (currentUser?.uid && profile.name) {
-      saveUserNameToCloud(currentUser.uid, profile.name).catch(console.error);
-    }
+
 
     const timer = setTimeout(() => {
       router.replace('/');

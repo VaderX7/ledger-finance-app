@@ -64,7 +64,8 @@ export default function FDTenureRates({ productId, accentColor = '#C9A96E' }: FD
 
   if (error || rates.length === 0) return null;
 
-  const COLS = ['Tenure', 'General', 'Senior'];
+  const maxGeneral = Math.max(...rates.map((r) => r.rate_general));
+  const COLS = ['Tenure', 'General %', 'Senior %'];
 
   return (
     <motion.div
@@ -103,7 +104,7 @@ export default function FDTenureRates({ productId, accentColor = '#C9A96E' }: FD
             <tbody>
               {rates.map((rate, idx) => {
                 const isSpecial = rate.is_special_tenure === 'Yes';
-                const isBest = rate.notes.includes('✓ Best Rate');
+                const isBest = rate.rate_general === maxGeneral;
                 return (
                   <motion.tr
                     key={`${rate.fd_id}-${idx}`}

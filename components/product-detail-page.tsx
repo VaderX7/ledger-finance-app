@@ -11,6 +11,7 @@ import {
 import { useLang } from '@/context/LanguageContext';
 import { TranslationKey } from '@/lib/i18n';
 import { isFavourited, toggleFavourite } from '@/lib/favourites';
+import { addRecentlyViewed } from '@/lib/recently-viewed';
 import JargonText from './jargon-text';
 import JargonBottomSheet from './jargon-bottom-sheet';
 import FDTenureRates from './fd-tenure-rates';
@@ -196,6 +197,15 @@ export default function ProductDetailPage({ product, onBack }: ProductDetailPage
   useEffect(() => {
     window.scrollTo(0, 0);
     if (scrollRef.current) scrollRef.current.scrollTop = 0;
+    addRecentlyViewed({
+      id: product.id,
+      name: product.name,
+      lender: product.lender,
+      category: product.category,
+      color: product.color,
+      colorAccent: product.colorAccent,
+      viewedAt: Date.now(),
+    });
   }, [product.id]);
 
   const handleAccessPortal = () => {
@@ -523,21 +533,18 @@ export default function ProductDetailPage({ product, onBack }: ProductDetailPage
           </h3>
           
           {product.category === 'fds' ? (
-            /* Compact 2-column grid for FD products */
-            <div
-              className="grid grid-cols-2 gap-2 p-3 rounded-xl"
-              style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.06)' }}
-            >
+            /* Compact 2-column grid for FD products — no cards, just labels + bold values */
+            <div className="grid grid-cols-2 gap-x-4 gap-y-3">
               {Object.entries(product.metrics)
                 .filter(([key]) => key !== heroRateKey && isNaN(Number(key)))
                 .map(([key, value]) => {
                   const label = METRIC_LABEL_MAP[key] || key.replace(/([A-Z])/g, ' $1').trim();
                   return (
-                    <div key={key} className="flex flex-col gap-0.5 px-2 py-1.5">
+                    <div key={key} className="flex flex-col gap-0.5">
                       <span className="text-[9px] uppercase tracking-wider text-white/30 font-semibold font-body">
                         {label}
                       </span>
-                      <JargonText text={String(value ?? '')} onTermClick={handleTermClick} className="text-[12px] text-white/85 font-bold leading-tight" />
+                      <JargonText text={String(value ?? '')} onTermClick={handleTermClick} className="text-[13px] text-white/90 font-bold leading-tight" />
                     </div>
                   );
                 })}

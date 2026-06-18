@@ -5,7 +5,7 @@ import { createContext, useContext } from 'react';
 const PAGE_COLORS: Record<string, string> = {
   '/': '#C9A96E',
   '/search': '#00E5FF',
-  '/myfinance': '#00F5A0',
+  '/tools': '#00F5A0',
   '/profile': '#8B5CF6',
 };
 

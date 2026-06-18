@@ -3,14 +3,14 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion, useAnimation } from 'framer-motion';
-import { Home, Search, Wallet, User } from 'lucide-react';
+import { Home, Search, Calculator, User } from 'lucide-react';
 import { useLang } from '@/context/LanguageContext';
 import { useEffect } from 'react';
 
 const TAB_COLORS: Record<string, string> = {
   '/': '#C9A96E',
   '/search': '#00E5FF',
-  '/myfinance': '#00F5A0',
+  '/tools': '#00F5A0',
   '/profile': '#8B5CF6',
 };
 
@@ -99,7 +99,7 @@ export default function BottomNav() {
   const navItems = [
     { href: '/', label: t.navHome, icon: Home },
     { href: '/search', label: t.navSearch, icon: Search },
-    { href: '/myfinance', label: t.navMyFinance ?? 'My Finance', icon: Wallet },
+    { href: '/tools', label: t.navTools ?? 'Tools', icon: Calculator },
     { href: '/profile', label: t.navProfile, icon: User },
   ];
 

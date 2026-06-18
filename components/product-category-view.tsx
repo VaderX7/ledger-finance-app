@@ -10,7 +10,7 @@ import CategoryViewHeader from './category-view-header';
 import CategoryProductCard from './category-product-card';
 import JargonBottomSheet from './jargon-bottom-sheet';
 import ProductDetailPage from './product-detail-page';
-import { Search, X, ChevronDown, Check, ChevronRight, ArrowLeft, Star } from 'lucide-react';
+import { Search, X, ChevronDown, Check, ChevronRight, ArrowLeft, Star, User, Home, Car, Briefcase, GraduationCap, Coins, Building, Bike, Sprout, Users } from 'lucide-react';
 import { toggleFavourite, isFavourited, getFavourites } from '@/lib/favourites';
 import { useLang } from '@/context/LanguageContext';
 import { TranslationKey } from '@/lib/i18n';
@@ -482,6 +482,46 @@ const categoryMeta: Record<
   govtschemes: { labelKey: 'govtschemesLabel', subtitleKey: 'govtschemesSub', accentColor: '#FF9933' },
   insurance: { labelKey: 'insuranceLabel', subtitleKey: 'insuranceSub', accentColor: '#00D4AA' },
 };
+
+export interface MajorLoanBank {
+  lender: string;
+  bankType: 'public' | 'private' | 'sfb' | 'payments' | 'nbfc';
+  color: string;
+  colorAccent: string;
+}
+
+export const MAJOR_LOAN_BANKS: MajorLoanBank[] = [
+  { lender: 'State Bank of India', bankType: 'public', color: '#00B4EF', colorAccent: '#00BCF9' },
+  { lender: 'HDFC Bank', bankType: 'private', color: '#CB2C3C', colorAccent: '#F8ECEE' },
+  { lender: 'ICICI Bank', bankType: 'private', color: '#C4442C', colorAccent: '#E6B7B5' },
+  { lender: 'Axis Bank', bankType: 'private', color: '#98144D', colorAccent: '#A01552' },
+  { lender: 'Bank of Baroda', bankType: 'public', color: '#FD6440', colorAccent: '#FEC4B6' },
+  { lender: 'Kotak Mahindra Bank', bankType: 'private', color: '#18346F', colorAccent: '#C0BACA' },
+  { lender: 'Punjab National Bank', bankType: 'public', color: '#952742', colorAccent: '#E2D8DA' },
+  { lender: 'Canara Bank', bankType: 'public', color: '#0486D9', colorAccent: '#7CB1C0' },
+  { lender: 'IndusInd Bank', bankType: 'private', color: '#853030', colorAccent: '#894242' },
+  { lender: 'IDFC FIRST Bank', bankType: 'private', color: '#A0202B', colorAccent: '#DCB0B3' }
+];
+
+export interface LoanCategory {
+  id: string;
+  name: string;
+  icon: any;
+  color: string;
+}
+
+export const LOAN_CATEGORIES: LoanCategory[] = [
+  { id: 'Personal Loan', name: 'Personal Loan', icon: User, color: '#FB7185' },
+  { id: 'Home Loan', name: 'Home Loan', icon: Home, color: '#38BDF8' },
+  { id: 'Car Loan', name: 'Car Loan', icon: Car, color: '#34D399' },
+  { id: 'Business Loan', name: 'Business Loan', icon: Briefcase, color: '#A78BFA' },
+  { id: 'Education Loan', name: 'Education Loan', icon: GraduationCap, color: '#FBBF24' },
+  { id: 'Gold Loan', name: 'Gold Loan', icon: Coins, color: '#FACC15' },
+  { id: 'Loan Against Property', name: 'Loan Against Property', icon: Building, color: '#818CF8' },
+  { id: 'Two-Wheeler Loan', name: 'Two-Wheeler Loan', icon: Bike, color: '#2DD4BF' },
+  { id: 'Agricultural Loan', name: 'Agricultural Loan', icon: Sprout, color: '#4ADE80' },
+  { id: 'Microfinance Loan', name: 'Microfinance Loan', icon: Users, color: '#F87171' }
+];
 
 // Bottom sheet for selecting a value from a list
 function SelectSheet({
@@ -977,6 +1017,209 @@ function BankCard({ group, setSelectedBank, logoErrors, setLogoErrors }: BankCar
   );
 }
 
+interface LoanBankCardProps {
+  bank: typeof MAJOR_LOAN_BANKS[number];
+  products: Product[];
+  setSelectedBank: (bank: string | null) => void;
+  logoErrors: Record<string, boolean>;
+  setLogoErrors: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
+}
+
+function LoanBankCard({ bank, products, setSelectedBank, logoErrors, setLogoErrors }: LoanBankCardProps) {
+  const lender = bank.lender;
+  const count = products.length;
+  const color = bank.color;
+  const colorAccent = bank.colorAccent;
+  
+  const bankLogoId = BANK_LOGO_MAP[lender] || lender.toLowerCase().replace(/bank/gi, '').replace(/[^a-z0-9]/g, '').trim();
+  const logoUrl = `/logos/${bankLogoId}.png`;
+  const hasLogoError = logoErrors[bankLogoId] || false;
+  
+  const [isFav, setIsFav] = useState(() => isFavourited('bank-' + lender));
+  useEffect(() => {
+    setIsFav(isFavourited('bank-' + lender));
+  }, [lender]);
+
+  const rateRange = getRateRange(products);
+  const highlights = products.length > 0 ? products[0].highlights.slice(0, 3) : [];
+  const bestFor = products.length > 0 ? getBestUSP(products) : null;
+  
+  const bankTypeName = bank.bankType === 'public' ? 'PUBLIC' : bank.bankType === 'private' ? 'PRIVATE' : bank.bankType === 'sfb' ? 'SMALL FINANCE' : bank.bankType === 'payments' ? 'PAYMENTS BANK' : 'NBFC';
+  
+  return (
+    <div className="relative group">
+      <motion.div
+        whileTap={{ scale: 0.985 }}
+        onClick={() => setSelectedBank(lender)}
+        className="overflow-hidden rounded-2xl cursor-pointer p-4 border-l-[3px]"
+        style={{
+          background: `linear-gradient(135deg, ${color}12 0%, ${colorAccent}08 100%)`,
+          borderTop: `1px solid ${color}28`,
+          borderRight: `1px solid ${color}28`,
+          borderBottom: `1px solid ${color}28`,
+          borderLeftColor: color,
+        }}
+      >
+        <div className="absolute -top-8 -right-8 w-28 h-28 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" style={{ background: `${color}14` }} />
+
+        <div className="flex items-center gap-3 mb-3">
+          {/* Logo Container */}
+          <div
+            className="w-12 h-12 rounded-xl flex-shrink-0 flex items-center justify-center p-[6px] overflow-hidden"
+            style={{
+              background: LOGO_BG_MAP[lender] ?? '#FFFFFF',
+              border: `1px solid ${color}40`,
+              boxShadow: `0 0 10px ${color}35, 0 2px 8px rgba(0,0,0,0.15)`,
+            }}
+          >
+            {!hasLogoError ? (
+              <Image
+                src={logoUrl}
+                alt={`${lender} logo`}
+                width={40}
+                height={40}
+                className="object-contain w-full h-full"
+                onError={() => {
+                  setLogoErrors((prev) => ({ ...prev, [bankLogoId]: true }));
+                }}
+              />
+            ) : (
+              <div
+                className="w-full h-full rounded-full flex items-center justify-center text-[10px] font-extrabold tracking-wider border"
+                style={{
+                  borderColor: `${color}40`,
+                  color: color,
+                  background: `${color}08`
+                }}
+              >
+                {getBankInitials(lender)}
+              </div>
+            )}
+          </div>
+
+          {/* Bank Name and Sector Badge */}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-start justify-between gap-2">
+              <h3 className="text-[16px] leading-tight text-white/95 truncate pr-1" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800 }}>
+                {lender}
+              </h3>
+            </div>
+            <div className="flex items-center gap-1.5 mt-1">
+              <span
+                className="text-[8px] font-body px-1.5 py-0.5 rounded-full font-bold uppercase tracking-wider"
+                style={{
+                  background: bank.bankType === 'public'
+                    ? 'rgba(201,169,110,0.12)'
+                    : bank.bankType === 'private'
+                      ? 'rgba(56,189,248,0.12)'
+                      : bank.bankType === 'sfb'
+                        ? 'rgba(45,212,191,0.12)'
+                        : 'rgba(251,113,133,0.12)',
+                  color: bank.bankType === 'public'
+                    ? '#C9A96E'
+                    : bank.bankType === 'private'
+                      ? '#38BDF8'
+                      : bank.bankType === 'sfb'
+                        ? '#2DD4BF'
+                        : '#FB7185',
+                  border: `1px solid ${bank.bankType === 'public'
+                      ? 'rgba(201,169,110,0.25)'
+                      : bank.bankType === 'private'
+                        ? 'rgba(56,189,248,0.25)'
+                        : bank.bankType === 'sfb'
+                          ? 'rgba(45,212,191,0.25)'
+                          : 'rgba(251,113,133,0.25)'
+                    }`
+                }}
+              >
+                {bankTypeName}
+              </span>
+              <span className="w-1 h-1 rounded-full bg-white/20" />
+              <span className="text-[11px] text-white/50 font-body">
+                {count} {count === 1 ? 'loan option' : 'loan options'}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {count > 0 ? (
+          <>
+            <div className="grid grid-cols-2 gap-3 mb-3">
+              <div className="rounded-lg px-2.5 py-2" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
+                <p className="font-body text-[9px] text-white/30 mb-0.5 uppercase tracking-wide">Interest Rate</p>
+                <p className="text-[12px] font-bold" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: '#00F5A0' }}>
+                  {rateRange}
+                </p>
+              </div>
+              {bestFor && (
+                <div className="rounded-lg px-2.5 py-2" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
+                  <p className="font-body text-[9px] text-white/30 mb-0.5 uppercase tracking-wide">Best For</p>
+                  <p className="text-[12px] font-bold truncate" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: '#00F5A0' }}>
+                    {bestFor}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                {highlights.map((h) => (
+                  <span
+                    key={h}
+                    className="px-2 py-0.5 rounded-md text-[9px] font-body text-white/40"
+                    style={{ background: `${color}10`, border: `1px solid ${color}1e` }}
+                  >
+                    {h}
+                  </span>
+                ))}
+              </div>
+              <ChevronRight size={16} className="text-white/30 group-hover:text-white/70 transition-colors" />
+            </div>
+          </>
+        ) : (
+          <div className="text-[11px] text-white/30 font-body py-1.5 flex items-center justify-between">
+            <span>No loans listed currently</span>
+            <ChevronRight size={14} className="text-white/20 group-hover:text-white/40 transition-colors" />
+          </div>
+        )}
+      </motion.div>
+
+      {/* Star Button outside card's motion.div wrapper */}
+      <motion.button
+        whileTap={{ scale: 0.85 }}
+        onClick={async (e) => {
+          e.stopPropagation();
+          e.preventDefault();
+          const cardId = 'bank-' + lender;
+          const added = await toggleFavourite({
+            id: cardId,
+            type: 'bank',
+            lender: lender,
+            name: lender,
+            color,
+            colorAccent,
+            savedAt: Date.now(),
+          });
+          setIsFav(added);
+        }}
+        className="absolute p-1.5 rounded-full bg-black/20 hover:bg-black/40 transition-colors z-10"
+        style={{ position: 'absolute', top: '12px', right: '12px' }}
+      >
+        <motion.div
+          animate={isFav ? { scale: [1, 1.4, 1] } : { scale: 1 }}
+          transition={{ duration: 0.3, type: 'tween', ease: 'easeInOut' }}
+        >
+          <Star
+            size={16}
+            style={{ color: isFav ? '#C9A96E' : 'rgba(255,255,255,0.3)' }}
+            fill={isFav ? "#C9A96E" : "transparent"}
+          />
+        </motion.div>
+      </motion.button>
+    </div>
+  );
+}
+
 interface ProductCategoryViewProps {
   category: ProductCategory;
   onBack: () => void;
@@ -999,6 +1242,7 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
   const [logoErrors, setLogoErrors] = useState<Record<string, boolean>>({});
   const [searchFocused, setSearchFocused] = useState(false);
   const [activeChip, setActiveChip] = useState<string | null>(null);
+  const [loansBrowseMode, setLoansBrowseMode] = useState<'bank' | 'category'>('bank');
 
   const getSortLabel = (sortByKey: string) => {
     if (lang === 'hi') {
@@ -1156,9 +1400,19 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
     const n = p.name.toLowerCase();
     if (n.includes('personal')) return 'Personal Loan';
     if (n.includes('home')) return 'Home Loan';
-    if (n.includes('car') || n.includes('auto')) return 'Car Loan';
-    if (n.includes('mudra') || n.includes('business')) return 'Business Loan';
+    if (n.includes('car') || n.includes('auto') || n.includes('vehicle')) {
+      if (n.includes('two-wheeler') || n.includes('bike') || n.includes('2-wheeler')) {
+        return 'Two-Wheeler Loan';
+      }
+      return 'Car Loan';
+    }
+    if (n.includes('two-wheeler') || n.includes('bike') || n.includes('2-wheeler')) return 'Two-Wheeler Loan';
+    if (n.includes('mudra') || n.includes('business') || n.includes('msme') || n.includes('enterprise')) return 'Business Loan';
     if (n.includes('education') || n.includes('student')) return 'Education Loan';
+    if (n.includes('gold') || n.includes('jewel')) return 'Gold Loan';
+    if (n.includes('property') || n.includes('lap') || n.includes('against property')) return 'Loan Against Property';
+    if (n.includes('agri') || n.includes('crop') || n.includes('farm') || n.includes('kcc') || n.includes('kisan')) return 'Agricultural Loan';
+    if (n.includes('micro') || n.includes('shishu') || n.includes('kishor') || n.includes('tarun') || n.includes('microfinance')) return 'Microfinance Loan';
     return 'Other';
   };
 
@@ -1251,12 +1505,12 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
     }
   }
 
-  const showSavingsLevel2 = category === 'savings' && selectedBank !== null;
+  const showBankLevel2 = (category === 'savings' || category === 'loans') && selectedBank !== null;
 
   return (
     <>
       <AnimatePresence mode="wait">
-        {!showSavingsLevel2 ? (
+        {!showBankLevel2 ? (
           <motion.div
             key="level1"
             initial={{ x: 40, opacity: 0 }}
@@ -1300,6 +1554,55 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
                     </button>
                   )}
                 </div>
+
+                {/* Loans Category Switcher */}
+                {category === 'loans' && (
+                  <div className="w-full p-1 rounded-2xl bg-[#090F1C]/40 flex items-center justify-between border-2 relative overflow-hidden"
+                    style={{
+                      borderColor: '#00F5A0',
+                      boxShadow: '0 0 12px rgba(0, 245, 160, 0.12)',
+                    }}
+                  >
+                    <button
+                      onClick={() => setLoansBrowseMode('bank')}
+                      className="flex-1 py-2 text-center font-bold text-[10.5px] tracking-wider rounded-xl transition-all relative z-10"
+                      style={{
+                        color: loansBrowseMode === 'bank' ? '#070A12' : 'rgba(255,255,255,0.6)',
+                        fontFamily: "'Plus Jakarta Sans', sans-serif"
+                      }}
+                    >
+                      {loansBrowseMode === 'bank' && (
+                        <motion.div
+                          layoutId="loansActiveToggle"
+                          className="absolute inset-0 rounded-xl -z-10"
+                          style={{
+                            background: 'linear-gradient(135deg, #00F5A0 0%, #00D4AA 100%)',
+                          }}
+                        />
+                      )}
+                      BROWSE BY BANK
+                    </button>
+                    <button
+                      onClick={() => setLoansBrowseMode('category')}
+                      className="flex-1 py-2 text-center font-bold text-[10.5px] tracking-wider rounded-xl transition-all relative z-10"
+                      style={{
+                        color: loansBrowseMode === 'category' ? '#070A12' : 'rgba(255,255,255,0.6)',
+                        fontFamily: "'Plus Jakarta Sans', sans-serif"
+                      }}
+                    >
+                      {loansBrowseMode === 'category' && (
+                        <motion.div
+                          layoutId="loansActiveToggle"
+                          className="absolute inset-0 rounded-xl -z-10"
+                          style={{
+                            background: 'linear-gradient(135deg, #00F5A0 0%, #00D4AA 100%)',
+                          }}
+                        />
+                      )}
+                      BROWSE BY CATEGORY
+                    </button>
+                  </div>
+                )}
 
                 {/* Quick Filter Chips (only for savings category) */}
                 {category === 'savings' && (
@@ -1345,6 +1648,12 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
                         <span><strong className="text-white/80">{filtered.length}</strong> accounts · <strong className="text-white/80">{bankGroups.length}</strong> banks</span>
                       ) : (
                         <span><strong className="text-white/80">{filtered.length}</strong> accounts · <strong className="text-white/80">{bankGroups.length}</strong> banks</span>
+                      )
+                    ) : category === 'loans' ? (
+                      loansBrowseMode === 'bank' ? (
+                        <span>Showing <strong className="text-white/80">{filtered.length}</strong> loan products across banks</span>
+                      ) : (
+                        <span>Showing <strong className="text-white/80">{filtered.length}</strong> loan products across categories</span>
                       )
                     ) : (
                       lang === 'hi' ? (
@@ -1408,7 +1717,7 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
                         <ChevronDown size={14} className="flex-shrink-0 ml-1.5" style={{ color: sortBy !== 'popularity' ? '#070A12' : meta.accentColor }} />
                       </motion.button>
                     </div>
-                  ) : (
+                  ) : category !== 'loans' ? (
                     /* For other categories, show them as grid or flex layout */
                     <div className="flex flex-wrap gap-2 w-full">
                       {/* Institution Type Filter Button */}
@@ -1459,15 +1768,15 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
                             color: typeFilter ? '#070A12' : `${meta.accentColor}d0`,
                           }}
                         >
-                          {typeFilter ?? (category === 'loans' ? t.filterByType : category === 'insurance' ? t.filterByType : t.filterByIncome)}
+                          {typeFilter ?? (category === 'insurance' ? t.filterByType : t.filterByIncome)}
                           <ChevronDown size={11} style={{ color: typeFilter ? '#070A12' : meta.accentColor }} />
                         </motion.button>
                       )}
                     </div>
-                  )}
+                  ) : null}
 
                   {/* Clear all active filters and search/sort values */}
-                  {(bankPopupFilter || typeFilter || bankFilter !== 'all' || sortBy !== 'popularity' || searchText !== '') && (
+                  {category !== 'loans' && (bankPopupFilter || typeFilter || bankFilter !== 'all' || sortBy !== 'popularity' || searchText !== '') && (
                     <div className="mt-2 flex justify-start">
                       <motion.button
                         whileTap={{ scale: 0.96 }}
@@ -1497,7 +1806,7 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
                 </div>
               )}
 
-              {/* Product cards / Groups */}
+              {/* Product cards / Groups / Grid views */}
               {!loading && (
                 <div className="space-y-3">
                   {category === 'savings' ? (
@@ -1510,6 +1819,134 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
                         setLogoErrors={setLogoErrors}
                       />
                     ))
+                  ) : category === 'loans' ? (
+                    loansBrowseMode === 'bank' ? (
+                      (() => {
+                        const visibleBanks = MAJOR_LOAN_BANKS.filter((bank) => {
+                          const bankProducts = filtered.filter((p) => p.lender === bank.lender);
+                          if (searchText.trim() !== '' && bankProducts.length === 0) return false;
+                          return true;
+                        });
+
+                        if (visibleBanks.length === 0) {
+                          return (
+                            <div className="text-center py-16 text-white/25 font-body text-sm">
+                              No banks match your search
+                            </div>
+                          );
+                        }
+
+                        return (
+                          <div className="space-y-3">
+                            {visibleBanks.map((bank) => (
+                              <LoanBankCard
+                                key={bank.lender}
+                                bank={bank}
+                                products={filtered.filter((p) => p.lender === bank.lender)}
+                                setSelectedBank={setSelectedBank}
+                                logoErrors={logoErrors}
+                                setLogoErrors={setLogoErrors}
+                              />
+                            ))}
+                          </div>
+                        );
+                      })()
+                    ) : (
+                      /* Category view */
+                      typeFilter === null ? (
+                        (() => {
+                          const visibleCategories = LOAN_CATEGORIES.filter((cat) => {
+                            const count = filtered.filter((p) => getLoanType(p) === cat.id).length;
+                            if (searchText.trim() !== '' && count === 0) return false;
+                            return true;
+                          });
+
+                          if (visibleCategories.length === 0) {
+                            return (
+                              <div className="text-center py-16 text-white/25 font-body text-sm">
+                                No categories match your search
+                              </div>
+                            );
+                          }
+
+                          return (
+                            <div className="grid grid-cols-2 gap-3 pt-1">
+                              {visibleCategories.map((cat) => {
+                                const IconComponent = cat.icon;
+                                const count = filtered.filter((p) => getLoanType(p) === cat.id).length;
+                                return (
+                                  <motion.button
+                                    key={cat.id}
+                                    whileTap={{ scale: 0.97 }}
+                                    onClick={() => setTypeFilter(cat.id)}
+                                    className="rounded-2xl p-4 text-left border flex flex-col justify-between transition-all aspect-[5/4] relative overflow-hidden"
+                                    style={{
+                                      background: 'rgba(255, 255, 255, 0.02)',
+                                      borderColor: `${cat.color}25`,
+                                      boxShadow: '0 4px 24px rgba(0,0,0,0.15)',
+                                    }}
+                                  >
+                                    <div
+                                      className="w-9 h-9 rounded-xl flex items-center justify-center mb-3"
+                                      style={{ background: `${cat.color}15` }}
+                                    >
+                                      <IconComponent size={18} style={{ color: cat.color }} strokeWidth={2.2} />
+                                    </div>
+                                    <div>
+                                      <p className="text-[13px] font-bold leading-tight text-white/90" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+                                        {cat.name}
+                                      </p>
+                                      <p className="font-body text-[10px] mt-1 text-white/40">
+                                        {count} {count === 1 ? 'option' : 'options'}
+                                      </p>
+                                    </div>
+                                  </motion.button>
+                                );
+                              })}
+                            </div>
+                          );
+                        })()
+                      ) : (
+                        /* Show products inside selected loan type */
+                        <div className="space-y-3">
+                          <div className="flex items-center gap-2 pb-1">
+                            <motion.button
+                              whileTap={{ scale: 0.93 }}
+                              onClick={() => setTypeFilter(null)}
+                              className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-[10px] font-semibold font-body"
+                              style={{
+                                background: 'rgba(255,255,255,0.04)',
+                                border: '1px solid rgba(255,255,255,0.08)',
+                                color: 'rgba(255,255,255,0.6)',
+                              }}
+                            >
+                              ← Back to Categories
+                            </motion.button>
+                            <span className="text-[11px] font-bold text-white/40 uppercase tracking-wider">
+                              Category: {typeFilter}
+                            </span>
+                          </div>
+                          
+                          <AnimatePresence mode="popLayout">
+                            {filtered.map((product, idx) => (
+                              <CategoryProductCard
+                                key={product.id}
+                                product={product}
+                                index={idx}
+                                onJargonClick={(term) => { setSelectedTerm(term); setIsSheetOpen(true); }}
+                                onDetailsClick={setSelectedProduct}
+                              />
+                            ))}
+                          </AnimatePresence>
+                          
+                          {filtered.length === 0 && (
+                            <div className="text-center py-16 text-white/25 font-body text-sm">
+                              {t.noProductsMatch}
+                            </div>
+                          )}
+                        </div>
+                      )
+                    )
                   ) : (
                     <AnimatePresence mode="popLayout">
                       {filtered.map((product, idx) => (
@@ -1526,7 +1963,7 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
                 </div>
               )}
 
-              {!loading && (category === 'savings' ? bankGroups.length === 0 : filtered.length === 0) && (
+              {!loading && (category === 'savings' ? bankGroups.length === 0 : category === 'loans' ? false : filtered.length === 0) && (
                 <div className="text-center py-16 text-white/25 font-body text-sm">
                   {t.noProductsMatch}
                 </div>
@@ -1618,12 +2055,8 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
                         <p className="text-[10px] text-white/45 font-body mt-0.5">
                           {bankProducts.length} {
                             category === 'savings' ? 'savings options' :
-                              category === 'current' ? 'current account options' :
-                                category === 'fds' ? 'FD options' :
-                                  category === 'creditcards' ? 'credit card options' :
-                                    category === 'loans' ? 'loan options' :
-                                      category === 'govtschemes' ? 'schemes' :
-                                        'options'
+                              category === 'loans' ? 'loan options' :
+                                'options'
                           }
                         </p>
                       </div>

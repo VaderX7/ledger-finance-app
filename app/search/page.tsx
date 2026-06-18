@@ -9,6 +9,7 @@ import { useLang } from '@/context/LanguageContext';
 import ProductCategoryView from '@/components/product-category-view';
 import ProductDetailPage from '@/components/product-detail-page';
 import BankBrowserPage from '@/components/bank-browser-page';
+import { useSearchParams } from 'next/navigation';
 
 type SearchView = 'search' | ProductCategory | 'banks';
 
@@ -23,7 +24,13 @@ export default function SearchPage() {
     savings: null, current: null, fds: null, creditcards: null,
     loans: null, govtschemes: null, insurance: null,
   });
-  const [activeView, setActiveView] = useState<SearchView>('search');
+  const searchParams = useSearchParams();
+  const catParam = searchParams.get('category');
+  const [activeView, setActiveView] = useState<SearchView>(
+    (catParam && ['savings', 'current', 'fds', 'creditcards', 'loans', 'govtschemes', 'insurance', 'banks'].includes(catParam))
+      ? (catParam as SearchView)
+      : 'search'
+  );
   const [activeTool, setActiveTool] = useState<ToolId | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const { t } = useLang();
