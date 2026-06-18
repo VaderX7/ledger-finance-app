@@ -27,7 +27,7 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
     };
   }, [onComplete]);
 
-  const letters = ['L', 'E', 'D', 'G', 'E', 'R'];
+  const letters = ['T', 'R', 'U', 'E', 'L', 'Y', ' ', 'M', 'O', 'N', 'E', 'Y'];
 
   return (
     <div 
@@ -96,7 +96,7 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
               WebkitTextFillColor: 'transparent',
             }}
           >
-            L
+            T
           </span>
         </motion.div>
       </div>

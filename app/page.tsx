@@ -6,7 +6,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useLang } from '@/context/LanguageContext';
 import { getGreeting } from '@/lib/i18n';
-import LedgerLogo from '@/components/LedgerLogo';
+import TruelyMoneyLogo from '@/components/TruelyMoneyLogo';
 import SplashScreen from '@/components/SplashScreen';
 
 export default function HomePage() {
@@ -92,12 +92,12 @@ export default function HomePage() {
         className="flex items-center justify-between mb-8"
       >
         <div className="flex items-center gap-2.5">
-          <LedgerLogo variant="home" />
+          <TruelyMoneyLogo variant="home" />
           <span
-            className="text-sm text-white/80"
-            style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 600 }}
+            className="text-base text-white tracking-widest"
+            style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800 }}
           >
-            LEDGER
+            Truely Money
           </span>
         </div>
         <motion.button

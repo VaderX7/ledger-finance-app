@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { motion, useAnimation } from 'framer-motion';
 
-interface LedgerLogoProps {
+interface TruelyMoneyLogoProps {
   variant: 'hero' | 'corner' | 'done' | 'home';
   onDoneComplete?: () => void;
 }
@@ -29,7 +29,7 @@ const FONT_SIZES = {
   home: 12,
 };
 
-export default function LedgerLogo({ variant, onDoneComplete }: LedgerLogoProps) {
+export default function TruelyMoneyLogo({ variant, onDoneComplete }: TruelyMoneyLogoProps) {
   const controls = useAnimation();
   const size = SIZES[variant];
   const borderRadius = RADII[variant];
@@ -92,7 +92,7 @@ export default function LedgerLogo({ variant, onDoneComplete }: LedgerLogoProps)
     >
       <img
         src="/logo.png"
-        alt="Ledger Logo"
+        alt="Truely Money Logo"
         className="w-full h-full object-cover select-none pointer-events-none"
       />
       

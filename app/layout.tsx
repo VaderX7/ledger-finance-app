@@ -12,13 +12,13 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: 'LEDGER — Know Your Finance',
+  title: 'Truely Money — Know Your Finance',
   description: 'Compare 100+ Indian financial products anonymously — loans, deposits, and welfare schemes at your fingertips.',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
-    title: 'LEDGER',
+    title: 'Truely Money',
   },
   openGraph: {
     images: [{ url: 'https://bolt.new/static/og_default.png' }],
@@ -38,7 +38,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-        <meta name="apple-mobile-web-app-title" content="LEDGER" />
+        <meta name="apple-mobile-web-app-title" content="Truely Money" />
         <link rel="manifest" href="/manifest.json" />
         <link rel="apple-touch-icon" href="/icon-192.png" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />

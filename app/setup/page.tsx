@@ -12,7 +12,7 @@ import {
   ArrowLeft,
 } from 'lucide-react';
 import { useLang } from '@/context/LanguageContext';
-import LedgerLogo from '@/components/LedgerLogo';
+import TruelyMoneyLogo from '@/components/TruelyMoneyLogo';
 import { useAuth } from '@/context/AuthContext';
 import { saveUserNameToCloud, loadUserNameFromCloud } from '@/lib/userProfile';
 import { auth } from '@/lib/firebase';
@@ -120,7 +120,7 @@ function CornerLogoBar({
     <div className="flex items-center justify-between mb-10 w-full relative z-30">
       <div className="flex items-center gap-3">
         <BackButton onBack={onBack} />
-        <LedgerLogo variant="corner" />
+        <TruelyMoneyLogo variant="corner" />
       </div>
       <div className="flex items-center gap-3">
         <StepDots current={current} total={total} />
@@ -146,7 +146,7 @@ function SplashStep({ onNext }: { onNext: () => void }) {
         transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
         className="mb-8 relative"
       >
-        <LedgerLogo variant="hero" />
+        <TruelyMoneyLogo variant="hero" />
       </motion.div>
 
       {/* Wordmark */}
@@ -160,7 +160,7 @@ function SplashStep({ onNext }: { onNext: () => void }) {
           className="text-[42px] tracking-[-0.05em] leading-none mb-2"
           style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800, color: 'rgba(255,255,255,0.95)' }}
         >
-          LEDGER
+          Truely Money
         </h1>
         <p
           className="text-[11px] tracking-[0.28em] uppercase"
@@ -679,7 +679,7 @@ function DoneStep({ profile }: { profile: UserProfile }) {
         transition={{ type: 'spring', stiffness: 300, damping: 22, delay: 0.1 }}
         className="mb-8 relative flex items-center justify-center animate-glow"
       >
-        <LedgerLogo variant="done" onDoneComplete={() => setCelebrationDone(true)} />
+        <TruelyMoneyLogo variant="done" onDoneComplete={() => setCelebrationDone(true)} />
         {celebrationDone && (
           <motion.div
             initial={{ scale: 1, opacity: 0.5 }}
@@ -714,7 +714,7 @@ function DoneStep({ profile }: { profile: UserProfile }) {
         className="text-[13px] text-white/35 max-w-[240px] mb-10"
         style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
       >
-        LEDGER is ready. Explore savings, FDs, loans and more — all anonymously.
+        Truely Money is ready. Explore savings, FDs, loans and more — all anonymously.
       </motion.p>
 
       {/* Animated loading bar */}
