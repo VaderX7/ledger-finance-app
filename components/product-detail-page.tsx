@@ -187,6 +187,7 @@ export default function ProductDetailPage({ product, onBack }: ProductDetailPage
   const scrollRef = useRef<HTMLDivElement>(null);
   const [docsExpanded, setDocsExpanded] = useState(false);
   const [eligibilityExpanded, setEligibilityExpanded] = useState(true);
+  const [tenureRatesExpanded, setTenureRatesExpanded] = useState(true);
   const [selectedTerm, setSelectedTerm] = useState<string | null>(null);
   const [jargonOpen, setJargonOpen] = useState(false);
   const [logoErrors, setLogoErrors] = useState<Record<string, boolean>>({});
@@ -425,7 +426,7 @@ export default function ProductDetailPage({ product, onBack }: ProductDetailPage
       </div>
 
       {/* Scrollable content */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto px-5 py-5 space-y-5 pb-28">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto px-5 py-5 space-y-5 pb-28 custom-scrollbar">
         
         {/* HERO SECTION: Logo, Lender name, Hero Interest Rate, description */}
         <motion.div
@@ -590,9 +591,46 @@ export default function ProductDetailPage({ product, onBack }: ProductDetailPage
           )}
         </motion.div>
 
-        {/* SECTION 3.5: FD Tenure-wise Interest Rates */}
+        {/* SECTION 3.5: FD Tenure-wise Interest Rates Accordion */}
         {product.category === 'fds' && (
-          <FDTenureRates productId={product.id} accentColor={product.colorAccent || product.color || '#C9A96E'} />
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.4 }}
+            className="border border-white/[0.06] rounded-xl overflow-hidden bg-white/[0.01]"
+          >
+            <button
+              onClick={() => setTenureRatesExpanded(!tenureRatesExpanded)}
+              className="w-full flex items-center justify-between p-4 text-[12px] text-white/80 font-bold transition-all hover:bg-white/[0.02]"
+              style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+            >
+              <span className="flex items-center gap-2">
+                <TrendingUp size={14} style={{ color: product.colorAccent || product.color || '#C9A96E' }} />
+                {t.tenureRatesTitle || "Tenure & Interest Rates"}
+              </span>
+              <motion.div
+                animate={{ rotate: tenureRatesExpanded ? 180 : 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                <ChevronDown size={16} className="text-white/40" />
+              </motion.div>
+            </button>
+            
+            <motion.div
+              initial={false}
+              animate={{ height: tenureRatesExpanded ? 'auto' : 0, opacity: tenureRatesExpanded ? 1 : 0 }}
+              transition={{ duration: 0.25, ease: 'easeInOut' }}
+              className="overflow-hidden"
+            >
+              <div className="px-4 pb-4 pt-1">
+                <FDTenureRates 
+                  productId={product.id} 
+                  accentColor={product.colorAccent || product.color || '#C9A96E'} 
+                  hideHeader={true} 
+                />
+              </div>
+            </motion.div>
+          </motion.div>
         )}
 
         {/* SECTION 4: Required Documents Accordion */}

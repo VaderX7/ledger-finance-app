@@ -6,6 +6,7 @@ import { Product } from '@/lib/products';
 import { X, ExternalLink, Shield, Gift, AlertCircle } from 'lucide-react';
 import JargonText from '@/components/jargon-text';
 import JargonBottomSheet from '@/components/jargon-bottom-sheet';
+import FDTenureRates from './fd-tenure-rates';
 
 interface DetailPanelProps {
   product: Product;
@@ -71,6 +72,8 @@ export default function DetailPanel({ product, isOpen, onClose }: DetailPanelPro
               </div>
             </div>
           </div>
+
+          <FDTenureRates productId={product.id} accentColor={product.colorAccent || product.color || '#C9A96E'} />
         </motion.div>
       );
     }
@@ -209,7 +212,7 @@ export default function DetailPanel({ product, isOpen, onClose }: DetailPanelPro
 
             {/* Content */}
             <motion.div
-              className="px-5 py-5 space-y-5 overflow-y-auto flex-1"
+              className="px-5 py-5 space-y-5 overflow-y-auto flex-1 custom-scrollbar"
               transition={{ type: 'spring', stiffness: 300, damping: 30 }}
             >
               {/* Product Description */}

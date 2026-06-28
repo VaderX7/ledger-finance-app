@@ -176,7 +176,17 @@ function rowToProduct(row: Record<string, string>): Product {
       if (bt.includes('nbfc')) return 'nbfc';
       return 'private'; // default fallback
     })() as BankType,
-    category: row['category'] as ProductCategory,
+    category: (() => {
+      const cat = (row['category'] || '').trim().toLowerCase();
+      if (cat === 'fixed deposit' || cat === 'fixed deposits' || cat === 'fd' || cat === 'fds') return 'fds';
+      if (cat === 'savings account' || cat === 'savings accounts' || cat === 'savings') return 'savings';
+      if (cat === 'current account' || cat === 'current accounts' || cat === 'current') return 'current';
+      if (cat === 'credit card' || cat === 'credit cards' || cat === 'creditcards' || cat === 'cards') return 'creditcards';
+      if (cat === 'loan' || cat === 'loans') return 'loans';
+      if (cat === 'government scheme' || cat === 'government schemes' || cat === 'govt scheme' || cat === 'govtschemes') return 'govtschemes';
+      if (cat === 'insurance') return 'insurance';
+      return cat as ProductCategory;
+    })(),
     description: row['description'],
     highlights: arr(row['highlights']),
     documents: arr(row['documents']),

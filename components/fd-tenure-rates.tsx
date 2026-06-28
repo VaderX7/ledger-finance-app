@@ -21,9 +21,10 @@ const PRODUCT_TO_FD_ID: Record<string, string> = {
 interface FDTenureRatesProps {
   productId: string;
   accentColor?: string;
+  hideHeader?: boolean;
 }
 
-export default function FDTenureRates({ productId, accentColor = '#C9A96E' }: FDTenureRatesProps) {
+export default function FDTenureRates({ productId, accentColor = '#C9A96E', hideHeader = false }: FDTenureRatesProps) {
   const [rates, setRates] = useState<TenureRate[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -49,10 +50,12 @@ export default function FDTenureRates({ productId, accentColor = '#C9A96E' }: FD
   if (loading) {
     return (
       <div className="space-y-3">
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 rounded-full animate-pulse" style={{ background: `${accentColor}30` }} />
-          <div className="h-3 w-40 rounded animate-pulse bg-white/10" />
-        </div>
+        {!hideHeader && (
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 rounded-full animate-pulse" style={{ background: `${accentColor}30` }} />
+            <div className="h-3 w-40 rounded animate-pulse bg-white/10" />
+          </div>
+        )}
         <div className="space-y-2">
           {[1, 2, 3, 4, 5].map((i) => (
             <div key={i} className="h-10 rounded-lg animate-pulse bg-white/5" />
@@ -74,19 +77,21 @@ export default function FDTenureRates({ productId, accentColor = '#C9A96E' }: FD
       transition={{ delay: 0.3, duration: 0.4 }}
       className="space-y-3"
     >
-      <h3
-        className="text-[13px] text-white/80 flex items-center gap-2"
-        style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700 }}
-      >
-        <TrendingUp size={14} style={{ color: accentColor }} />
-        Tenure-wise Interest Rates
-      </h3>
+      {!hideHeader && (
+        <h3
+          className="text-[13px] text-white/80 flex items-center gap-2"
+          style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700 }}
+        >
+          <TrendingUp size={14} style={{ color: accentColor }} />
+          Tenure-wise Interest Rates
+        </h3>
+      )}
 
       <div
         className="rounded-xl overflow-hidden"
         style={{ border: '1px solid rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.02)' }}
       >
-        <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
+        <div className="overflow-x-auto max-h-[400px] overflow-y-auto custom-scrollbar">
           <table className="w-full text-left min-w-[320px]">
             <thead className="sticky top-0 z-10" style={{ background: 'rgba(7, 10, 18, 0.95)' }}>
               <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
@@ -116,8 +121,8 @@ export default function FDTenureRates({ productId, accentColor = '#C9A96E' }: FD
                       background: isBest
                         ? 'rgba(34, 197, 94, 0.08)'
                         : isSpecial
-                        ? `${accentColor}08`
-                        : 'transparent',
+                          ? `${accentColor}08`
+                          : 'transparent',
                     }}
                   >
                     <td className="px-3 py-2.5">

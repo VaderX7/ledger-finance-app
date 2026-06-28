@@ -251,6 +251,8 @@ function LanguageSelectSheet({
   );
 }
 
+
+
 function EditProfileSheet({
   isOpen,
   currentName,
@@ -1148,6 +1150,12 @@ export default function ProfilePage() {
                           setToggles((t) => ({ ...t, [item.label]: !t[item.label] }));
                         } else if (item.key === 'language') {
                           setIsLangSheetOpen(true);
+                        } else if (item.label === t.helpFAQ) {
+                          router.push('/faq');
+                        } else if (item.label === t.privacyPolicy) {
+                          router.push('/privacy');
+                        } else if (item.label === t.aboutApp) {
+                          router.push('/about');
                         }
                       }}
                       className="w-full flex items-center justify-between px-5 py-3.5 transition-colors text-left"
@@ -1231,6 +1239,7 @@ export default function ProfilePage() {
         onClose={() => setIsLangSheetOpen(false)}
         t={t}
       />
+
       </div>
     </div>
   );
