@@ -1646,22 +1646,48 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
                       onClick={() => setShowBankTypePopup(true)}
                       className="flex items-center justify-between px-3.5 py-2.5 rounded-xl font-body text-[11px] font-semibold transition-all relative overflow-hidden"
                       style={{
-                        background: 'rgba(255, 255, 255, 0.02)',
+                        background: bankFilter !== 'all' && bankFilter !== 'All Banks'
+                          ? '#C9A96E'
+                          : 'rgba(255, 255, 255, 0.02)',
                         border: bankFilter !== 'all' && bankFilter !== 'All Banks'
                           ? '1px solid #C9A96E' 
-                          : '1px solid rgba(255, 255, 255, 0.08)',
+                          : '1px solid color-mix(in srgb, #C9A96E 30%, transparent)',
                         boxShadow: bankFilter !== 'all' && bankFilter !== 'All Banks'
-                          ? '0 0 12px rgba(201, 169, 110, 0.15)' 
+                          ? '0 0 15px rgba(201, 169, 110, 0.35)' 
                           : 'none',
                       }}
                     >
                       <div className="flex flex-col items-start min-w-0 text-left">
-                        <span className="text-[9px] uppercase tracking-wider opacity-60 font-body text-white/50">Institution</span>
-                        <span className="truncate mt-0.5 max-w-full font-bold" style={{ color: bankFilter !== 'all' && bankFilter !== 'All Banks' ? '#C9A96E' : 'rgba(255, 255, 255, 0.9)' }}>
+                        <span 
+                          className="text-[9px] uppercase tracking-wider opacity-60 font-body transition-colors"
+                          style={{
+                            color: bankFilter !== 'all' && bankFilter !== 'All Banks'
+                              ? 'rgba(7, 10, 18, 0.6)'
+                              : 'rgba(255, 255, 255, 0.5)',
+                          }}
+                        >
+                          Institution
+                        </span>
+                        <span 
+                          className="truncate mt-0.5 max-w-full font-bold transition-colors" 
+                          style={{ 
+                            color: bankFilter !== 'all' && bankFilter !== 'All Banks' 
+                              ? '#070A12' 
+                              : 'rgba(255, 255, 255, 0.9)' 
+                          }}
+                        >
                           {bankFilter === 'all' || bankFilter === 'All Banks' ? 'All Banks' : getBankTypeLabel(bankFilter)}
                         </span>
                       </div>
-                      <ChevronDown size={14} className="flex-shrink-0 ml-1.5" style={{ color: bankFilter !== 'all' && bankFilter !== 'All Banks' ? '#C9A96E' : 'rgba(255, 255, 255, 0.4)' }} />
+                      <ChevronDown 
+                        size={14} 
+                        className="flex-shrink-0 ml-1.5 transition-colors" 
+                        style={{ 
+                          color: bankFilter !== 'all' && bankFilter !== 'All Banks' 
+                            ? '#070A12' 
+                            : 'rgba(255, 255, 255, 0.4)' 
+                        }} 
+                      />
                     </motion.button>
 
                     {/* Sort By Filter Button */}
@@ -1670,22 +1696,48 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
                       onClick={() => setShowSortPopup(true)}
                       className="flex items-center justify-between px-3.5 py-2.5 rounded-xl font-body text-[11px] font-semibold transition-all relative overflow-hidden"
                       style={{
-                        background: 'rgba(255, 255, 255, 0.02)',
+                        background: sortBy !== 'popularity'
+                          ? '#C9A96E'
+                          : 'rgba(255, 255, 255, 0.02)',
                         border: sortBy !== 'popularity' 
                           ? '1px solid #C9A96E' 
-                          : '1px solid rgba(255, 255, 255, 0.08)',
+                          : '1px solid color-mix(in srgb, #C9A96E 30%, transparent)',
                         boxShadow: sortBy !== 'popularity' 
-                          ? '0 0 12px rgba(201, 169, 110, 0.15)' 
+                          ? '0 0 15px rgba(201, 169, 110, 0.35)' 
                           : 'none',
                       }}
                     >
                       <div className="flex flex-col items-start min-w-0 text-left">
-                        <span className="text-[9px] uppercase tracking-wider opacity-60 font-body text-white/50">Sort By</span>
-                        <span className="truncate mt-0.5 max-w-full font-bold" style={{ color: sortBy !== 'popularity' ? '#C9A96E' : 'rgba(255, 255, 255, 0.9)' }}>
+                        <span 
+                          className="text-[9px] uppercase tracking-wider opacity-60 font-body transition-colors"
+                          style={{
+                            color: sortBy !== 'popularity'
+                              ? 'rgba(7, 10, 18, 0.6)'
+                              : 'rgba(255, 255, 255, 0.5)',
+                          }}
+                        >
+                          Sort By
+                        </span>
+                        <span 
+                          className="truncate mt-0.5 max-w-full font-bold transition-colors" 
+                          style={{ 
+                            color: sortBy !== 'popularity' 
+                              ? '#070A12' 
+                              : 'rgba(255, 255, 255, 0.9)' 
+                          }}
+                        >
                           {getSortLabel(sortBy)}
                         </span>
                       </div>
-                      <ChevronDown size={14} className="flex-shrink-0 ml-1.5" style={{ color: sortBy !== 'popularity' ? '#C9A96E' : 'rgba(255, 255, 255, 0.4)' }} />
+                      <ChevronDown 
+                        size={14} 
+                        className="flex-shrink-0 ml-1.5 transition-colors" 
+                        style={{ 
+                          color: sortBy !== 'popularity' 
+                            ? '#070A12' 
+                            : 'rgba(255, 255, 255, 0.4)' 
+                        }} 
+                      />
                     </motion.button>
                   </div>
 
