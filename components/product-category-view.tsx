@@ -1432,6 +1432,7 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
         if (!topPicks.some((l) => p.lender.toLowerCase().includes(l.toLowerCase()))) return false;
       }
     }
+    return true;
   });
 
   const getProductInterestRate = (p: Product): number => {
