@@ -352,6 +352,20 @@ export default function CategoryProductCard({
 
   const metricHighlight = getProductMetricHighlight(product);
 
+  const seniorBonusText = (() => {
+    if (product.category !== 'fds') return '';
+    const genRateVal = parseFloat(String(product.metrics['Interest Rate (General)'] || product.metrics['interestRate'] || product.metrics['baseYield'] || '0'));
+    const srRateVal = parseFloat(String(product.metrics['Interest Rate (Senior)'] || '0'));
+    if (srRateVal > genRateVal) {
+      const diff = srRateVal - genRateVal;
+      return `+${diff.toFixed(2).replace(/\.00$/, '')}% for seniors`;
+    } else if (product.metrics['seniorCitizenBonus']) {
+      const scBonus = String(product.metrics['seniorCitizenBonus']);
+      return scBonus.startsWith('+') ? `${scBonus} for seniors` : `+${scBonus} for seniors`;
+    }
+    return '';
+  })();
+
   return (
     <div className="relative group">
       <motion.div
@@ -426,41 +440,55 @@ export default function CategoryProductCard({
       </div>
 
       {/* Divider 1 */}
-      <div className="border-t border-white/[0.05] my-3" />
+      {product.category !== 'fds' && (
+        <div className="border-t border-white/[0.05] my-3" />
+      )}
 
       {/* Product Name */}
-      <div className="relative z-10">
-        <h3
-          className="text-[20px] font-bold text-white tracking-tight leading-snug"
-          style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
-        >
-          {product.name}
-        </h3>
-      </div>
+      {product.category !== 'fds' && (
+        <div className="relative z-10">
+          <h3
+            className="text-[20px] font-bold text-white tracking-tight leading-snug"
+            style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+          >
+            {product.name}
+          </h3>
+        </div>
+      )}
 
       {/* Key Metric Highlight */}
       {product.category === 'fds' ? (
-        <div className="relative z-10 space-y-2 mt-2.5">
+        <div className="relative z-10 space-y-1 mt-2">
           {/* Main Interest Rate row */}
-          <div className="flex items-baseline gap-2">
+          <div className="flex items-baseline gap-1">
             <span 
               className="text-[28px] font-bold leading-none tracking-tight"
               style={{ color: cardColor }}
             >
               {metricHighlight.value}
             </span>
-            <span className="text-[11px] text-white/35 font-body">
-              Best General Rate Offered
+            <span className="text-[12px] text-white/35 font-body">
+              p.a.
             </span>
           </div>
+
+          {/* Senior Citizen bonus rate */}
+          {seniorBonusText && (
+            <div className="text-[11px] text-[#2DD4BF] font-semibold leading-none mb-1 font-body">
+              {seniorBonusText}
+            </div>
+          )}
           
           {/* Tenure Range, Min Deposit, DICGC Info Row */}
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-white/50 font-body">
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-white/50 font-body">
             {/* Tenure Range */}
             {(() => {
               const minTenure = product.metrics['Minimum Tenure'] || product.metrics['tenureRange'];
               const maxTenure = product.metrics['Maximum Tenure'];
-              const tenureText = minTenure && maxTenure ? `${minTenure} - ${maxTenure}` : minTenure || 'N/A';
+              const cleanTenureText = (txt: string) => String(txt).replace(/\s*days?/gi, 'd').replace(/\s*years?/gi, 'y').replace(/\s*months?/gi, 'm');
+              const tenureText = minTenure && maxTenure 
+                ? `${cleanTenureText(String(minTenure))} - ${cleanTenureText(String(maxTenure))}` 
+                : cleanTenureText(String(minTenure || 'N/A'));
               return (
                 <span>Tenure: <span className="text-white/80 font-semibold">{tenureText}</span></span>
               );
@@ -472,7 +500,7 @@ export default function CategoryProductCard({
             {(() => {
               const minDeposit = product.metrics['Minimum Deposit'] || 'N/A';
               return (
-                <span>Min Deposit: <span className="text-white/80 font-semibold">{minDeposit}</span></span>
+                <span>Min: <span className="text-white/80 font-semibold">{minDeposit}</span></span>
               );
             })()}
             
