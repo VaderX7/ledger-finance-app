@@ -237,6 +237,21 @@ function formatMinBalance(balance: string | number | undefined): string {
   return String(balance);
 }
 
+function formatMAB(raw: string | number | undefined | null): string {
+  if (raw === undefined || raw === null) return '—';
+  const rawStr = String(raw);
+  if (!rawStr) return '—';
+  const lower = rawStr.toLowerCase().trim();
+  if (lower === 'nil' || lower === '0' || lower === 'zero' || lower === 'none') return 'Zero Balance';
+  // Extract first number found e.g. "Rs. 50000 (Cut-off...)" → "₹50,000 MAB"
+  const match = rawStr.match(/[\d,]+/);
+  if (match) {
+    const num = parseInt(match[0].replace(/,/g, ''));
+    return `₹${num.toLocaleString('en-IN')} MAB`;
+  }
+  return 'Zero Balance';
+}
+
 function getProductMetricHighlight(product: Product) {
   const cat = product.category;
   
@@ -522,6 +537,209 @@ export default function CategoryProductCard({
       </div>
     );
   }
+
+  if (product.category === 'savings') {
+    const accountType = (() => {
+      const nameLower = product.name.toLowerCase();
+      const descLower = product.description.toLowerCase();
+      const highlightsJoined = (product.highlights || []).join(' ').toLowerCase();
+      
+      if (nameLower.includes('salary') || descLower.includes('salary') || highlightsJoined.includes('salary')) {
+        return 'Salary';
+      }
+      if (nameLower.includes('bsbda') || descLower.includes('bsbda') || highlightsJoined.includes('bsbda')) {
+        return 'BSBDA';
+      }
+      if (nameLower.includes('zero balance') || descLower.includes('zero balance') || highlightsJoined.includes('zero balance') || highlightsJoined.includes('zero mab') || String(product.metrics.minBalance) === '₹0') {
+        return 'Zero Balance';
+      }
+      return 'Regular';
+    })();
+
+    const mabDisplay = formatMAB(product.metrics.minBalance);
+
+    const topTwoFeatures = (() => {
+      const highlights = product.highlights || [];
+      const prioritized = [...highlights].sort((a, b) => {
+        const keywords = ['dicgc', 'mab', 'zero', 'interest', 'rate', 'cashback', 'free'];
+        const aScore = keywords.findIndex(k => a.toLowerCase().includes(k));
+        const bScore = keywords.findIndex(k => b.toLowerCase().includes(k));
+        
+        const aVal = aScore === -1 ? 999 : aScore;
+        const bVal = bScore === -1 ? 999 : bScore;
+        return aVal - bVal;
+      });
+      return prioritized.slice(0, 2);
+    })();
+
+    return (
+      <div className="relative group">
+        <motion.div
+          initial={{ opacity: 0, y: 14, scale: 0.97 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.96 }}
+          transition={{ type: 'spring', stiffness: 260, damping: 24, delay: index * 0.05 }}
+          whileTap={{ scale: 0.985 }}
+          onClick={() => onDetailsClick(product)}
+          className="overflow-hidden cursor-pointer py-3 px-4"
+          style={{
+            background: `linear-gradient(135deg, color-mix(in srgb, ${cardColor} 22%, transparent) 0%, color-mix(in srgb, ${cardColorAccent} 8%, transparent) 100%), #0d1117`,
+            borderTop: `1px solid color-mix(in srgb, ${cardColor} 50%, transparent)`,
+            borderRight: `1px solid color-mix(in srgb, ${cardColor} 50%, transparent)`,
+            borderBottom: `1px solid color-mix(in srgb, ${cardColor} 50%, transparent)`,
+            borderLeft: `6px solid ${cardColor}`,
+            borderRadius: '16px',
+          }}
+        >
+          {/* Ambient glow */}
+          <div
+            className="absolute -top-8 -right-8 w-28 h-28 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+            style={{ background: `color-mix(in srgb, ${cardColor} 14%, transparent)` }}
+          />
+
+          <div className="relative z-10 flex items-stretch justify-between gap-3 w-full">
+            {/* Left Column */}
+            <div className="flex-1 min-w-0 flex flex-col justify-between">
+              {/* Logo + Name Row */}
+              <div className="flex items-center gap-2.5 min-w-0">
+                {/* Logo */}
+                <div
+                  className="w-8 h-8 rounded-lg flex-shrink-0 flex items-center justify-center p-[4px] overflow-hidden"
+                  style={{
+                    background: LOGO_BG_MAP[product.lender] ?? '#FFFFFF',
+                    border: `1px solid color-mix(in srgb, ${cardColor} 40%, transparent)`,
+                  }}
+                >
+                  <img 
+                    src={`/logos/${BANK_LOGO_MAP[product.lender] || product.lender.toLowerCase().replace(/bank/gi, '').replace(/[^a-z0-9]/g, '').trim()}.png`} 
+                    alt={product.lender} 
+                    className="w-full h-full object-contain" 
+                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                  />
+                </div>
+
+                {/* Bank Info */}
+                <div className="flex flex-col min-w-0">
+                  <span className="text-[12.5px] font-bold text-white leading-tight truncate block max-w-full" title={product.name}>
+                    {product.name}
+                  </span>
+                  <span className="text-[10px] text-white/40 leading-tight mt-0.5 font-body truncate">
+                    {subtitleText}
+                  </span>
+                </div>
+              </div>
+
+              {/* Big Rate */}
+              <div className="flex items-baseline gap-1 mt-3">
+                <span 
+                  className="text-[26px] font-bold leading-none tracking-tight"
+                  style={{ color: cardColor }}
+                >
+                  {metricHighlight.value}
+                </span>
+                <span className="text-[11px] text-white/35 font-body">
+                  p.a.
+                </span>
+              </div>
+
+              {/* Badge underneath */}
+              <div className="mt-2.5 flex">
+                <span 
+                  className="text-[8.5px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider font-body"
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    color: cardColor,
+                  }}
+                >
+                  {accountType}
+                </span>
+              </div>
+            </div>
+
+            {/* Right Column */}
+            <div className="w-[110px] max-w-[110px] flex-shrink-0 flex flex-col items-end justify-between text-right leading-tight">
+              {/* Top: Star Button */}
+              <motion.button
+                whileTap={{ scale: 0.85 }}
+                onClick={async (e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  const added = await toggleFavourite({
+                    id: product.id,
+                    type: product.category,
+                    lender: product.lender,
+                    name: product.name,
+                    color: product.color,
+                    colorAccent: product.colorAccent,
+                    savedAt: Date.now(),
+                  });
+                  setIsFav(added);
+                }}
+                className="p-1.5 rounded-full bg-white/[0.03] hover:bg-white/[0.08] transition-colors flex-shrink-0"
+              >
+                <motion.div
+                  animate={isFav ? { scale: [1, 1.4, 1] } : { scale: 1 }}
+                  transition={{ duration: 0.3, type: 'tween', ease: 'easeInOut' }}
+                >
+                  <Star
+                    size={15}
+                    style={{ color: isFav ? '#C9A96E' : 'rgba(255,255,255,0.3)' }}
+                    fill={isFav ? "#C9A96E" : "transparent"}
+                  />
+                </motion.div>
+              </motion.button>
+
+              {/* Middle: Prominent MAB */}
+              <div className="flex-1 flex flex-col justify-center items-end my-1 max-w-[110px]">
+                <span 
+                  className="text-[13px] font-extrabold text-right leading-tight whitespace-nowrap"
+                  style={{ color: '#C9A96E' }}
+                >
+                  {mabDisplay}
+                </span>
+              </div>
+
+              {/* Bottom: Details button */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDetailsClick(product);
+                }}
+                className="flex items-center gap-1 px-2.5 py-1 rounded-xl text-[10px] font-bold border transition-all duration-300 hover:bg-[#00E5FF]/10"
+                style={{
+                  borderColor: 'rgba(0, 229, 255, 0.35)',
+                  color: '#00E5FF',
+                  background: 'transparent',
+                }}
+              >
+                <span>Details</span>
+                <span>→</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Divider */}
+          <div className="border-t border-white/[0.05] my-2.5" />
+
+          {/* Bottom strip */}
+          <div className="relative z-10 flex items-center h-5 overflow-hidden">
+            <div className="flex items-center gap-1.5 flex-nowrap overflow-hidden">
+              {topTwoFeatures.map((feat) => (
+                <span
+                  key={feat}
+                  className="px-2 py-0.5 rounded text-[10px] font-body text-white/40 bg-white/[0.02] border border-white/[0.08] whitespace-nowrap"
+                >
+                  {feat}
+                </span>
+              ))}
+            </div>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
+
 
   return (
     <div className="relative group">

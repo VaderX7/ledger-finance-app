@@ -833,6 +833,22 @@ interface BankCardProps {
   setLogoErrors: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
 }
 
+function sanitizeRate(rateVal: any): number | null {
+  if (rateVal === undefined || rateVal === null) return null;
+  const matches = String(rateVal).match(/\d+(\.\d+)?/g);
+  if (matches) {
+    let maxMatch = 0;
+    for (const m of matches) {
+      const num = parseFloat(m);
+      if (!isNaN(num) && num <= 12) {
+        if (num > maxMatch) maxMatch = num;
+      }
+    }
+    return maxMatch > 0 ? maxMatch : null;
+  }
+  return null;
+}
+
 function BankCard({ group, setSelectedBank, logoErrors, setLogoErrors }: BankCardProps) {
   const lender = group.lender;
   const firstProduct = group.products[0];
@@ -851,8 +867,23 @@ function BankCard({ group, setSelectedBank, logoErrors, setLogoErrors }: BankCar
     setIsFav(isFavourited('bank-' + bankName));
   }, [bankName]);
 
-  const rateRange = getRateRange(group.products);
-  const highlights = firstProduct.highlights.slice(0, 3);
+  const highestRate = (() => {
+    let maxRate = 0;
+    group.products.forEach(p => {
+      const rate = sanitizeRate(p.metrics.interestRate);
+      if (rate !== null && rate > maxRate) {
+        maxRate = rate;
+      }
+    });
+    return maxRate > 0 ? `${maxRate.toFixed(2).replace(/\.00$/, '')}%` : null;
+  })();
+
+  const lowestMAB = getLowestMinBalance(group.products);
+
+  const hasZeroBalance = group.products.some(p => {
+    const balStr = String(p.metrics.minBalance || '').toLowerCase();
+    return balStr.includes('nil') || balStr.includes('zero') || balStr.includes('free') || balStr.includes('₹0') || balStr.replace(/[^\d]/g, '') === '0';
+  });
 
   return (
     <div className="relative group">
@@ -870,7 +901,7 @@ function BankCard({ group, setSelectedBank, logoErrors, setLogoErrors }: BankCar
       >
         <div className="absolute -top-8 -right-8 w-28 h-28 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" style={{ background: `${color}14` }} />
 
-        <div className="flex items-center gap-3 mb-3">
+        <div className="flex items-center gap-3">
           {/* Logo Container */}
           <div
             className="w-12 h-12 rounded-xl flex-shrink-0 flex items-center justify-center p-[6px] overflow-hidden"
@@ -912,7 +943,7 @@ function BankCard({ group, setSelectedBank, logoErrors, setLogoErrors }: BankCar
                 {lender}
               </h3>
             </div>
-            <div className="flex items-center gap-1.5 mt-1">
+            <div className="flex items-center gap-1.5 mt-1 flex-wrap">
               <span
                 className="text-[8px] font-body px-1.5 py-0.5 rounded-full font-bold uppercase tracking-wider"
                 style={{
@@ -946,38 +977,38 @@ function BankCard({ group, setSelectedBank, logoErrors, setLogoErrors }: BankCar
               <span className="text-[11px] text-white/50 font-body">
                 {group.products.length} {group.products.length === 1 ? 'savings option' : 'savings options'}
               </span>
+              {hasZeroBalance && (
+                <>
+                  <span className="w-1 h-1 rounded-full bg-white/20" />
+                  <span className="text-[8px] font-bold px-1.5 py-0.5 rounded bg-green-500/10 border border-green-500/25 text-green-400 whitespace-nowrap">
+                    Zero Balance ✓
+                  </span>
+                </>
+              )}
             </div>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-3 mb-3">
-          <div className="rounded-lg px-2.5 py-2" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
-            <p className="font-body text-[9px] text-white/30 mb-0.5 uppercase tracking-wide">Interest Rate</p>
-            <p className="text-[12px] font-bold" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: '#00F5A0' }}>
-              {rateRange}
-            </p>
-          </div>
-          <div className="rounded-lg px-2.5 py-2" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
-            <p className="font-body text-[9px] text-white/30 mb-0.5 uppercase tracking-wide">Best For</p>
-            <p className="text-[12px] font-bold truncate" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: '#00F5A0' }}>
-              {getBestUSP(group.products)}
+            
+            <p className="text-[11px] text-white/50 mt-2 font-body">
+              {highestRate ? `Up to ${highestRate} p.a.` : '—'} · {lowestMAB !== '—' ? `From ${lowestMAB} MAB` : '—'}
             </p>
           </div>
         </div>
 
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1.5 flex-wrap">
-            {highlights.map((h) => (
-              <span
-                key={h}
-                className="px-2 py-0.5 rounded-md text-[9px] font-body text-white/40"
-                style={{ background: `${color}10`, border: `1px solid ${color}1e` }}
-              >
-                {h}
-              </span>
-            ))}
+        <div className="flex items-center justify-between mt-3.5">
+          <div className="flex items-center gap-1.5 flex-nowrap overflow-hidden h-5">
+            {firstProduct.highlights
+              .filter((h) => h.length <= 25)
+              .slice(0, 2)
+              .map((h) => (
+                <span
+                  key={h}
+                  className="px-2 py-0.5 rounded-md text-[9px] font-body text-white/40 max-w-[150px] truncate overflow-hidden whitespace-nowrap"
+                  style={{ background: `${color}10`, border: `1px solid ${color}1e` }}
+                >
+                  {h}
+                </span>
+              ))}
           </div>
-          <ChevronRight size={16} className="text-white/30 group-hover:text-white/70 transition-colors" />
+          <ChevronRight size={16} className="flex-shrink-0" style={{ color: '#C9A96E' }} />
         </div>
       </motion.div>
 
@@ -1241,6 +1272,7 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
   const [showBankTypePopup, setShowBankTypePopup] = useState(false);
   const [logoErrors, setLogoErrors] = useState<Record<string, boolean>>({});
   const [searchFocused, setSearchFocused] = useState(false);
+  const [scopedSearchFocused, setScopedSearchFocused] = useState(false);
   const [activeChip, setActiveChip] = useState<string | null>(null);
   const [loansBrowseMode, setLoansBrowseMode] = useState<'bank' | 'category'>('bank');
 
@@ -2033,17 +2065,28 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
                     {/* Scoped Search bar */}
                     <div className="sticky top-16 z-20 py-2" style={{ background: 'rgba(7,10,18,0.95)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
                       <div className="relative">
-                        <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: 'rgba(255,255,255,0.25)' }} />
+                        <Search 
+                          size={14} 
+                          className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none transition-colors duration-300" 
+                          style={{ color: scopedSearchFocused ? colorAccent : `color-mix(in srgb, ${colorAccent} 40%, transparent)` }} 
+                        />
                         <input
                           type="text"
                           value={searchText}
                           onChange={(e) => setSearchText(e.target.value)}
+                          onFocus={() => setScopedSearchFocused(true)}
+                          onBlur={() => setScopedSearchFocused(false)}
                           placeholder={lang === 'hi' ? `खोजें…` : lang === 'hinglish' ? `search karein…` : `Search accounts…`}
-                          className="w-full pl-9 pr-9 py-2.5 rounded-xl font-body text-[12px] outline-none"
+                          className="w-full pl-9 pr-9 py-2.5 rounded-xl font-body text-[12px] outline-none transition-all duration-300"
                           style={{
-                            background: 'rgba(255,255,255,0.05)',
-                            border: '1px solid color-mix(in srgb, var(--cat-color) 30%, transparent)',
-                            color: 'rgba(255,255,255,0.78)',
+                            background: scopedSearchFocused ? 'rgba(7,10,18,0.6)' : 'rgba(255,255,255,0.05)',
+                            border: scopedSearchFocused 
+                              ? `1px solid ${colorAccent}` 
+                              : `1px solid color-mix(in srgb, ${colorAccent} 20%, transparent)`,
+                            boxShadow: scopedSearchFocused 
+                              ? `0 0 15px color-mix(in srgb, ${colorAccent} 25%, transparent)` 
+                              : 'none',
+                            color: scopedSearchFocused ? '#ffffff' : 'rgba(255,255,255,0.78)',
                           }}
                         />
                         {searchText && (
