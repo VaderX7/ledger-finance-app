@@ -256,14 +256,29 @@ function getProductMetricHighlight(product: Product) {
   }
   
   if (cat === 'fds') {
-    let yieldVal = String(product.metrics.baseYield || 'N/A');
+    let yieldVal = 'N/A';
+    if (product.metrics.baseYield) {
+      yieldVal = String(product.metrics.baseYield);
+    } else if (product.metrics['Interest Rate (General)']) {
+      yieldVal = String(product.metrics['Interest Rate (General)']);
+    } else if (product.metrics['interestRate']) {
+      yieldVal = String(product.metrics['interestRate']);
+    }
+    
     if (yieldVal.includes('-')) {
       yieldVal = yieldVal.split('-')[0].trim();
     }
     if (!yieldVal.endsWith('%') && yieldVal !== 'N/A') {
       yieldVal = `${yieldVal}%`;
     }
-    const tenure = String(product.metrics.tenureRange || 'N/A');
+    
+    let tenure = 'N/A';
+    if (product.metrics.tenureRange) {
+      tenure = String(product.metrics.tenureRange);
+    } else if (product.metrics['Minimum Tenure'] && product.metrics['Maximum Tenure']) {
+      tenure = `${product.metrics['Minimum Tenure']} - ${product.metrics['Maximum Tenure']}`;
+    }
+    
     return {
       value: yieldVal,
       subtitle: `p.a. yield · ${tenure} tenure`
@@ -424,17 +439,64 @@ export default function CategoryProductCard({
       </div>
 
       {/* Key Metric Highlight */}
-      <div className="relative z-10 flex items-baseline gap-2 mt-2.5">
-        <span 
-          className="text-[28px] font-bold leading-none tracking-tight"
-          style={{ color: cardColor }}
-        >
-          {metricHighlight.value}
-        </span>
-        <span className="text-[12px] text-white/35 font-body">
-          {metricHighlight.subtitle}
-        </span>
-      </div>
+      {product.category === 'fds' ? (
+        <div className="relative z-10 space-y-2 mt-2.5">
+          {/* Main Interest Rate row */}
+          <div className="flex items-baseline gap-2">
+            <span 
+              className="text-[28px] font-bold leading-none tracking-tight"
+              style={{ color: cardColor }}
+            >
+              {metricHighlight.value}
+            </span>
+            <span className="text-[11px] text-white/35 font-body">
+              Best General Rate Offered
+            </span>
+          </div>
+          
+          {/* Tenure Range, Min Deposit, DICGC Info Row */}
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-white/50 font-body">
+            {/* Tenure Range */}
+            {(() => {
+              const minTenure = product.metrics['Minimum Tenure'] || product.metrics['tenureRange'];
+              const maxTenure = product.metrics['Maximum Tenure'];
+              const tenureText = minTenure && maxTenure ? `${minTenure} - ${maxTenure}` : minTenure || 'N/A';
+              return (
+                <span>Tenure: <span className="text-white/80 font-semibold">{tenureText}</span></span>
+              );
+            })()}
+            
+            <span className="text-white/10">•</span>
+            
+            {/* Min Deposit */}
+            {(() => {
+              const minDeposit = product.metrics['Minimum Deposit'] || 'N/A';
+              return (
+                <span>Min Deposit: <span className="text-white/80 font-semibold">{minDeposit}</span></span>
+              );
+            })()}
+            
+            {product.metrics['DICGC Insured'] === 'Yes' && (
+              <>
+                <span className="text-white/10">•</span>
+                <span className="text-[#00F5A0] font-semibold">DICGC Insured</span>
+              </>
+            )}
+          </div>
+        </div>
+      ) : (
+        <div className="relative z-10 flex items-baseline gap-2 mt-2.5">
+          <span 
+            className="text-[28px] font-bold leading-none tracking-tight"
+            style={{ color: cardColor }}
+          >
+            {metricHighlight.value}
+          </span>
+          <span className="text-[12px] text-white/35 font-body">
+            {metricHighlight.subtitle}
+          </span>
+        </div>
+      )}
 
       {/* Divider 2 */}
       <div className="border-t border-white/[0.05] my-3" />
@@ -442,16 +504,18 @@ export default function CategoryProductCard({
       {/* Tags Row */}
       <div className="relative z-10 flex items-center justify-between gap-4">
         {/* Highlights */}
-        <div className="flex items-center gap-1.5 flex-wrap">
-          {product.highlights.slice(0, 3).map((h) => (
-            <span
-              key={h}
-              className="px-2 py-0.5 rounded text-[10px] font-body text-white/40 bg-white/[0.02] border border-white/[0.08]"
-            >
-              {h}
-            </span>
-          ))}
-        </div>
+        {product.category !== 'fds' && (
+          <div className="flex items-center gap-1.5 flex-wrap">
+            {product.highlights.slice(0, 3).map((h) => (
+              <span
+                key={h}
+                className="px-2 py-0.5 rounded text-[10px] font-body text-white/40 bg-white/[0.02] border border-white/[0.08]"
+              >
+                {h}
+              </span>
+            ))}
+          </div>
+        )}
 
         {/* View Details Button */}
         <button
@@ -459,7 +523,9 @@ export default function CategoryProductCard({
             e.stopPropagation();
             onDetailsClick(product);
           }}
-          className="flex items-center gap-1 px-3.5 py-1.5 rounded-xl text-[11px] font-bold border transition-all duration-300 hover:bg-[#00E5FF]/10 flex-shrink-0"
+          className={`flex items-center gap-1 px-3.5 py-1.5 rounded-xl text-[11px] font-bold border transition-all duration-300 hover:bg-[#00E5FF]/10 flex-shrink-0 ${
+            product.category === 'fds' ? 'ml-auto' : ''
+          }`}
           style={{
             borderColor: 'rgba(0, 229, 255, 0.35)',
             color: '#00E5FF',
