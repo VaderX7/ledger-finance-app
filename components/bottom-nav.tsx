@@ -101,13 +101,16 @@ export default function BottomNav() {
 
   const handleNavClick = (e: React.MouseEvent, href: string) => {
     e.preventDefault();
+    const searchParamsStr = typeof window !== 'undefined' ? window.location.search : '';
+    const fullPath = pathname + searchParamsStr;
+
     if (href === '/') {
       if (pathname === '/') {
         // do nothing
       } else {
         router.push(href);
       }
-    } else if (pathname.startsWith(href) && pathname !== href) {
+    } else if (pathname.startsWith(href) && fullPath !== href) {
       router.back();
     } else {
       router.push(href);
