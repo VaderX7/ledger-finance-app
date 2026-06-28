@@ -381,7 +381,7 @@ export default function CategoryProductCard({
           borderTop: `1px solid color-mix(in srgb, ${cardColor} 50%, transparent)`,
           borderRight: `1px solid color-mix(in srgb, ${cardColor} 50%, transparent)`,
           borderBottom: `1px solid color-mix(in srgb, ${cardColor} 50%, transparent)`,
-          borderLeft: `6px solid ${cardColor}`,
+          borderLeft: `6px solid var(--cat-color, ${cardColor})`,
           borderRadius: '16px',
         }}
       >
@@ -507,7 +507,7 @@ export default function CategoryProductCard({
             {product.metrics['DICGC Insured'] === 'Yes' && (
               <>
                 <span className="text-white/10">•</span>
-                <span className="text-[#00F5A0] font-semibold">DICGC Insured</span>
+                <span className="font-semibold" style={{ color: 'var(--cat-color, #00F5A0)' }}>DICGC Insured</span>
               </>
             )}
           </div>

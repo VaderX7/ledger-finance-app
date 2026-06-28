@@ -475,12 +475,12 @@ const categoryMeta: Record<
   }
 > = {
   savings: { labelKey: 'savingsLabel', subtitleKey: 'savingsSub', accentColor: '#C9A96E' },
-  current: { labelKey: 'currentLabel', subtitleKey: 'currentSub', accentColor: '#00E5FF' },
-  fds: { labelKey: 'fdsLabel', subtitleKey: 'fdsSub', accentColor: '#00F5A0' },
-  creditcards: { labelKey: 'creditcardsLabel', subtitleKey: 'creditcardsSub', accentColor: '#2DD4BF' },
-  loans: { labelKey: 'loansLabel', subtitleKey: 'loansSub', accentColor: '#FB7185' },
-  govtschemes: { labelKey: 'govtschemesLabel', subtitleKey: 'govtschemesSub', accentColor: '#FF9933' },
-  insurance: { labelKey: 'insuranceLabel', subtitleKey: 'insuranceSub', accentColor: '#00D4AA' },
+  current: { labelKey: 'currentLabel', subtitleKey: 'currentSub', accentColor: '#38BDF8' },
+  fds: { labelKey: 'fdsLabel', subtitleKey: 'fdsSub', accentColor: '#4ADE80' },
+  creditcards: { labelKey: 'creditcardsLabel', subtitleKey: 'creditcardsSub', accentColor: '#818CF8' },
+  loans: { labelKey: 'loansLabel', subtitleKey: 'loansSub', accentColor: '#F87171' },
+  govtschemes: { labelKey: 'govtschemesLabel', subtitleKey: 'govtschemesSub', accentColor: '#FB923C' },
+  insurance: { labelKey: 'insuranceLabel', subtitleKey: 'insuranceSub', accentColor: '#A78BFA' },
 };
 
 export interface MajorLoanBank {
@@ -1248,37 +1248,17 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
     if (lang === 'hi') {
       switch (sortByKey) {
         case 'popularity': return 'लोकप्रियता';
-        case 'alpha-asc': return 'वर्णानुक्रम (A-Z)';
-        case 'alpha-desc': return 'वर्णानुक्रम (Z-A)';
-        case 'interest-desc': return 'ब्याज: उच्च से निम्न';
-        case 'interest-asc': return 'ब्याज: निम्न से उच्च';
-        case 'balance-asc': return 'न्यूनतम बैलेंस: निम्न से उच्च';
-        case 'balance-desc': return 'न्यूनतम बैलेंस: उच्च से निम्न';
-        case 'accounts-desc': return 'विकल्पों की संख्या';
+        case 'interest-desc': return 'उच्चतम ब्याज दर';
+        case 'balance-asc': return 'न्यूनतम जमा';
+        case 'alpha-asc': return 'A–Z';
         default: return 'क्रमबद्ध करें';
-      }
-    } else if (lang === 'hinglish') {
-      switch (sortByKey) {
-        case 'popularity': return 'Popularity';
-        case 'alpha-asc': return 'Alphabetical (A-Z)';
-        case 'alpha-desc': return 'Alphabetical (Z-A)';
-        case 'interest-desc': return 'Interest: High to Low';
-        case 'interest-asc': return 'Interest: Low to High';
-        case 'balance-asc': return 'Min Balance: Low to High';
-        case 'balance-desc': return 'Min Balance: High to Low';
-        case 'accounts-desc': return 'Zyada Accounts First';
-        default: return 'Sort By';
       }
     } else {
       switch (sortByKey) {
         case 'popularity': return 'Popularity';
-        case 'alpha-asc': return 'Alphabetical (A-Z)';
-        case 'alpha-desc': return 'Alphabetical (Z-A)';
-        case 'interest-desc': return 'Interest: High to Low';
-        case 'interest-asc': return 'Interest: Low to High';
-        case 'balance-asc': return 'Min Balance: Low to High';
-        case 'balance-desc': return 'Min Balance: High to Low';
-        case 'accounts-desc': return 'Number of Options';
+        case 'interest-desc': return 'Highest Rate';
+        case 'balance-asc': return 'Lowest Min Deposit';
+        case 'alpha-asc': return 'A–Z';
         default: return 'Sort By';
       }
     }
@@ -1287,33 +1267,21 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
   const getBankTypeLabel = (bt: BankType | 'all'): string => {
     if (lang === 'hi') {
       switch (bt) {
-        case 'all': return 'सभी संस्थान';
+        case 'all': return 'सभी बैंक';
         case 'public': return 'सरकारी बैंक';
         case 'private': return 'निजी बैंक';
-        case 'sfb': return 'स्मॉल फाइनेंस बैंक';
-        case 'payments': return 'पेमेंट्स बैंक';
-        case 'nbfc': return 'एनबीएफसी (NBFC)';
-        default: return String(bt);
-      }
-    } else if (lang === 'hinglish') {
-      switch (bt) {
-        case 'all': return 'All Institutions';
-        case 'public': return 'Public Banks';
-        case 'private': return 'Private Banks';
-        case 'sfb': return 'Small Finance Banks';
-        case 'payments': return 'PAYMENTS BANK';
-        case 'nbfc': return 'NBFCs';
+        case 'sfb': return 'SFB (स्मॉल फाइनेंस)';
+        case 'nbfc': return 'NBFC (एनबीएफसी)';
         default: return String(bt);
       }
     } else {
       switch (bt) {
-        case 'all': return 'All Institutions';
+        case 'all': return 'All Banks';
         case 'public': return 'Public Banks';
         case 'private': return 'Private Banks';
-        case 'sfb': return 'Small Finance Banks';
-        case 'payments': return 'PAYMENTS BANK';
-        case 'nbfc': return 'NBFCs';
-        default: return String(bt);
+        case 'sfb': return 'SFB';
+        case 'nbfc': return 'NBFC';
+        default: return String(bt).toUpperCase();
       }
     }
   };
@@ -1463,8 +1431,34 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
         if (!topPicks.some((l) => p.lender.toLowerCase().includes(l.toLowerCase()))) return false;
       }
     }
-    return true;
   });
+
+  const getProductInterestRate = (p: Product): number => {
+    const m = p.metrics;
+    const val = m['Interest Rate (General)'] || m['interestRate'] || m['baseYield'] || m['minRate'] || m['yieldVal'] || '0';
+    const match = String(val).match(/[\d.]+/);
+    return match ? parseFloat(match[0]) : 0;
+  };
+
+  const getProductMinDeposit = (p: Product): number => {
+    const m = p.metrics;
+    const val = m['Minimum Deposit'] || m['minDeposit'] || m['minBalance'] || m['monthlyAvgBalance'] || '0';
+    const clean = String(val).replace(/[^\d]/g, '');
+    const num = parseInt(clean, 10);
+    return isNaN(num) ? 0 : num;
+  };
+
+  if (category !== 'savings') {
+    if (sortBy === 'popularity') {
+      filtered.sort((a, b) => getPopularityIndex(a.lender) - getPopularityIndex(b.lender));
+    } else if (sortBy === 'alpha-asc') {
+      filtered.sort((a, b) => a.lender.localeCompare(b.lender));
+    } else if (sortBy === 'interest-desc') {
+      filtered.sort((a, b) => getProductInterestRate(b) - getProductInterestRate(a));
+    } else if (sortBy === 'balance-asc') {
+      filtered.sort((a, b) => getProductMinDeposit(a) - getProductMinDeposit(b));
+    }
+  }
 
   const handleSheetClose = () => {
     setIsSheetOpen(false);
@@ -1518,6 +1512,7 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
             exit={{ x: 40, opacity: 0 }}
             transition={{ type: 'spring', stiffness: 260, damping: 28 }}
             className="min-h-screen"
+            style={{ '--cat-color': meta.accentColor } as React.CSSProperties}
           >
             {!selectedProduct && (
               <CategoryViewHeader
@@ -1532,7 +1527,7 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
               {/* Search bar — always first below header */}
               <div className="sticky top-16 z-20 py-2 space-y-2.5" style={{ background: 'rgba(7,10,18,0.95)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
                 <div className="relative">
-                  <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: searchFocused ? '#00F5A0' : 'rgba(255,255,255,0.25)' }} />
+                  <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: searchFocused ? 'var(--cat-color)' : 'rgba(255,255,255,0.25)' }} />
                   <input
                     type="text"
                     value={searchText}
@@ -1543,8 +1538,8 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
                     className="w-full pl-9 pr-9 py-3 rounded-xl font-body text-[13px] outline-none transition-all duration-300"
                     style={{
                       background: searchFocused ? 'rgba(7,10,18,0.6)' : 'rgba(255,255,255,0.05)',
-                      border: searchFocused ? '1px solid #00F5A0' : '1px solid rgba(255,255,255,0.09)',
-                      boxShadow: searchFocused ? '0 0 15px rgba(0, 245, 160, 0.25)' : 'none',
+                      border: searchFocused ? '1px solid var(--cat-color)' : '1px solid rgba(255,255,255,0.09)',
+                      boxShadow: searchFocused ? '0 0 15px color-mix(in srgb, var(--cat-color) 25%, transparent)' : 'none',
                       color: searchFocused ? '#ffffff' : 'rgba(255,255,255,0.78)',
                     }}
                   />
@@ -1559,8 +1554,8 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
                 {category === 'loans' && (
                   <div className="w-full p-1 rounded-2xl bg-[#090F1C]/40 flex items-center justify-between border-2 relative overflow-hidden"
                     style={{
-                      borderColor: '#00F5A0',
-                      boxShadow: '0 0 12px rgba(0, 245, 160, 0.12)',
+                      borderColor: 'var(--cat-color)',
+                      boxShadow: '0 0 12px color-mix(in srgb, var(--cat-color) 12%, transparent)',
                     }}
                   >
                     <button
@@ -1576,7 +1571,7 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
                           layoutId="loansActiveToggle"
                           className="absolute inset-0 rounded-xl -z-10"
                           style={{
-                            background: 'linear-gradient(135deg, #00F5A0 0%, #00D4AA 100%)',
+                            background: 'var(--cat-color)',
                           }}
                         />
                       )}
@@ -1595,7 +1590,7 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
                           layoutId="loansActiveToggle"
                           className="absolute inset-0 rounded-xl -z-10"
                           style={{
-                            background: 'linear-gradient(135deg, #00F5A0 0%, #00D4AA 100%)',
+                            background: 'var(--cat-color)',
                           }}
                         />
                       )}
@@ -1668,121 +1663,65 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
                 </div>
               )}
 
-              {/* Browse by Institution + Sort by + dual type filters */}
+              {/* Institution Type + Sort By dropdowns */}
               {!loading && allProducts.length > 0 && (
                 <div className="mb-4">
-                  {category === 'savings' ? (
-                    <div className="grid grid-cols-2 gap-2.5 w-full">
-                      {/* Institution Type Filter Button */}
-                      <motion.button
-                        whileTap={{ scale: 0.97 }}
-                        onClick={() => setShowBankTypePopup(true)}
-                        className="flex items-center justify-between px-3.5 py-3 rounded-xl font-body text-[11px] font-semibold transition-all relative overflow-hidden"
-                        style={{
-                          background: bankFilter !== 'all'
-                            ? `linear-gradient(135deg, ${meta.accentColor}d0 0%, ${meta.accentColor}80 100%)`
-                            : `linear-gradient(135deg, ${meta.accentColor}15 0%, ${meta.accentColor}06 100%)`,
-                          border: `1px solid ${bankFilter !== 'all' ? meta.accentColor : `${meta.accentColor}33`}`,
-                          boxShadow: bankFilter !== 'all' ? `0 0 20px ${meta.accentColor}30` : `inset 0 1px 0 rgba(255, 255, 255, 0.05)`,
-                          color: bankFilter !== 'all' ? '#070A12' : `${meta.accentColor}d0`,
-                        }}
-                      >
-                        <div className="flex flex-col items-start min-w-0 text-left">
-                          <span className="text-[9px] uppercase tracking-wider opacity-60 font-body">Institution</span>
-                          <span className="truncate mt-0.5 max-w-full">
-                            {bankFilter === 'all' ? 'All Banks' : getBankTypeLabel(bankFilter)}
-                          </span>
-                        </div>
-                        <ChevronDown size={14} className="flex-shrink-0 ml-1.5" style={{ color: bankFilter !== 'all' ? '#070A12' : meta.accentColor }} />
-                      </motion.button>
+                  <div className="grid grid-cols-2 gap-2.5 w-full">
+                    {/* Institution Type Filter Button */}
+                    <motion.button
+                      whileTap={{ scale: 0.97 }}
+                      onClick={() => setShowBankTypePopup(true)}
+                      className="flex items-center justify-between px-3.5 py-2.5 rounded-xl font-body text-[11px] font-semibold transition-all relative overflow-hidden"
+                      style={{
+                        background: 'rgba(255, 255, 255, 0.02)',
+                        border: bankFilter !== 'all' 
+                          ? '1px solid var(--cat-color)' 
+                          : '1px solid rgba(255, 255, 255, 0.08)',
+                        boxShadow: bankFilter !== 'all' 
+                          ? '0 0 12px color-mix(in srgb, var(--cat-color) 15%, transparent)' 
+                          : 'none',
+                      }}
+                    >
+                      <div className="flex flex-col items-start min-w-0 text-left">
+                        <span className="text-[9px] uppercase tracking-wider opacity-60 font-body text-white/50">Institution</span>
+                        <span className="truncate mt-0.5 max-w-full font-bold" style={{ color: bankFilter !== 'all' ? 'var(--cat-color)' : 'rgba(255, 255, 255, 0.9)' }}>
+                          {bankFilter === 'all' ? 'All Banks' : getBankTypeLabel(bankFilter)}
+                        </span>
+                      </div>
+                      <ChevronDown size={14} className="flex-shrink-0 ml-1.5" style={{ color: bankFilter !== 'all' ? 'var(--cat-color)' : 'rgba(255, 255, 255, 0.4)' }} />
+                    </motion.button>
 
-                      {/* Sort By Filter Button */}
-                      <motion.button
-                        whileTap={{ scale: 0.97 }}
-                        onClick={() => setShowSortPopup(true)}
-                        className="flex items-center justify-between px-3.5 py-3 rounded-xl font-body text-[11px] font-semibold transition-all relative overflow-hidden"
-                        style={{
-                          background: sortBy !== 'popularity'
-                            ? `linear-gradient(135deg, ${meta.accentColor}d0 0%, ${meta.accentColor}80 100%)`
-                            : `linear-gradient(135deg, ${meta.accentColor}15 0%, ${meta.accentColor}06 100%)`,
-                          border: `1px solid ${sortBy !== 'popularity' ? meta.accentColor : `${meta.accentColor}33`}`,
-                          boxShadow: sortBy !== 'popularity' ? `0 0 20px ${meta.accentColor}30` : `inset 0 1px 0 rgba(255, 255, 255, 0.05)`,
-                          color: sortBy !== 'popularity' ? '#070A12' : `${meta.accentColor}d0`,
-                        }}
-                      >
-                        <div className="flex flex-col items-start min-w-0 text-left">
-                          <span className="text-[9px] uppercase tracking-wider opacity-60 font-body">Sort By</span>
-                          <span className="truncate mt-0.5 max-w-full">{getSortLabel(sortBy)}</span>
-                        </div>
-                        <ChevronDown size={14} className="flex-shrink-0 ml-1.5" style={{ color: sortBy !== 'popularity' ? '#070A12' : meta.accentColor }} />
-                      </motion.button>
-                    </div>
-                  ) : category !== 'loans' ? (
-                    /* For other categories, show them as grid or flex layout */
-                    <div className="flex flex-wrap gap-2 w-full">
-                      {/* Institution Type Filter Button */}
-                      <motion.button
-                        whileTap={{ scale: 0.96 }}
-                        onClick={() => setShowBankTypePopup(true)}
-                        className="flex items-center gap-1.5 px-3 py-2 rounded-lg font-body text-[10px] font-semibold transition-all"
-                        style={{
-                          background: bankFilter !== 'all'
-                            ? `linear-gradient(135deg, ${meta.accentColor}dd 0%, ${meta.accentColor}99 100%)`
-                            : `linear-gradient(135deg, ${meta.accentColor}15 0%, ${meta.accentColor}06 100%)`,
-                          border: `1px solid ${bankFilter !== 'all' ? meta.accentColor : `${meta.accentColor}33`}`,
-                          color: bankFilter !== 'all' ? '#070A12' : `${meta.accentColor}d0`,
-                        }}
-                      >
-                        {bankFilter === 'all' ? 'All Institutions' : getBankTypeLabel(bankFilter)}
-                        <ChevronDown size={11} style={{ color: bankFilter !== 'all' ? '#070A12' : meta.accentColor }} />
-                      </motion.button>
-
-                      {/* Browse by Institution */}
-                      <motion.button
-                        whileTap={{ scale: 0.96 }}
-                        onClick={() => setShowBankPopup(true)}
-                        className="flex items-center gap-1.5 px-3 py-2 rounded-lg font-body text-[10px] font-semibold transition-all"
-                        style={{
-                          background: bankPopupFilter
-                            ? `linear-gradient(135deg, ${meta.accentColor}dd 0%, ${meta.accentColor}99 100%)`
-                            : `linear-gradient(135deg, ${meta.accentColor}15 0%, ${meta.accentColor}06 100%)`,
-                          border: `1px solid ${bankPopupFilter ? meta.accentColor : `${meta.accentColor}33`}`,
-                          color: bankPopupFilter ? '#070A12' : `${meta.accentColor}d0`,
-                        }}
-                      >
-                        {bankPopupFilter ?? t.filterByBank}
-                        <ChevronDown size={11} style={{ color: bankPopupFilter ? '#070A12' : meta.accentColor }} />
-                      </motion.button>
-
-                      {/* Type filter — only for creditcards and loans */}
-                      {showDualFilters && (
-                        <motion.button
-                          whileTap={{ scale: 0.96 }}
-                          onClick={() => setShowTypePopup(true)}
-                          className="flex items-center gap-1.5 px-3 py-2 rounded-lg font-body text-[10px] font-semibold transition-all"
-                          style={{
-                            background: typeFilter
-                              ? `linear-gradient(135deg, ${meta.accentColor}dd 0%, ${meta.accentColor}99 100%)`
-                              : `linear-gradient(135deg, ${meta.accentColor}15 0%, ${meta.accentColor}06 100%)`,
-                            border: `1px solid ${typeFilter ? meta.accentColor : `${meta.accentColor}33`}`,
-                            color: typeFilter ? '#070A12' : `${meta.accentColor}d0`,
-                          }}
-                        >
-                          {typeFilter ?? (category === 'insurance' ? t.filterByType : t.filterByIncome)}
-                          <ChevronDown size={11} style={{ color: typeFilter ? '#070A12' : meta.accentColor }} />
-                        </motion.button>
-                      )}
-                    </div>
-                  ) : null}
+                    {/* Sort By Filter Button */}
+                    <motion.button
+                      whileTap={{ scale: 0.97 }}
+                      onClick={() => setShowSortPopup(true)}
+                      className="flex items-center justify-between px-3.5 py-2.5 rounded-xl font-body text-[11px] font-semibold transition-all relative overflow-hidden"
+                      style={{
+                        background: 'rgba(255, 255, 255, 0.02)',
+                        border: sortBy !== 'popularity' 
+                          ? '1px solid var(--cat-color)' 
+                          : '1px solid rgba(255, 255, 255, 0.08)',
+                        boxShadow: sortBy !== 'popularity' 
+                          ? '0 0 12px color-mix(in srgb, var(--cat-color) 15%, transparent)' 
+                          : 'none',
+                      }}
+                    >
+                      <div className="flex flex-col items-start min-w-0 text-left">
+                        <span className="text-[9px] uppercase tracking-wider opacity-60 font-body text-white/50">Sort By</span>
+                        <span className="truncate mt-0.5 max-w-full font-bold" style={{ color: sortBy !== 'popularity' ? 'var(--cat-color)' : 'rgba(255, 255, 255, 0.9)' }}>
+                          {getSortLabel(sortBy)}
+                        </span>
+                      </div>
+                      <ChevronDown size={14} className="flex-shrink-0 ml-1.5" style={{ color: sortBy !== 'popularity' ? 'var(--cat-color)' : 'rgba(255, 255, 255, 0.4)' }} />
+                    </motion.button>
+                  </div>
 
                   {/* Clear all active filters and search/sort values */}
-                  {category !== 'loans' && (bankPopupFilter || typeFilter || bankFilter !== 'all' || sortBy !== 'popularity' || searchText !== '') && (
-                    <div className="mt-2 flex justify-start">
+                  {(bankFilter !== 'all' || sortBy !== 'popularity' || searchText !== '') && (
+                    <div className="mt-2.5 flex justify-start">
                       <motion.button
                         whileTap={{ scale: 0.96 }}
                         onClick={() => {
-                          setBankPopupFilter(null);
-                          setTypeFilter(null);
                           setBankFilter('all');
                           setSortBy('popularity');
                           setSearchText('');
@@ -1978,6 +1917,7 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
             exit={{ x: 40, opacity: 0 }}
             transition={{ type: 'spring', stiffness: 260, damping: 28 }}
             className="min-h-screen"
+            style={{ '--cat-color': meta.accentColor } as React.CSSProperties}
           >
             {(() => {
               const bankProducts = allProducts.filter((p) => p.lender === selectedBank);
@@ -2076,7 +2016,7 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
                           className="w-full pl-9 pr-9 py-2.5 rounded-xl font-body text-[12px] outline-none"
                           style={{
                             background: 'rgba(255,255,255,0.05)',
-                            border: `1px solid ${color}30`,
+                            border: '1px solid color-mix(in srgb, var(--cat-color) 30%, transparent)',
                             color: 'rgba(255,255,255,0.78)',
                           }}
                         />
@@ -2136,7 +2076,7 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
       {showBankTypePopup && (
         <InstitutionSelectSheet
           title={lang === 'hi' ? 'संस्थान प्रकार' : lang === 'hinglish' ? 'Institution Type' : 'Institution Type'}
-          options={['all', 'public', 'private', 'sfb', 'payments']}
+          options={['all', 'public', 'private', 'sfb', 'nbfc']}
           selected={bankFilter}
           onSelect={setBankFilter}
           onClose={() => setShowBankTypePopup(false)}
@@ -2147,16 +2087,7 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
       {showSortPopup && (
         <SortSelectSheet
           title={lang === 'hi' ? 'क्रमबद्ध करें' : lang === 'hinglish' ? 'Sort By' : 'Sort Options'}
-          options={[
-            'popularity',
-            'alpha-asc',
-            'alpha-desc',
-            'interest-desc',
-            'interest-asc',
-            'balance-asc',
-            'balance-desc',
-            'accounts-desc',
-          ]}
+          options={['popularity', 'interest-desc', 'balance-asc', 'alpha-asc']}
           selected={sortBy}
           onSelect={setSortBy}
           onClose={() => setShowSortPopup(false)}

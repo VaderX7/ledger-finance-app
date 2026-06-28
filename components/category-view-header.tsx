@@ -20,7 +20,7 @@ export default function CategoryViewHeader({
     <div
       className="fixed top-0 inset-x-0 mx-auto max-w-md z-30 flex items-center gap-3 px-4 py-3"
       style={{
-        background: 'rgba(7, 10, 18, 0.85)',
+        background: 'linear-gradient(to bottom, color-mix(in srgb, var(--cat-color, ' + accentColor + ') 8%, transparent) 0%, rgba(7, 10, 18, 0.88) 100%)',
         backdropFilter: 'blur(20px)',
         WebkitBackdropFilter: 'blur(20px)',
         borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
@@ -49,7 +49,7 @@ export default function CategoryViewHeader({
         >
           {label}
         </p>
-        <p className="font-body text-[10px] mt-0.5" style={{ color: accentColor + 'bb' }}>
+        <p className="font-body text-[10px] mt-0.5" style={{ color: 'color-mix(in srgb, var(--cat-color, ' + accentColor + ') 75%, white)' }}>
           {subtitle}
         </p>
       </div>
@@ -57,7 +57,7 @@ export default function CategoryViewHeader({
       {/* Accent dot */}
       <div
         className="w-2 h-2 rounded-full flex-shrink-0"
-        style={{ background: accentColor, boxShadow: `0 0 8px ${accentColor}88` }}
+        style={{ background: 'var(--cat-color, ' + accentColor + ')', boxShadow: `0 0 8px var(--cat-color, ${accentColor})` }}
       />
     </div>
   );
