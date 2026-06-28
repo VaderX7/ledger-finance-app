@@ -1647,13 +1647,13 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
                       className="flex items-center justify-between px-3.5 py-2.5 rounded-xl font-body text-[11px] font-semibold transition-all relative overflow-hidden"
                       style={{
                         background: bankFilter !== 'all' && bankFilter !== 'All Banks'
-                          ? '#C9A96E'
+                          ? 'color-mix(in srgb, #C9A96E 75%, #000000)'
                           : 'rgba(255, 255, 255, 0.02)',
                         border: bankFilter !== 'all' && bankFilter !== 'All Banks'
-                          ? '1px solid #C9A96E' 
+                          ? '1px solid color-mix(in srgb, #C9A96E 75%, #000000)' 
                           : '1px solid color-mix(in srgb, #C9A96E 30%, transparent)',
                         boxShadow: bankFilter !== 'all' && bankFilter !== 'All Banks'
-                          ? '0 0 15px rgba(201, 169, 110, 0.35)' 
+                          ? '0 0 15px rgba(201, 169, 110, 0.25)' 
                           : 'none',
                       }}
                     >
@@ -1662,7 +1662,7 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
                           className="text-[9px] uppercase tracking-wider opacity-60 font-body transition-colors"
                           style={{
                             color: bankFilter !== 'all' && bankFilter !== 'All Banks'
-                              ? 'rgba(7, 10, 18, 0.6)'
+                              ? 'rgba(255, 255, 255, 0.6)'
                               : 'rgba(255, 255, 255, 0.5)',
                           }}
                         >
@@ -1672,7 +1672,7 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
                           className="truncate mt-0.5 max-w-full font-bold transition-colors" 
                           style={{ 
                             color: bankFilter !== 'all' && bankFilter !== 'All Banks' 
-                              ? '#070A12' 
+                              ? '#ffffff' 
                               : 'rgba(255, 255, 255, 0.9)' 
                           }}
                         >
@@ -1684,7 +1684,7 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
                         className="flex-shrink-0 ml-1.5 transition-colors" 
                         style={{ 
                           color: bankFilter !== 'all' && bankFilter !== 'All Banks' 
-                            ? '#070A12' 
+                            ? '#ffffff' 
                             : 'rgba(255, 255, 255, 0.4)' 
                         }} 
                       />
@@ -1697,13 +1697,13 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
                       className="flex items-center justify-between px-3.5 py-2.5 rounded-xl font-body text-[11px] font-semibold transition-all relative overflow-hidden"
                       style={{
                         background: sortBy !== 'popularity'
-                          ? '#C9A96E'
+                          ? 'color-mix(in srgb, #C9A96E 75%, #000000)'
                           : 'rgba(255, 255, 255, 0.02)',
                         border: sortBy !== 'popularity' 
-                          ? '1px solid #C9A96E' 
+                          ? '1px solid color-mix(in srgb, #C9A96E 75%, #000000)' 
                           : '1px solid color-mix(in srgb, #C9A96E 30%, transparent)',
                         boxShadow: sortBy !== 'popularity' 
-                          ? '0 0 15px rgba(201, 169, 110, 0.35)' 
+                          ? '0 0 15px rgba(201, 169, 110, 0.25)' 
                           : 'none',
                       }}
                     >
@@ -1712,7 +1712,7 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
                           className="text-[9px] uppercase tracking-wider opacity-60 font-body transition-colors"
                           style={{
                             color: sortBy !== 'popularity'
-                              ? 'rgba(7, 10, 18, 0.6)'
+                              ? 'rgba(255, 255, 255, 0.6)'
                               : 'rgba(255, 255, 255, 0.5)',
                           }}
                         >
@@ -1722,7 +1722,7 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
                           className="truncate mt-0.5 max-w-full font-bold transition-colors" 
                           style={{ 
                             color: sortBy !== 'popularity' 
-                              ? '#070A12' 
+                              ? '#ffffff' 
                               : 'rgba(255, 255, 255, 0.9)' 
                           }}
                         >
@@ -1734,7 +1734,7 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
                         className="flex-shrink-0 ml-1.5 transition-colors" 
                         style={{ 
                           color: sortBy !== 'popularity' 
-                            ? '#070A12' 
+                            ? '#ffffff' 
                             : 'rgba(255, 255, 255, 0.4)' 
                         }} 
                       />
