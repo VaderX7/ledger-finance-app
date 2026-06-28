@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { motion, useAnimation } from 'framer-motion';
 import { Home, Search, Calculator, User } from 'lucide-react';
 import { useLang } from '@/context/LanguageContext';
@@ -28,11 +28,13 @@ function NavTab({
   label,
   Icon,
   isActive,
+  onClick,
 }: {
   href: string;
   label: string;
   Icon: typeof Home;
   isActive: boolean;
+  onClick: (e: React.MouseEvent) => void;
 }) {
   const controls = useAnimation();
 
@@ -49,7 +51,7 @@ function NavTab({
   const rgb = hexToRgb(color);
 
   return (
-    <Link href={href} className="relative flex-1">
+    <Link href={href} onClick={onClick} className="relative flex-1">
       <motion.div
         className="relative z-10 flex flex-col items-center justify-center gap-1 rounded-2xl px-4 py-2 mx-1"
         animate={{
@@ -92,9 +94,25 @@ function NavTab({
 
 export default function BottomNav() {
   const pathname = usePathname();
+  const router = useRouter();
   const { t } = useLang();
 
   if (pathname === '/setup') return null;
+
+  const handleNavClick = (e: React.MouseEvent, href: string) => {
+    e.preventDefault();
+    if (href === '/') {
+      if (pathname === '/') {
+        // do nothing
+      } else {
+        router.push(href);
+      }
+    } else if (pathname.startsWith(href) && pathname !== href) {
+      router.back();
+    } else {
+      router.push(href);
+    }
+  };
 
   const navItems = [
     { href: '/', label: t.navHome, icon: Home },
@@ -137,7 +155,7 @@ export default function BottomNav() {
       >
         {navItems.map((item) => {
           const Icon = item.icon;
-          const isActive = pathname === item.href;
+          const isActive = item.href === '/' ? pathname === '/' : pathname.startsWith(item.href);
           return (
             <NavTab
               key={item.href}
@@ -145,6 +163,7 @@ export default function BottomNav() {
               label={item.label}
               Icon={Icon}
               isActive={isActive}
+              onClick={(e) => handleNavClick(e, item.href)}
             />
           );
         })}
