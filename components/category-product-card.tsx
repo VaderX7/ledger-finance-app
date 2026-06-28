@@ -413,37 +413,6 @@ export default function CategoryProductCard({
                   />
                 </div>
 
-                {/* Star Button */}
-                <motion.button
-                  whileTap={{ scale: 0.85 }}
-                  onClick={async (e) => {
-                    e.stopPropagation();
-                    e.preventDefault();
-                    const added = await toggleFavourite({
-                      id: product.id,
-                      type: product.category,
-                      lender: product.lender,
-                      name: product.name,
-                      color: product.color,
-                      colorAccent: product.colorAccent,
-                      savedAt: Date.now(),
-                    });
-                    setIsFav(added);
-                  }}
-                  className="p-1.5 rounded-full bg-white/[0.03] hover:bg-white/[0.08] transition-colors flex-shrink-0"
-                >
-                  <motion.div
-                    animate={isFav ? { scale: [1, 1.4, 1] } : { scale: 1 }}
-                    transition={{ duration: 0.3, type: 'tween', ease: 'easeInOut' }}
-                  >
-                    <Star
-                      size={14}
-                      style={{ color: isFav ? '#C9A96E' : 'rgba(255,255,255,0.3)' }}
-                      fill={isFav ? "#C9A96E" : "transparent"}
-                    />
-                  </motion.div>
-                </motion.button>
-
                 {/* Bank Info */}
                 <div className="flex flex-col min-w-0">
                   <span className="text-[12.5px] font-bold text-white leading-tight truncate">
@@ -478,25 +447,39 @@ export default function CategoryProductCard({
 
             {/* Right Column */}
             <div className="w-[120px] flex-shrink-0 flex flex-col items-end justify-between text-right">
-              {/* Details button */}
-              <button
-                onClick={(e) => {
+              {/* Top: Star Button */}
+              <motion.button
+                whileTap={{ scale: 0.85 }}
+                onClick={async (e) => {
                   e.stopPropagation();
-                  onDetailsClick(product);
+                  e.preventDefault();
+                  const added = await toggleFavourite({
+                    id: product.id,
+                    type: product.category,
+                    lender: product.lender,
+                    name: product.name,
+                    color: product.color,
+                    colorAccent: product.colorAccent,
+                    savedAt: Date.now(),
+                  });
+                  setIsFav(added);
                 }}
-                className="flex items-center gap-1 px-2.5 py-1 rounded-xl text-[10px] font-bold border transition-all duration-300 hover:bg-[#00E5FF]/10"
-                style={{
-                  borderColor: 'rgba(0, 229, 255, 0.35)',
-                  color: '#00E5FF',
-                  background: 'transparent',
-                }}
+                className="p-1.5 rounded-full bg-white/[0.03] hover:bg-white/[0.08] transition-colors flex-shrink-0"
               >
-                <span>Details</span>
-                <span>→</span>
-              </button>
+                <motion.div
+                  animate={isFav ? { scale: [1, 1.4, 1] } : { scale: 1 }}
+                  transition={{ duration: 0.3, type: 'tween', ease: 'easeInOut' }}
+                >
+                  <Star
+                    size={15}
+                    style={{ color: isFav ? '#C9A96E' : 'rgba(255,255,255,0.3)' }}
+                    fill={isFav ? "#C9A96E" : "transparent"}
+                  />
+                </motion.div>
+              </motion.button>
 
-              {/* Stacked meta items */}
-              <div className="flex flex-col items-end gap-0.5 mt-2 font-body text-[10px] text-white/50 leading-normal">
+              {/* Middle: Stacked meta items */}
+              <div className="flex flex-col items-end gap-0.5 my-1.5 font-body text-[10px] text-white/50 leading-normal">
                 {(() => {
                   const minTenure = product.metrics['Minimum Tenure'] || product.metrics['tenureRange'];
                   const maxTenure = product.metrics['Maximum Tenure'];
@@ -517,9 +500,26 @@ export default function CategoryProductCard({
                 })()}
 
                 {product.metrics['DICGC Insured'] === 'Yes' && (
-                  <span className="font-semibold" style={{ color: 'var(--cat-color, #00F5A0)' }}>DICGC Insured</span>
+                  <span className="font-semibold text-right" style={{ color: 'var(--cat-color, #00F5A0)' }}>DICGC Insured</span>
                 )}
               </div>
+
+              {/* Bottom: Details button */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDetailsClick(product);
+                }}
+                className="flex items-center gap-1 px-2.5 py-1 rounded-xl text-[10px] font-bold border transition-all duration-300 hover:bg-[#00E5FF]/10"
+                style={{
+                  borderColor: 'rgba(0, 229, 255, 0.35)',
+                  color: '#00E5FF',
+                  background: 'transparent',
+                }}
+              >
+                <span>Details</span>
+                <span>→</span>
+              </button>
             </div>
           </div>
         </motion.div>
