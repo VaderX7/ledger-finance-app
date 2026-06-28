@@ -92,13 +92,15 @@ export default function FDTenureRates({ productId, accentColor = '#C9A96E', hide
         style={{ border: '1px solid rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.02)' }}
       >
         <div className="overflow-x-auto max-h-[400px] overflow-y-auto custom-scrollbar">
-          <table className="w-full text-left min-w-[320px]">
+          <table className="w-full text-left">
             <thead className="sticky top-0 z-10" style={{ background: 'rgba(7, 10, 18, 0.95)' }}>
               <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-                {COLS.map((col) => (
+                {COLS.map((col, idx) => (
                   <th
                     key={col}
-                    className="px-3 py-2.5 text-[10px] uppercase tracking-wider font-semibold text-white/30"
+                    className={`px-2 py-2 text-[10px] uppercase tracking-wider font-semibold text-white/30 ${
+                      idx === 0 ? 'w-[46%]' : 'w-[27%]'
+                    }`}
                     style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
                   >
                     {col}
@@ -125,11 +127,11 @@ export default function FDTenureRates({ productId, accentColor = '#C9A96E', hide
                           : 'transparent',
                     }}
                   >
-                    <td className="px-3 py-2.5">
-                      <div className="flex items-center gap-1.5">
-                        {isSpecial && <span className="text-[11px]">⭐</span>}
+                    <td className="px-2 py-2">
+                      <div className="flex items-center gap-1">
+                        {isSpecial && <span className="text-[11px] flex-shrink-0">⭐</span>}
                         <span
-                          className="text-[11px] font-medium"
+                          className="text-[11px] font-medium truncate"
                           style={{
                             fontFamily: "'Plus Jakarta Sans', sans-serif",
                             color: isBest ? '#22C55E' : 'rgba(255,255,255,0.7)',
@@ -139,7 +141,7 @@ export default function FDTenureRates({ productId, accentColor = '#C9A96E', hide
                         </span>
                       </div>
                     </td>
-                    <td className="px-3 py-2.5">
+                    <td className="px-2 py-2">
                       <span
                         className="text-[11px] font-bold"
                         style={{
@@ -150,7 +152,7 @@ export default function FDTenureRates({ productId, accentColor = '#C9A96E', hide
                         {rate.rate_general}%
                       </span>
                     </td>
-                    <td className="px-3 py-2.5">
+                    <td className="px-2 py-2">
                       <span
                         className="text-[11px] font-bold"
                         style={{
