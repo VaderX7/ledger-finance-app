@@ -664,11 +664,11 @@ function InstitutionSelectSheet({
   getLabel,
 }: {
   title: string;
-  options: (BankType | 'all')[];
-  selected: BankType | 'all';
-  onSelect: (v: BankType | 'all') => void;
+  options: (BankType | 'all' | 'All Banks')[];
+  selected: BankType | 'all' | 'All Banks';
+  onSelect: (v: BankType | 'all' | 'All Banks') => void;
   onClose: () => void;
-  getLabel: (v: BankType | 'all') => string;
+  getLabel: (v: BankType | 'all' | 'All Banks') => string;
 }) {
   return (
     <AnimatePresence>
@@ -1228,7 +1228,7 @@ interface ProductCategoryViewProps {
 export default function ProductCategoryView({ category, onBack }: ProductCategoryViewProps) {
   const { t, lang } = useLang();
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [bankFilter, setBankFilter] = useState<BankType | 'all'>('all');
+  const [bankFilter, setBankFilter] = useState<BankType | 'all' | 'All Banks'>('all');
   const [searchText, setSearchText] = useState('');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [selectedTerm, setSelectedTerm] = useState<string | null>(null);
@@ -1264,10 +1264,11 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
     }
   };
 
-  const getBankTypeLabel = (bt: BankType | 'all'): string => {
+  const getBankTypeLabel = (bt: BankType | 'all' | 'All Banks'): string => {
     if (lang === 'hi') {
       switch (bt) {
-        case 'all': return 'सभी बैंक';
+        case 'all':
+        case 'All Banks': return 'सभी बैंक';
         case 'public': return 'सरकारी बैंक';
         case 'private': return 'निजी बैंक';
         case 'sfb': return 'SFB (स्मॉल फाइनेंस)';
@@ -1276,7 +1277,8 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
       }
     } else {
       switch (bt) {
-        case 'all': return 'All Banks';
+        case 'all':
+        case 'All Banks': return 'All Banks';
         case 'public': return 'Public Banks';
         case 'private': return 'Private Banks';
         case 'sfb': return 'SFB';

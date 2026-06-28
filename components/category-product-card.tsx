@@ -601,113 +601,48 @@ export default function CategoryProductCard({
       </div>
 
       {/* Divider 1 */}
-      {product.category !== 'fds' && (
-        <div className="border-t border-white/[0.05] my-3" />
-      )}
+      <div className="border-t border-white/[0.05] my-3" />
 
       {/* Product Name */}
-      {product.category !== 'fds' && (
-        <div className="relative z-10">
-          <h3
-            className="text-[20px] font-bold text-white tracking-tight leading-snug"
-            style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
-          >
-            {product.name}
-          </h3>
-        </div>
-      )}
+      <div className="relative z-10">
+        <h3
+          className="text-[20px] font-bold text-white tracking-tight leading-snug"
+          style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+        >
+          {product.name}
+        </h3>
+      </div>
 
       {/* Key Metric Highlight */}
-      {product.category === 'fds' ? (
-        <div className="relative z-10 space-y-1 mt-2">
-          {/* Main Interest Rate row */}
-          <div className="flex items-baseline gap-1">
-            <span 
-              className="text-[28px] font-bold leading-none tracking-tight"
-              style={{ color: cardColor }}
-            >
-              {metricHighlight.value}
-            </span>
-            <span className="text-[12px] text-white/35 font-body">
-              p.a.
-            </span>
-          </div>
-
-          {/* Senior Citizen bonus rate */}
-          {seniorBonusText && (
-            <div className="text-[11px] text-[#2DD4BF] font-semibold leading-none mb-1 font-body">
-              {seniorBonusText}
-            </div>
-          )}
-          
-          {/* Tenure Range, Min Deposit, DICGC Info Row */}
-          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-white/50 font-body">
-            {/* Tenure Range */}
-            {(() => {
-              const minTenure = product.metrics['Minimum Tenure'] || product.metrics['tenureRange'];
-              const maxTenure = product.metrics['Maximum Tenure'];
-              const cleanTenureText = (txt: string) => String(txt).replace(/\s*days?/gi, 'd').replace(/\s*years?/gi, 'y').replace(/\s*months?/gi, 'm');
-              const tenureText = minTenure && maxTenure 
-                ? `${cleanTenureText(String(minTenure))} - ${cleanTenureText(String(maxTenure))}` 
-                : cleanTenureText(String(minTenure || 'N/A'));
-              return (
-                <span>Tenure: <span className="text-white/80 font-semibold">{tenureText}</span></span>
-              );
-            })()}
-            
-            <span className="text-white/10">•</span>
-            
-            {/* Min Deposit */}
-            {(() => {
-              const minDeposit = product.metrics['Minimum Deposit'] || 'N/A';
-              return (
-                <span>Min: <span className="text-white/80 font-semibold">{minDeposit}</span></span>
-              );
-            })()}
-            
-            {product.metrics['DICGC Insured'] === 'Yes' && (
-              <>
-                <span className="text-white/10">•</span>
-                <span className="font-semibold" style={{ color: 'var(--cat-color, #00F5A0)' }}>DICGC Insured</span>
-              </>
-            )}
-          </div>
-        </div>
-      ) : (
-        <div className="relative z-10 flex items-baseline gap-2 mt-2.5">
-          <span 
-            className="text-[28px] font-bold leading-none tracking-tight"
-            style={{ color: cardColor }}
-          >
-            {metricHighlight.value}
-          </span>
-          <span className="text-[12px] text-white/35 font-body">
-            {metricHighlight.subtitle}
-          </span>
-        </div>
-      )}
+      <div className="relative z-10 flex items-baseline gap-2 mt-2.5">
+        <span 
+          className="text-[28px] font-bold leading-none tracking-tight"
+          style={{ color: cardColor }}
+        >
+          {metricHighlight.value}
+        </span>
+        <span className="text-[12px] text-white/35 font-body">
+          {metricHighlight.subtitle}
+        </span>
+      </div>
 
       {/* Divider 2 */}
-      {product.category !== 'fds' && (
-        <div className="border-t border-white/[0.05] my-3" />
-      )}
+      <div className="border-t border-white/[0.05] my-3" />
 
       {/* Tags Row */}
-      {product.category !== 'fds' && (
-        <div className="relative z-10 flex items-center justify-between gap-4">
-          {/* Highlights */}
-          <div className="flex items-center gap-1.5 flex-wrap">
-            {product.highlights.slice(0, 3).map((h) => (
-              <span
-                key={h}
-                className="px-2 py-0.5 rounded text-[10px] font-body text-white/40 bg-white/[0.02] border border-white/[0.08]"
-              >
-                {h}
-              </span>
-            ))}
-          </div>
+      <div className="relative z-10 flex items-center justify-between gap-4">
+        {/* Highlights */}
+        <div className="flex items-center gap-1.5 flex-wrap">
+          {product.highlights.slice(0, 3).map((h) => (
+            <span
+              key={h}
+              className="px-2 py-0.5 rounded text-[10px] font-body text-white/40 bg-white/[0.02] border border-white/[0.08]"
+            >
+              {h}
+            </span>
+          ))}
         </div>
-      )}
+      </div>
     </motion.div>
 
     {/* Details Button next to Star */}
