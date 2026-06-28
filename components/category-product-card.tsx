@@ -378,7 +378,7 @@ export default function CategoryProductCard({
         />
 
       {/* Header Row */}
-      <div className="relative z-10 flex items-center justify-between gap-3">
+      <div className="relative z-10 flex items-center justify-between gap-3 pr-[130px]">
         {/* Left: Avatar + Bank Details */}
         <div className="flex items-center gap-3 min-w-0">
           {/* Bank Avatar */}
@@ -499,12 +499,14 @@ export default function CategoryProductCard({
       )}
 
       {/* Divider 2 */}
-      <div className="border-t border-white/[0.05] my-3" />
+      {product.category !== 'fds' && (
+        <div className="border-t border-white/[0.05] my-3" />
+      )}
 
       {/* Tags Row */}
-      <div className="relative z-10 flex items-center justify-between gap-4">
-        {/* Highlights */}
-        {product.category !== 'fds' && (
+      {product.category !== 'fds' && (
+        <div className="relative z-10 flex items-center justify-between gap-4">
+          {/* Highlights */}
           <div className="flex items-center gap-1.5 flex-wrap">
             {product.highlights.slice(0, 3).map((h) => (
               <span
@@ -515,28 +517,26 @@ export default function CategoryProductCard({
               </span>
             ))}
           </div>
-        )}
-
-        {/* View Details Button */}
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onDetailsClick(product);
-          }}
-          className={`flex items-center gap-1 px-3.5 py-1.5 rounded-xl text-[11px] font-bold border transition-all duration-300 hover:bg-[#00E5FF]/10 flex-shrink-0 ${
-            product.category === 'fds' ? 'ml-auto' : ''
-          }`}
-          style={{
-            borderColor: 'rgba(0, 229, 255, 0.35)',
-            color: '#00E5FF',
-            background: 'transparent',
-          }}
-        >
-          <span>View details</span>
-          <span>→</span>
-        </button>
-      </div>
+        </div>
+      )}
     </motion.div>
+
+    {/* Details Button next to Star */}
+    <button
+      onClick={(e) => {
+        e.stopPropagation();
+        onDetailsClick(product);
+      }}
+      className="absolute top-3.5 right-11 flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-[10px] font-bold border transition-all duration-300 hover:bg-[#00E5FF]/10 z-10"
+      style={{
+        borderColor: 'rgba(0, 229, 255, 0.35)',
+        color: '#00E5FF',
+        background: 'transparent',
+      }}
+    >
+      <span>Details</span>
+      <span>→</span>
+    </button>
 
     {/* Star Button outside the card's clickable motion.div wrapper */}
     <motion.button
