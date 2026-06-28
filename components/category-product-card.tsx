@@ -397,6 +397,22 @@ export default function CategoryProductCard({
             <div className="flex-1 min-w-0 flex flex-col justify-between">
               {/* Logo + Name Row */}
               <div className="flex items-center gap-2.5 min-w-0">
+                {/* Logo */}
+                <div
+                  className="w-8 h-8 rounded-lg flex-shrink-0 flex items-center justify-center p-[4px] overflow-hidden"
+                  style={{
+                    background: LOGO_BG_MAP[product.lender] ?? '#FFFFFF',
+                    border: `1px solid color-mix(in srgb, ${cardColor} 40%, transparent)`,
+                  }}
+                >
+                  <img 
+                    src={`/logos/${BANK_LOGO_MAP[product.lender] || product.lender.toLowerCase().replace(/bank/gi, '').replace(/[^a-z0-9]/g, '').trim()}.png`} 
+                    alt={product.lender} 
+                    className="w-full h-full object-contain" 
+                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                  />
+                </div>
+
                 {/* Star Button */}
                 <motion.button
                   whileTap={{ scale: 0.85 }}
@@ -427,22 +443,6 @@ export default function CategoryProductCard({
                     />
                   </motion.div>
                 </motion.button>
-
-                {/* Logo */}
-                <div
-                  className="w-8 h-8 rounded-lg flex-shrink-0 flex items-center justify-center p-[4px] overflow-hidden"
-                  style={{
-                    background: LOGO_BG_MAP[product.lender] ?? '#FFFFFF',
-                    border: `1px solid color-mix(in srgb, ${cardColor} 40%, transparent)`,
-                  }}
-                >
-                  <img 
-                    src={`/logos/${BANK_LOGO_MAP[product.lender] || product.lender.toLowerCase().replace(/bank/gi, '').replace(/[^a-z0-9]/g, '').trim()}.png`} 
-                    alt={product.lender} 
-                    className="w-full h-full object-contain" 
-                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                  />
-                </div>
 
                 {/* Bank Info */}
                 <div className="flex flex-col min-w-0">
