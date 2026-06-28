@@ -1398,7 +1398,8 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
   };
 
   const filtered = allProducts.filter((p) => {
-    if (bankFilter !== 'all' && p.bankType !== bankFilter) return false;
+    const isDefaultBankFilter = !bankFilter || bankFilter === 'all' || bankFilter === 'All Banks';
+    if (!isDefaultBankFilter && p.bankType !== bankFilter) return false;
     if (bankPopupFilter && p.lender !== bankPopupFilter) return false;
     if (typeFilter) {
       if (category === 'creditcards' && String(p.metrics.eligibilityIncome) !== typeFilter) return false;
@@ -1525,7 +1526,7 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
 
             <div ref={scrollRef} className="pt-16 px-4 pb-28">
               {/* Search bar — always first below header */}
-              <div className="sticky top-16 z-20 py-2 space-y-2.5" style={{ background: 'rgba(7,10,18,0.95)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
+              <div className="sticky top-16 z-20 py-2" style={{ background: 'rgba(7,10,18,0.95)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
                 <div className="relative">
                   <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: searchFocused ? 'var(--cat-color)' : 'rgba(255,255,255,0.25)' }} />
                   <input
@@ -1549,117 +1550,86 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
                     </button>
                   )}
                 </div>
-
-                {/* Loans Category Switcher */}
-                {category === 'loans' && (
-                  <div className="w-full p-1 rounded-2xl bg-[#090F1C]/40 flex items-center justify-between border-2 relative overflow-hidden"
-                    style={{
-                      borderColor: 'var(--cat-color)',
-                      boxShadow: '0 0 12px color-mix(in srgb, var(--cat-color) 12%, transparent)',
-                    }}
-                  >
-                    <button
-                      onClick={() => setLoansBrowseMode('bank')}
-                      className="flex-1 py-2 text-center font-bold text-[10.5px] tracking-wider rounded-xl transition-all relative z-10"
-                      style={{
-                        color: loansBrowseMode === 'bank' ? '#070A12' : 'rgba(255,255,255,0.6)',
-                        fontFamily: "'Plus Jakarta Sans', sans-serif"
-                      }}
-                    >
-                      {loansBrowseMode === 'bank' && (
-                        <motion.div
-                          layoutId="loansActiveToggle"
-                          className="absolute inset-0 rounded-xl -z-10"
-                          style={{
-                            background: 'var(--cat-color)',
-                          }}
-                        />
-                      )}
-                      BROWSE BY BANK
-                    </button>
-                    <button
-                      onClick={() => setLoansBrowseMode('category')}
-                      className="flex-1 py-2 text-center font-bold text-[10.5px] tracking-wider rounded-xl transition-all relative z-10"
-                      style={{
-                        color: loansBrowseMode === 'category' ? '#070A12' : 'rgba(255,255,255,0.6)',
-                        fontFamily: "'Plus Jakarta Sans', sans-serif"
-                      }}
-                    >
-                      {loansBrowseMode === 'category' && (
-                        <motion.div
-                          layoutId="loansActiveToggle"
-                          className="absolute inset-0 rounded-xl -z-10"
-                          style={{
-                            background: 'var(--cat-color)',
-                          }}
-                        />
-                      )}
-                      BROWSE BY CATEGORY
-                    </button>
-                  </div>
-                )}
-
-                {/* Quick Filter Chips (only for savings category) */}
-                {category === 'savings' && (
-                  <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none -mx-4 px-4 mask-gradient-x">
-                    {[
-                      { id: 'zero-mab', label: 'Zero MAB' },
-                      { id: 'high-interest', label: 'High Interest' },
-                      { id: 'no-min-balance', label: 'No Min Balance' },
-                      { id: 'top-pick', label: 'Top Pick' }
-                    ].map((chip) => {
-                      const isActive = activeChip === chip.id;
-                      return (
-                        <motion.button
-                          key={chip.id}
-                          whileTap={{ scale: 0.95 }}
-                          onClick={() => setActiveChip(isActive ? null : chip.id)}
-                          className="px-3 py-1.5 rounded-full text-[10px] font-semibold whitespace-nowrap transition-all duration-200"
-                          style={{
-                            background: isActive
-                              ? `linear-gradient(135deg, ${meta.accentColor}d0 0%, ${meta.accentColor}80 100%)`
-                              : 'rgba(255,255,255,0.04)',
-                            border: `1px solid ${isActive ? meta.accentColor : 'rgba(255,255,255,0.07)'}`,
-                            color: isActive ? '#070A12' : 'rgba(255,255,255,0.6)',
-                            boxShadow: isActive ? `0 0 10px ${meta.accentColor}40` : 'none',
-                          }}
-                        >
-                          {chip.label}
-                        </motion.button>
-                      );
-                    })}
-                  </div>
-                )}
               </div>
 
-              {/* Counts display showing filtered vs total */}
-              {!loading && allProducts.length > 0 && (
-                <div className="mb-3 mt-1.5 px-1 flex items-center justify-between text-[11px] font-body text-white/40">
-                  <div>
-                    {category === 'savings' ? (
-                      lang === 'hi' ? (
-                        <span><strong className="text-white/80">{filtered.length}</strong> खाते · <strong className="text-white/80">{bankGroups.length}</strong> बैंक</span>
-                      ) : lang === 'hinglish' ? (
-                        <span><strong className="text-white/80">{filtered.length}</strong> accounts · <strong className="text-white/80">{bankGroups.length}</strong> banks</span>
-                      ) : (
-                        <span><strong className="text-white/80">{filtered.length}</strong> accounts · <strong className="text-white/80">{bankGroups.length}</strong> banks</span>
-                      )
-                    ) : category === 'loans' ? (
-                      loansBrowseMode === 'bank' ? (
-                        <span>Showing <strong className="text-white/80">{filtered.length}</strong> loan products across banks</span>
-                      ) : (
-                        <span>Showing <strong className="text-white/80">{filtered.length}</strong> loan products across categories</span>
-                      )
-                    ) : (
-                      lang === 'hi' ? (
-                        <span>दिखा रहा है: <strong className="text-white/80">{filtered.length}</strong> विकल्प (कुल {allProducts.length} में से)</span>
-                      ) : lang === 'hinglish' ? (
-                        <span>Showing <strong className="text-white/80">{filtered.length}</strong> options (Out of {allProducts.length} total)</span>
-                      ) : (
-                        <span>Showing <strong className="text-white/80">{filtered.length}</strong> options (Out of {allProducts.length} total)</span>
-                      )
+              {/* Loans Category Switcher */}
+              {category === 'loans' && (
+                <div className="w-full p-1 rounded-2xl bg-[#090F1C]/40 flex items-center justify-between border-2 relative overflow-hidden mb-3"
+                  style={{
+                    borderColor: 'var(--cat-color)',
+                    boxShadow: '0 0 12px color-mix(in srgb, var(--cat-color) 12%, transparent)',
+                  }}
+                >
+                  <button
+                    onClick={() => setLoansBrowseMode('bank')}
+                    className="flex-1 py-2 text-center font-bold text-[10.5px] tracking-wider rounded-xl transition-all relative z-10"
+                    style={{
+                      color: loansBrowseMode === 'bank' ? '#070A12' : 'rgba(255,255,255,0.6)',
+                      fontFamily: "'Plus Jakarta Sans', sans-serif"
+                    }}
+                  >
+                    {loansBrowseMode === 'bank' && (
+                      <motion.div
+                        layoutId="loansActiveToggle"
+                        className="absolute inset-0 rounded-xl -z-10"
+                        style={{
+                          background: 'var(--cat-color)',
+                        }}
+                      />
                     )}
-                  </div>
+                    BROWSE BY BANK
+                  </button>
+                  <button
+                    onClick={() => setLoansBrowseMode('category')}
+                    className="flex-1 py-2 text-center font-bold text-[10.5px] tracking-wider rounded-xl transition-all relative z-10"
+                    style={{
+                      color: loansBrowseMode === 'category' ? '#070A12' : 'rgba(255,255,255,0.6)',
+                      fontFamily: "'Plus Jakarta Sans', sans-serif"
+                    }}
+                  >
+                    {loansBrowseMode === 'category' && (
+                      <motion.div
+                        layoutId="loansActiveToggle"
+                        className="absolute inset-0 rounded-xl -z-10"
+                        style={{
+                          background: 'var(--cat-color)',
+                        }}
+                      />
+                    )}
+                    BROWSE BY CATEGORY
+                  </button>
+                </div>
+              )}
+
+              {/* Quick Filter Chips (only for savings category) */}
+              {category === 'savings' && (
+                <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none -mx-4 px-4 mask-gradient-x mb-3">
+                  {[
+                    { id: 'zero-mab', label: 'Zero MAB' },
+                    { id: 'high-interest', label: 'High Interest' },
+                    { id: 'no-min-balance', label: 'No Min Balance' },
+                    { id: 'top-pick', label: 'Top Pick' }
+                  ].map((chip) => {
+                    const isActive = activeChip === chip.id;
+                    return (
+                      <motion.button
+                        key={chip.id}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => setActiveChip(isActive ? null : chip.id)}
+                        className="px-3 py-1.5 rounded-full text-[10px] font-semibold whitespace-nowrap transition-all duration-200"
+                        style={{
+                          background: isActive
+                            ? `linear-gradient(135deg, ${meta.accentColor}d0 0%, ${meta.accentColor}80 100%)`
+                            : 'rgba(255,255,255,0.04)',
+                          border: `1px solid ${isActive ? meta.accentColor : 'rgba(255,255,255,0.07)'}`,
+                          color: isActive ? '#070A12' : 'rgba(255,255,255,0.6)',
+                          boxShadow: isActive ? `0 0 10px ${meta.accentColor}40` : 'none',
+                        }}
+                      >
+                        {chip.label}
+                      </motion.button>
+                    );
+                  })}
                 </div>
               )}
 
@@ -1674,21 +1644,21 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
                       className="flex items-center justify-between px-3.5 py-2.5 rounded-xl font-body text-[11px] font-semibold transition-all relative overflow-hidden"
                       style={{
                         background: 'rgba(255, 255, 255, 0.02)',
-                        border: bankFilter !== 'all' 
+                        border: bankFilter !== 'all' && bankFilter !== 'All Banks'
                           ? '1px solid var(--cat-color)' 
                           : '1px solid rgba(255, 255, 255, 0.08)',
-                        boxShadow: bankFilter !== 'all' 
+                        boxShadow: bankFilter !== 'all' && bankFilter !== 'All Banks'
                           ? '0 0 12px color-mix(in srgb, var(--cat-color) 15%, transparent)' 
                           : 'none',
                       }}
                     >
                       <div className="flex flex-col items-start min-w-0 text-left">
                         <span className="text-[9px] uppercase tracking-wider opacity-60 font-body text-white/50">Institution</span>
-                        <span className="truncate mt-0.5 max-w-full font-bold" style={{ color: bankFilter !== 'all' ? 'var(--cat-color)' : 'rgba(255, 255, 255, 0.9)' }}>
-                          {bankFilter === 'all' ? 'All Banks' : getBankTypeLabel(bankFilter)}
+                        <span className="truncate mt-0.5 max-w-full font-bold" style={{ color: bankFilter !== 'all' && bankFilter !== 'All Banks' ? 'var(--cat-color)' : 'rgba(255, 255, 255, 0.9)' }}>
+                          {bankFilter === 'all' || bankFilter === 'All Banks' ? 'All Banks' : getBankTypeLabel(bankFilter)}
                         </span>
                       </div>
-                      <ChevronDown size={14} className="flex-shrink-0 ml-1.5" style={{ color: bankFilter !== 'all' ? 'var(--cat-color)' : 'rgba(255, 255, 255, 0.4)' }} />
+                      <ChevronDown size={14} className="flex-shrink-0 ml-1.5" style={{ color: bankFilter !== 'all' && bankFilter !== 'All Banks' ? 'var(--cat-color)' : 'rgba(255, 255, 255, 0.4)' }} />
                     </motion.button>
 
                     {/* Sort By Filter Button */}
@@ -1717,7 +1687,7 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
                   </div>
 
                   {/* Clear all active filters and search/sort values */}
-                  {(bankFilter !== 'all' || sortBy !== 'popularity' || searchText !== '') && (
+                  {(bankFilter !== 'all' && bankFilter !== 'All Banks' || sortBy !== 'popularity' || searchText !== '' || activeChip !== null) && (
                     <div className="mt-2.5 flex justify-start">
                       <motion.button
                         whileTap={{ scale: 0.96 }}
@@ -1725,6 +1695,7 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
                           setBankFilter('all');
                           setSortBy('popularity');
                           setSearchText('');
+                          setActiveChip(null);
                         }}
                         className="flex items-center gap-1 px-3 py-1.5 rounded-lg font-body text-[9px] font-semibold"
                         style={{ background: 'rgba(251,113,133,0.10)', border: '1px solid rgba(251,113,133,0.25)', color: '#FB7185' }}
