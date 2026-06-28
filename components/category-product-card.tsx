@@ -376,7 +376,7 @@ export default function CategoryProductCard({
           transition={{ type: 'spring', stiffness: 260, damping: 24, delay: index * 0.05 }}
           whileTap={{ scale: 0.985 }}
           onClick={() => onDetailsClick(product)}
-          className="overflow-hidden cursor-pointer p-4"
+          className="overflow-hidden cursor-pointer py-3 px-4"
           style={{
             background: `linear-gradient(135deg, color-mix(in srgb, ${cardColor} 22%, transparent) 0%, color-mix(in srgb, ${cardColorAccent} 8%, transparent) 100%), #0d1117`,
             borderTop: `1px solid color-mix(in srgb, ${cardColor} 50%, transparent)`,
@@ -498,10 +498,6 @@ export default function CategoryProductCard({
                     <span>Min: <span className="text-white/80 font-semibold">{minDeposit}</span></span>
                   );
                 })()}
-
-                {product.metrics['DICGC Insured'] === 'Yes' && (
-                  <span className="font-semibold text-right" style={{ color: 'var(--cat-color, #00F5A0)' }}>DICGC Insured</span>
-                )}
               </div>
 
               {/* Bottom: Details button */}
