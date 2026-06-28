@@ -381,7 +381,7 @@ export default function CategoryProductCard({
           borderTop: `1px solid color-mix(in srgb, ${cardColor} 50%, transparent)`,
           borderRight: `1px solid color-mix(in srgb, ${cardColor} 50%, transparent)`,
           borderBottom: `1px solid color-mix(in srgb, ${cardColor} 50%, transparent)`,
-          borderLeft: `6px solid var(--cat-color, ${cardColor})`,
+          borderLeft: `6px solid ${cardColor}`,
           borderRadius: '16px',
         }}
       >

@@ -1529,7 +1529,7 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
               {/* Search bar — always first below header */}
               <div className="sticky top-16 z-20 py-2" style={{ background: 'rgba(7,10,18,0.95)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
                 <div className="relative">
-                  <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: searchFocused ? 'var(--cat-color)' : 'rgba(255,255,255,0.25)' }} />
+                  <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: searchFocused ? 'var(--cat-color)' : 'color-mix(in srgb, var(--cat-color) 40%, transparent)' }} />
                   <input
                     type="text"
                     value={searchText}
@@ -1540,7 +1540,7 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
                     className="w-full pl-9 pr-9 py-3 rounded-xl font-body text-[13px] outline-none transition-all duration-300"
                     style={{
                       background: searchFocused ? 'rgba(7,10,18,0.6)' : 'rgba(255,255,255,0.05)',
-                      border: searchFocused ? '1px solid var(--cat-color)' : '1px solid rgba(255,255,255,0.09)',
+                      border: searchFocused ? '1px solid var(--cat-color)' : '1px solid color-mix(in srgb, var(--cat-color) 20%, transparent)',
                       boxShadow: searchFocused ? '0 0 15px color-mix(in srgb, var(--cat-color) 25%, transparent)' : 'none',
                       color: searchFocused ? '#ffffff' : 'rgba(255,255,255,0.78)',
                     }}
@@ -1646,20 +1646,20 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
                       style={{
                         background: 'rgba(255, 255, 255, 0.02)',
                         border: bankFilter !== 'all' && bankFilter !== 'All Banks'
-                          ? '1px solid var(--cat-color)' 
+                          ? '1px solid #C9A96E' 
                           : '1px solid rgba(255, 255, 255, 0.08)',
                         boxShadow: bankFilter !== 'all' && bankFilter !== 'All Banks'
-                          ? '0 0 12px color-mix(in srgb, var(--cat-color) 15%, transparent)' 
+                          ? '0 0 12px rgba(201, 169, 110, 0.15)' 
                           : 'none',
                       }}
                     >
                       <div className="flex flex-col items-start min-w-0 text-left">
                         <span className="text-[9px] uppercase tracking-wider opacity-60 font-body text-white/50">Institution</span>
-                        <span className="truncate mt-0.5 max-w-full font-bold" style={{ color: bankFilter !== 'all' && bankFilter !== 'All Banks' ? 'var(--cat-color)' : 'rgba(255, 255, 255, 0.9)' }}>
+                        <span className="truncate mt-0.5 max-w-full font-bold" style={{ color: bankFilter !== 'all' && bankFilter !== 'All Banks' ? '#C9A96E' : 'rgba(255, 255, 255, 0.9)' }}>
                           {bankFilter === 'all' || bankFilter === 'All Banks' ? 'All Banks' : getBankTypeLabel(bankFilter)}
                         </span>
                       </div>
-                      <ChevronDown size={14} className="flex-shrink-0 ml-1.5" style={{ color: bankFilter !== 'all' && bankFilter !== 'All Banks' ? 'var(--cat-color)' : 'rgba(255, 255, 255, 0.4)' }} />
+                      <ChevronDown size={14} className="flex-shrink-0 ml-1.5" style={{ color: bankFilter !== 'all' && bankFilter !== 'All Banks' ? '#C9A96E' : 'rgba(255, 255, 255, 0.4)' }} />
                     </motion.button>
 
                     {/* Sort By Filter Button */}
@@ -1670,20 +1670,20 @@ export default function ProductCategoryView({ category, onBack }: ProductCategor
                       style={{
                         background: 'rgba(255, 255, 255, 0.02)',
                         border: sortBy !== 'popularity' 
-                          ? '1px solid var(--cat-color)' 
+                          ? '1px solid #C9A96E' 
                           : '1px solid rgba(255, 255, 255, 0.08)',
                         boxShadow: sortBy !== 'popularity' 
-                          ? '0 0 12px color-mix(in srgb, var(--cat-color) 15%, transparent)' 
+                          ? '0 0 12px rgba(201, 169, 110, 0.15)' 
                           : 'none',
                       }}
                     >
                       <div className="flex flex-col items-start min-w-0 text-left">
                         <span className="text-[9px] uppercase tracking-wider opacity-60 font-body text-white/50">Sort By</span>
-                        <span className="truncate mt-0.5 max-w-full font-bold" style={{ color: sortBy !== 'popularity' ? 'var(--cat-color)' : 'rgba(255, 255, 255, 0.9)' }}>
+                        <span className="truncate mt-0.5 max-w-full font-bold" style={{ color: sortBy !== 'popularity' ? '#C9A96E' : 'rgba(255, 255, 255, 0.9)' }}>
                           {getSortLabel(sortBy)}
                         </span>
                       </div>
-                      <ChevronDown size={14} className="flex-shrink-0 ml-1.5" style={{ color: sortBy !== 'popularity' ? 'var(--cat-color)' : 'rgba(255, 255, 255, 0.4)' }} />
+                      <ChevronDown size={14} className="flex-shrink-0 ml-1.5" style={{ color: sortBy !== 'popularity' ? '#C9A96E' : 'rgba(255, 255, 255, 0.4)' }} />
                     </motion.button>
                   </div>
 
