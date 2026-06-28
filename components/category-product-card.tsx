@@ -366,6 +366,167 @@ export default function CategoryProductCard({
     return '';
   })();
 
+  if (product.category === 'fds') {
+    return (
+      <div className="relative group">
+        <motion.div
+          initial={{ opacity: 0, y: 14, scale: 0.97 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.96 }}
+          transition={{ type: 'spring', stiffness: 260, damping: 24, delay: index * 0.05 }}
+          whileTap={{ scale: 0.985 }}
+          onClick={() => onDetailsClick(product)}
+          className="overflow-hidden cursor-pointer p-4"
+          style={{
+            background: `linear-gradient(135deg, color-mix(in srgb, ${cardColor} 22%, transparent) 0%, color-mix(in srgb, ${cardColorAccent} 8%, transparent) 100%), #0d1117`,
+            borderTop: `1px solid color-mix(in srgb, ${cardColor} 50%, transparent)`,
+            borderRight: `1px solid color-mix(in srgb, ${cardColor} 50%, transparent)`,
+            borderBottom: `1px solid color-mix(in srgb, ${cardColor} 50%, transparent)`,
+            borderLeft: `6px solid ${cardColor}`,
+            borderRadius: '16px',
+          }}
+        >
+          {/* Ambient glow */}
+          <div
+            className="absolute -top-8 -right-8 w-28 h-28 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+            style={{ background: `color-mix(in srgb, ${cardColor} 14%, transparent)` }}
+          />
+
+          <div className="relative z-10 flex items-stretch justify-between gap-3 w-full">
+            {/* Left Column */}
+            <div className="flex-1 min-w-0 flex flex-col justify-between">
+              {/* Logo + Name Row */}
+              <div className="flex items-center gap-2.5 min-w-0">
+                {/* Star Button */}
+                <motion.button
+                  whileTap={{ scale: 0.85 }}
+                  onClick={async (e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    const added = await toggleFavourite({
+                      id: product.id,
+                      type: product.category,
+                      lender: product.lender,
+                      name: product.name,
+                      color: product.color,
+                      colorAccent: product.colorAccent,
+                      savedAt: Date.now(),
+                    });
+                    setIsFav(added);
+                  }}
+                  className="p-1.5 rounded-full bg-white/[0.03] hover:bg-white/[0.08] transition-colors flex-shrink-0"
+                >
+                  <motion.div
+                    animate={isFav ? { scale: [1, 1.4, 1] } : { scale: 1 }}
+                    transition={{ duration: 0.3, type: 'tween', ease: 'easeInOut' }}
+                  >
+                    <Star
+                      size={14}
+                      style={{ color: isFav ? '#C9A96E' : 'rgba(255,255,255,0.3)' }}
+                      fill={isFav ? "#C9A96E" : "transparent"}
+                    />
+                  </motion.div>
+                </motion.button>
+
+                {/* Logo */}
+                <div
+                  className="w-8 h-8 rounded-lg flex-shrink-0 flex items-center justify-center p-[4px] overflow-hidden"
+                  style={{
+                    background: LOGO_BG_MAP[product.lender] ?? '#FFFFFF',
+                    border: `1px solid color-mix(in srgb, ${cardColor} 40%, transparent)`,
+                  }}
+                >
+                  <img 
+                    src={`/logos/${BANK_LOGO_MAP[product.lender] || product.lender.toLowerCase().replace(/bank/gi, '').replace(/[^a-z0-9]/g, '').trim()}.png`} 
+                    alt={product.lender} 
+                    className="w-full h-full object-contain" 
+                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                  />
+                </div>
+
+                {/* Bank Info */}
+                <div className="flex flex-col min-w-0">
+                  <span className="text-[12.5px] font-bold text-white leading-tight truncate">
+                    {formatLenderName(product.lender)}
+                  </span>
+                  <span className="text-[10px] text-white/40 leading-tight mt-0.5 font-body truncate">
+                    {subtitleText}
+                  </span>
+                </div>
+              </div>
+
+              {/* Big Rate */}
+              <div className="flex items-baseline gap-1 mt-3">
+                <span 
+                  className="text-[26px] font-bold leading-none tracking-tight"
+                  style={{ color: cardColor }}
+                >
+                  {metricHighlight.value}
+                </span>
+                <span className="text-[11px] text-white/35 font-body">
+                  p.a.
+                </span>
+              </div>
+
+              {/* Senior citizen rate line */}
+              {seniorBonusText && (
+                <div className="text-[10.5px] text-[#2DD4BF] font-semibold leading-none mt-1 font-body">
+                  {seniorBonusText}
+                </div>
+              )}
+            </div>
+
+            {/* Right Column */}
+            <div className="w-[120px] flex-shrink-0 flex flex-col items-end justify-between text-right">
+              {/* Details button */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDetailsClick(product);
+                }}
+                className="flex items-center gap-1 px-2.5 py-1 rounded-xl text-[10px] font-bold border transition-all duration-300 hover:bg-[#00E5FF]/10"
+                style={{
+                  borderColor: 'rgba(0, 229, 255, 0.35)',
+                  color: '#00E5FF',
+                  background: 'transparent',
+                }}
+              >
+                <span>Details</span>
+                <span>→</span>
+              </button>
+
+              {/* Stacked meta items */}
+              <div className="flex flex-col items-end gap-0.5 mt-2 font-body text-[10px] text-white/50 leading-normal">
+                {(() => {
+                  const minTenure = product.metrics['Minimum Tenure'] || product.metrics['tenureRange'];
+                  const maxTenure = product.metrics['Maximum Tenure'];
+                  const cleanTenureText = (txt: string) => String(txt).replace(/\s*days?/gi, 'd').replace(/\s*years?/gi, 'y').replace(/\s*months?/gi, 'm');
+                  const tenureText = minTenure && maxTenure 
+                    ? `${cleanTenureText(String(minTenure))} - ${cleanTenureText(String(maxTenure))}` 
+                    : cleanTenureText(String(minTenure || 'N/A'));
+                  return (
+                    <span>Tenure: <span className="text-white/80 font-semibold">{tenureText}</span></span>
+                  );
+                })()}
+
+                {(() => {
+                  const minDeposit = product.metrics['Minimum Deposit'] || 'N/A';
+                  return (
+                    <span>Min: <span className="text-white/80 font-semibold">{minDeposit}</span></span>
+                  );
+                })()}
+
+                {product.metrics['DICGC Insured'] === 'Yes' && (
+                  <span className="font-semibold" style={{ color: 'var(--cat-color, #00F5A0)' }}>DICGC Insured</span>
+                )}
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
+
   return (
     <div className="relative group">
       <motion.div
